@@ -1,3 +1,4 @@
+import pandas as pd
 import mt5_mock
 import mt5_connector
 
@@ -50,3 +51,36 @@ def test_disconnect_calls_shutdown_and_prints_message(monkeypatch, capsys):
 	output = capsys.readouterr().out
 	assert shutdown_called, "mt5.shutdown() was not called"
 	assert "MT5 disconnected" in output
+
+
+def test_get_ohlcv_returns_dataframe_with_correct_shape(monkeypatch):
+	monkeypatch.setattr(mt5_connector, "mt5", mt5_mock)
+	mt5_mock.initialize()
+
+	df = mt5_connector.get_ohlcv("US30", mt5_mock.TIMEFRAME_M5, 50)
+
+	assert isinstance(df, pd.DataFrame)
+	assert len(df) == 50
+
+
+def test_get_ohlcv_dataframe_has_required_columns(monkeypatch):
+	monkeypatch.setattr(mt5_connector, "mt5", mt5_mock)
+	mt5_mock.initialize()
+
+	df = mt5_connector.get_ohlcv("US30", mt5_mock.TIMEFRAME_M15, 10)
+
+	for col in ("time", "open", "high", "low", "close", "tick_volume"):
+		assert col in df.columns, f"Missing column: {col}"
+
+
+def test_get_ohlcv_returns_none_when_no_data(monkeypatch):
+	class EmptyMT5:
+		@staticmethod
+		def copy_rates_from_pos(symbol, timeframe, start, count):
+			return []
+
+	monkeypatch.setattr(mt5_connector, "mt5", EmptyMT5)
+
+	result = mt5_connector.get_ohlcv("US30", 5, 50)
+
+	assert result is None
