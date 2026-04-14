@@ -52,7 +52,7 @@
 
 - [ ] 2.0 MT5 Connection & Data Feed
 
-  - [ ] 2.1 Create `mt5_mock.py` — stub that mimics `MetaTrader5` module interface (initialize, shutdown, account_info, copy_rates_from_pos) returning dummy data, for use on Linux
+  - [x] 2.1 Create `mt5_mock.py` — stub that mimics `MetaTrader5` module interface (initialize, shutdown, account_info, copy_rates_from_pos) returning dummy data, for use on Linux
   - [ ] 2.2 Write `mt5_connector.py` — `connect()` function that initialises MT5, prints account info (login, server, balance), and returns connection status
   - [ ] 2.3 Write `disconnect()` function in `mt5_connector.py` that cleanly shuts down the MT5 connection
   - [ ] 2.4 Write `get_ohlcv(symbol, timeframe, n_bars)` function that fetches N bars of OHLCV data and returns a pandas DataFrame
