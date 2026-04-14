@@ -41,14 +41,14 @@
 
 ## Tasks
 
-- [ ] 1.0 Project Setup & Environment Configuration
+- [x] 1.0 Project Setup & Environment Configuration
 
-  - [ ] 1.1 Initialise the project folder `us30-signal-bot/` with the full directory structure (all files as empty stubs)
-  - [ ] 1.2 Create `requirements.txt` with all dependencies: `MetaTrader5`, `pandas`, `pandas-ta`, `colorama`, `python-dotenv`, `pytest`
-  - [ ] 1.3 Create `.gitignore` excluding `.env`, `__pycache__/`, `*.log`, `venv/`, `*.pyc`
-  - [ ] 1.4 Create `config.py` with all configurable values: symbol, capital, risk mode, timeframes, BB/RSI/EMA settings, polling interval, SL buffer pips, email toggle
-  - [ ] 1.5 Create `.env` template file (with placeholder values, not real credentials) and document how to populate it in `README.md`
-  - [ ] 1.6 Initialise Git repo, create GitHub repository, and push initial project skeleton
+  - [x] 1.1 Initialise the project folder `us30-signal-bot/` with the full directory structure (all files as empty stubs)
+  - [x] 1.2 Create `requirements.txt` with all dependencies: `MetaTrader5`, `pandas`, `pandas-ta`, `colorama`, `python-dotenv`, `pytest`
+  - [x] 1.3 Create `.gitignore` excluding `.env`, `__pycache__/`, `*.log`, `venv/`, `*.pyc`
+  - [x] 1.4 Create `config.py` with all configurable values: symbol, capital, risk mode, timeframes, BB/RSI/EMA settings, polling interval, SL buffer pips, email toggle
+  - [x] 1.5 Create `.env` template file (with placeholder values, not real credentials) and document how to populate it in `README.md`
+  - [x] 1.6 Initialise Git repo, create GitHub repository, and push initial project skeleton
 
 - [ ] 2.0 MT5 Connection & Data Feed
 
