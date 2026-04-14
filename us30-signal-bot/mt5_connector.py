@@ -2,7 +2,11 @@
 
 from __future__ import annotations
 
+import time
+
 import pandas as pd
+
+import config
 
 try:
 	import MetaTrader5 as mt5
@@ -11,21 +15,30 @@ except ImportError:  # pragma: no cover - used in Linux dev environments.
 
 
 def connect() -> bool:
-	"""Initialize MT5 and print connected account details."""
-	initialized = mt5.initialize()
-	if not initialized:
+	"""Initialize MT5 with retry logic and print connected account details.
+
+	Retries up to config.MAX_RETRIES times, waiting config.RETRY_DELAY_SECONDS
+	between attempts. Returns False and exits gracefully on exhaustion.
+	"""
+	for attempt in range(1, config.MAX_RETRIES + 1):
+		initialized = mt5.initialize()
+		if initialized:
+			account = mt5.account_info()
+			if account is None:
+				print("MT5 connected but account info is unavailable.")
+				return False
+			print("MT5 connected")
+			print(f"login={account.login} server={account.server} balance={account.balance}")
+			return True
+
 		error = mt5.last_error() if hasattr(mt5, "last_error") else (None, "Unknown error")
-		print(f"MT5 initialization failed: {error}")
-		return False
+		print(f"MT5 initialization failed (attempt {attempt}/{config.MAX_RETRIES}): {error}")
+		if attempt < config.MAX_RETRIES:
+			print(f"Retrying in {config.RETRY_DELAY_SECONDS}s...")
+			time.sleep(config.RETRY_DELAY_SECONDS)
 
-	account = mt5.account_info()
-	if account is None:
-		print("MT5 connected but account info is unavailable.")
-		return False
-
-	print("MT5 connected")
-	print(f"login={account.login} server={account.server} balance={account.balance}")
-	return True
+	print("MT5 connection failed: max retries reached. Exiting.")
+	return False
 
 
 def disconnect() -> None:

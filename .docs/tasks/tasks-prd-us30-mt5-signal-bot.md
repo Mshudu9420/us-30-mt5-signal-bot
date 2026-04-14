@@ -56,7 +56,7 @@
   - [x] 2.2 Write `mt5_connector.py` — `connect()` function that initialises MT5, prints account info (login, server, balance), and returns connection status
   - [x] 2.3 Write `disconnect()` function in `mt5_connector.py` that cleanly shuts down the MT5 connection
   - [x] 2.4 Write `get_ohlcv(symbol, timeframe, n_bars)` function that fetches N bars of OHLCV data and returns a pandas DataFrame
-  - [ ] 2.5 Add retry logic to `connect()` — if connection fails, wait 10 seconds and retry up to `MAX_RETRIES` (from config), then exit gracefully
+  - [x] 2.5 Add retry logic to `connect()` — if connection fails, wait 10 seconds and retry up to `MAX_RETRIES` (from config), then exit gracefully
   - [ ] 2.6 Write unit tests in `tests/test_mt5_connector.py` using `mt5_mock.py` to test connect, disconnect, and get_ohlcv without a live MT5 terminal
 
 - [ ] 3.0 Indicators Module (BB, RSI, EMA)

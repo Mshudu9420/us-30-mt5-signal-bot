@@ -1,6 +1,7 @@
 import pandas as pd
 import mt5_mock
 import mt5_connector
+import config
 
 
 def test_connect_success_prints_account_info(monkeypatch, capsys):
@@ -28,6 +29,8 @@ def test_connect_returns_false_when_initialize_fails(monkeypatch, capsys):
 			return (100, "Init failed")
 
 	monkeypatch.setattr(mt5_connector, "mt5", FailingMT5)
+	monkeypatch.setattr(mt5_connector.config, "MAX_RETRIES", 1)
+	monkeypatch.setattr(mt5_connector.time, "sleep", lambda s: None)
 
 	connected = mt5_connector.connect()
 
@@ -51,6 +54,60 @@ def test_disconnect_calls_shutdown_and_prints_message(monkeypatch, capsys):
 	output = capsys.readouterr().out
 	assert shutdown_called, "mt5.shutdown() was not called"
 	assert "MT5 disconnected" in output
+
+
+def test_connect_retries_on_failure_and_succeeds(monkeypatch, capsys):
+	"""Fails once then succeeds on second attempt."""
+	attempts = [0]
+
+	class FlakyMT5:
+		@staticmethod
+		def initialize():
+			attempts[0] += 1
+			return attempts[0] >= 2  # fail first, succeed second
+
+		@staticmethod
+		def last_error():
+			return (100, "Transient error")
+
+		@staticmethod
+		def account_info():
+			return mt5_mock.AccountInfo(login=99, server="Demo", balance=500.0)
+
+	monkeypatch.setattr(mt5_connector, "mt5", FlakyMT5)
+	monkeypatch.setattr(mt5_connector.config, "MAX_RETRIES", 3)
+	monkeypatch.setattr(mt5_connector.config, "RETRY_DELAY_SECONDS", 0)
+	monkeypatch.setattr(mt5_connector.time, "sleep", lambda s: None)
+
+	result = mt5_connector.connect()
+
+	output = capsys.readouterr().out
+	assert result is True
+	assert attempts[0] == 2
+	assert "Retrying" in output
+	assert "MT5 connected" in output
+
+
+def test_connect_exhausts_retries_and_returns_false(monkeypatch, capsys):
+	class AlwaysFailMT5:
+		@staticmethod
+		def initialize():
+			return False
+
+		@staticmethod
+		def last_error():
+			return (100, "Persistent error")
+
+	monkeypatch.setattr(mt5_connector, "mt5", AlwaysFailMT5)
+	monkeypatch.setattr(mt5_connector.config, "MAX_RETRIES", 3)
+	monkeypatch.setattr(mt5_connector.config, "RETRY_DELAY_SECONDS", 0)
+	monkeypatch.setattr(mt5_connector.time, "sleep", lambda s: None)
+
+	result = mt5_connector.connect()
+
+	output = capsys.readouterr().out
+	assert result is False
+	assert "max retries reached" in output
 
 
 def test_get_ohlcv_returns_dataframe_with_correct_shape(monkeypatch):
