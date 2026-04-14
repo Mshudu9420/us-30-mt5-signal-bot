@@ -83,3 +83,51 @@ def test_check_signal_returns_none_when_conditions_are_not_met():
 	result = strategy.check_signal(df, timeframe="M5", h1_bias="UNCLEAR")
 
 	assert result is None
+
+
+def test_check_signal_suppresses_buy_when_h1_bias_is_bearish():
+	df = pd.DataFrame(
+		{
+			"time": ["2026-04-14 10:15:00"],
+			"close": [38900.0],
+			"rsi": [25.0],
+			"bb_lower": [38950.0],
+			"bb_upper": [39150.0],
+		}
+	)
+
+	result = strategy.check_signal(df, timeframe="M5", h1_bias="BEARISH")
+
+	assert result is None
+
+
+def test_check_signal_suppresses_sell_when_h1_bias_is_bullish():
+	df = pd.DataFrame(
+		{
+			"time": ["2026-04-14 10:20:00"],
+			"close": [39200.0],
+			"rsi": [75.0],
+			"bb_lower": [38950.0],
+			"bb_upper": [39150.0],
+		}
+	)
+
+	result = strategy.check_signal(df, timeframe="M15", h1_bias="BULLISH")
+
+	assert result is None
+
+
+def test_check_signal_suppresses_all_signals_when_h1_bias_unclear():
+	df = pd.DataFrame(
+		{
+			"time": ["2026-04-14 10:25:00"],
+			"close": [39200.0],
+			"rsi": [75.0],
+			"bb_lower": [38950.0],
+			"bb_upper": [39150.0],
+		}
+	)
+
+	result = strategy.check_signal(df, timeframe="M15", h1_bias="UNCLEAR")
+
+	assert result is None

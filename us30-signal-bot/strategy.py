@@ -19,7 +19,7 @@ def get_h1_bias(h1_df: pd.DataFrame) -> str:
 
 
 def check_signal(df: pd.DataFrame, timeframe: str, h1_bias: str) -> dict[str, object] | None:
-	"""Return a raw mean-reversion signal from the latest BB + RSI values."""
+	"""Return a mean-reversion signal filtered by H1 trend bias."""
 	latest = df.iloc[-1]
 	close = latest["close"]
 	rsi = latest["rsi"]
@@ -27,7 +27,12 @@ def check_signal(df: pd.DataFrame, timeframe: str, h1_bias: str) -> dict[str, ob
 	bb_upper = latest["bb_upper"]
 	timestamp = latest.get("time")
 
+	if h1_bias == "UNCLEAR":
+		return None
+
 	if close < bb_lower and rsi < 30:
+		if h1_bias == "BEARISH":
+			return None
 		return {
 			"direction": "BUY",
 			"timeframe": timeframe,
@@ -36,6 +41,8 @@ def check_signal(df: pd.DataFrame, timeframe: str, h1_bias: str) -> dict[str, ob
 		}
 
 	if close > bb_upper and rsi > 70:
+		if h1_bias == "BULLISH":
+			return None
 		return {
 			"direction": "SELL",
 			"timeframe": timeframe,
