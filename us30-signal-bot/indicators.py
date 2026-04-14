@@ -44,3 +44,10 @@ def calculate_ema(df: pd.DataFrame, period: int) -> pd.DataFrame:
 	result = df.copy()
 	result["ema"] = result["close"].ewm(span=period, adjust=False).mean()
 	return result
+
+
+def get_latest_values(df: pd.DataFrame) -> dict[str, float]:
+	"""Return the latest row values needed by strategy logic."""
+	latest = df.iloc[-1]
+	keys = ["close", "bb_mid", "bb_upper", "bb_lower", "rsi", "ema"]
+	return {key: latest[key] for key in keys if key in df.columns}

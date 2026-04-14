@@ -62,3 +62,28 @@ def test_calculate_ema_returns_expected_latest_value():
 	result = indicators.calculate_ema(df, period=3)
 
 	assert round(result.iloc[-1]["ema"], 2) == 13.06
+
+
+def test_get_latest_values_returns_latest_indicator_snapshot():
+	df = _build_price_df()
+	df = indicators.calculate_bollinger_bands(df, period=3, std_dev=2)
+	df = indicators.calculate_rsi(df, period=3)
+	df = indicators.calculate_ema(df, period=3)
+
+	latest = indicators.get_latest_values(df)
+
+	assert latest["close"] == 14.0
+	assert round(latest["bb_mid"], 2) == 13.0
+	assert round(latest["bb_upper"], 2) == 15.0
+	assert round(latest["bb_lower"], 2) == 11.0
+	assert round(latest["ema"], 2) == 13.06
+
+
+def test_get_latest_values_includes_rsi_key():
+	df = pd.DataFrame({"close": [10.0, 11.0, 12.0, 13.0, 14.0, 15.0]})
+	df = indicators.calculate_rsi(df, period=3)
+
+	latest = indicators.get_latest_values(df)
+
+	assert "rsi" in latest
+	assert round(latest["rsi"], 2) == 100.0
