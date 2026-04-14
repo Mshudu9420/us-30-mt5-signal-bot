@@ -33,3 +33,20 @@ def test_connect_returns_false_when_initialize_fails(monkeypatch, capsys):
 	output = capsys.readouterr().out
 	assert connected is False
 	assert "MT5 initialization failed" in output
+
+
+def test_disconnect_calls_shutdown_and_prints_message(monkeypatch, capsys):
+	shutdown_called = []
+
+	class TrackingMT5:
+		@staticmethod
+		def shutdown():
+			shutdown_called.append(True)
+
+	monkeypatch.setattr(mt5_connector, "mt5", TrackingMT5)
+
+	mt5_connector.disconnect()
+
+	output = capsys.readouterr().out
+	assert shutdown_called, "mt5.shutdown() was not called"
+	assert "MT5 disconnected" in output

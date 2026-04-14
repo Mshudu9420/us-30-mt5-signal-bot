@@ -22,3 +22,9 @@ def connect() -> bool:
 	print("MT5 connected")
 	print(f"login={account.login} server={account.server} balance={account.balance}")
 	return True
+
+
+def disconnect() -> None:
+	"""Cleanly shut down the MT5 connection."""
+	mt5.shutdown()
+	print("MT5 disconnected")
