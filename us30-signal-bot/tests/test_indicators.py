@@ -46,3 +46,19 @@ def test_calculate_rsi_returns_100_for_strict_uptrend_after_warmup():
 	result = indicators.calculate_rsi(df, period=3)
 
 	assert round(result.iloc[-1]["rsi"], 2) == 100.00
+
+
+def test_calculate_ema_adds_ema_column():
+	df = _build_price_df()
+
+	result = indicators.calculate_ema(df, period=3)
+
+	assert "ema" in result.columns
+
+
+def test_calculate_ema_returns_expected_latest_value():
+	df = _build_price_df()
+
+	result = indicators.calculate_ema(df, period=3)
+
+	assert round(result.iloc[-1]["ema"], 2) == 13.06

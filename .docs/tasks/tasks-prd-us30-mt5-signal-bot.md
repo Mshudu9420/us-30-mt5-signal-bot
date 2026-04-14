@@ -63,7 +63,7 @@
 
   - [x] 3.1 Write `calculate_bollinger_bands(df, period, std_dev)` in `indicators.py` — returns upper band, lower band, and midline as new DataFrame columns
   - [x] 3.2 Write `calculate_rsi(df, period)` in `indicators.py` — returns RSI as a new DataFrame column
-  - [ ] 3.3 Write `calculate_ema(df, period)` in `indicators.py` — returns EMA as a new DataFrame column
+  - [x] 3.3 Write `calculate_ema(df, period)` in `indicators.py` — returns EMA as a new DataFrame column
   - [ ] 3.4 Write `get_latest_values(df)` helper — returns the most recent row's BB, RSI, EMA, and close price as a dict
   - [ ] 3.5 Write unit tests in `tests/test_indicators.py` using synthetic OHLCV DataFrames — test BB, RSI, EMA output types, shapes, and known values
 

@@ -37,3 +37,10 @@ def calculate_rsi(df: pd.DataFrame, period: int) -> pd.DataFrame:
 	result.loc[(avg_loss == 0) & (avg_gain > 0), "rsi"] = 100.0
 	result.loc[(avg_gain == 0) & (avg_loss > 0), "rsi"] = 0.0
 	return result
+
+
+def calculate_ema(df: pd.DataFrame, period: int) -> pd.DataFrame:
+	"""Return a copy of df with an EMA column added."""
+	result = df.copy()
+	result["ema"] = result["close"].ewm(span=period, adjust=False).mean()
+	return result
