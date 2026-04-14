@@ -12,6 +12,8 @@
 - `main.py` — Entry point, startup summary, and continuous polling loop
 - `mt5_connector.py` — MT5 connection, disconnection handling, and OHLCV data fetching
 - `mt5_mock.py` — Stub module that mimics MetaTrader5 for Linux dev/testing
+- `mt5_mock.py` — Stub module that mimics MetaTrader5 for Linux dev/testing
+- `tests/test_mt5_connector.py` — Unit tests for connect, disconnect, get_ohlcv using mt5_mock
 - `indicators.py` — Bollinger Bands, RSI, and EMA calculations using pandas
 - `strategy.py` — Signal generation logic and H1 trend filter
 - `risk_manager.py` — Lot size, stop loss, and take profit calculation
@@ -51,6 +53,7 @@
   - [x] 1.6 Initialise Git repo, create GitHub repository, and push initial project skeleton
 
 - [ ] 2.0 MT5 Connection & Data Feed
+- [x] 2.0 MT5 Connection & Data Feed
 
   - [x] 2.1 Create `mt5_mock.py` — stub that mimics `MetaTrader5` module interface (initialize, shutdown, account_info, copy_rates_from_pos) returning dummy data, for use on Linux
   - [x] 2.2 Write `mt5_connector.py` — `connect()` function that initialises MT5, prints account info (login, server, balance), and returns connection status
@@ -58,6 +61,7 @@
   - [x] 2.4 Write `get_ohlcv(symbol, timeframe, n_bars)` function that fetches N bars of OHLCV data and returns a pandas DataFrame
   - [x] 2.5 Add retry logic to `connect()` — if connection fails, wait 10 seconds and retry up to `MAX_RETRIES` (from config), then exit gracefully
   - [ ] 2.6 Write unit tests in `tests/test_mt5_connector.py` using `mt5_mock.py` to test connect, disconnect, and get_ohlcv without a live MT5 terminal
+  - [x] 2.6 Write unit tests in `tests/test_mt5_connector.py` using `mt5_mock.py` to test connect, disconnect, and get_ohlcv without a live MT5 terminal
 
 - [ ] 3.0 Indicators Module (BB, RSI, EMA)
 

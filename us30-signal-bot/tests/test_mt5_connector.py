@@ -141,3 +141,37 @@ def test_get_ohlcv_returns_none_when_no_data(monkeypatch):
 	result = mt5_connector.get_ohlcv("US30", 5, 50)
 
 	assert result is None
+
+
+# --- mt5_mock.py integration tests (Task 2.6) ---
+
+def test_disconnect_via_mock_resets_initialized_state(monkeypatch, capsys):
+	"""disconnect() via mt5_mock leaves mock in uninitialized state."""
+	monkeypatch.setattr(mt5_connector, "mt5", mt5_mock)
+	mt5_mock.initialize()
+	assert mt5_mock.account_info() is not None  # confirm connected
+
+	mt5_connector.disconnect()
+
+	assert mt5_mock.account_info() is None  # mock shut down
+
+
+def test_get_ohlcv_returns_none_when_mock_not_initialized(monkeypatch):
+	"""get_ohlcv() returns None when mt5_mock has not been initialized."""
+	monkeypatch.setattr(mt5_connector, "mt5", mt5_mock)
+	mt5_mock.shutdown()  # ensure uninitialized
+
+	result = mt5_connector.get_ohlcv("US30", mt5_mock.TIMEFRAME_H1, 20)
+
+	assert result is None
+
+
+def test_get_ohlcv_time_column_is_utc_datetime(monkeypatch):
+	"""time column in returned DataFrame must be timezone-aware datetime."""
+	monkeypatch.setattr(mt5_connector, "mt5", mt5_mock)
+	mt5_mock.initialize()
+
+	df = mt5_connector.get_ohlcv("US30", mt5_mock.TIMEFRAME_H1, 5)
+
+	assert pd.api.types.is_datetime64_any_dtype(df["time"])
+	assert df["time"].dt.tz is not None
