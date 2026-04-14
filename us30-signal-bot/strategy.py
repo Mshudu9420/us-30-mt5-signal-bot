@@ -51,3 +51,10 @@ def check_signal(df: pd.DataFrame, timeframe: str, h1_bias: str) -> dict[str, ob
 		}
 
 	return None
+
+
+def is_high_confidence(m5_signal: dict[str, object] | None, m15_signal: dict[str, object] | None) -> bool:
+	"""Return True when M5 and M15 signals both exist and match direction."""
+	if not m5_signal or not m15_signal:
+		return False
+	return m5_signal.get("direction") == m15_signal.get("direction")

@@ -73,7 +73,7 @@
   - [x] 4.1 Write `get_h1_bias(h1_df)` in `strategy.py` — returns `"BULLISH"`, `"BEARISH"`, or `"UNCLEAR"` based on close vs H1 EMA
   - [x] 4.2 Write `check_signal(df, timeframe, h1_bias)` in `strategy.py` — evaluates BB + RSI conditions and returns a signal dict `{direction, timeframe, entry_price, timestamp}` or `None`
   - [x] 4.3 Add H1 filter inside `check_signal` — suppress BUY if bias is BEARISH, suppress SELL if bias is BULLISH, suppress all if UNCLEAR
-  - [ ] 4.4 Write `is_high_confidence(m5_signal, m15_signal)` — returns `True` if both M5 and M15 produce the same direction signal simultaneously (used to trigger email alert)
+  - [x] 4.4 Write `is_high_confidence(m5_signal, m15_signal)` — returns `True` if both M5 and M15 produce the same direction signal simultaneously (used to trigger email alert)
   - [ ] 4.5 Write unit tests in `tests/test_strategy.py` — test all bias outcomes, signal suppression by H1 filter, and high-confidence detection logic
 
 - [ ] 5.0 Risk Manager (Lot Sizing, SL, TP)
