@@ -30,3 +30,19 @@ def test_calculate_bollinger_bands_returns_expected_latest_values():
 	assert round(latest["bb_mid"], 2) == 13.00
 	assert round(latest["bb_upper"], 2) == 15.00
 	assert round(latest["bb_lower"], 2) == 11.00
+
+
+def test_calculate_rsi_adds_rsi_column():
+	df = pd.DataFrame({"close": [10.0, 11.0, 12.0, 11.0, 12.0, 13.0]})
+
+	result = indicators.calculate_rsi(df, period=3)
+
+	assert "rsi" in result.columns
+
+
+def test_calculate_rsi_returns_100_for_strict_uptrend_after_warmup():
+	df = pd.DataFrame({"close": [10.0, 11.0, 12.0, 13.0, 14.0, 15.0]})
+
+	result = indicators.calculate_rsi(df, period=3)
+
+	assert round(result.iloc[-1]["rsi"], 2) == 100.00
