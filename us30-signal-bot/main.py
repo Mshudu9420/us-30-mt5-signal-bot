@@ -1,9 +1,12 @@
 """Main entry point for the US30 MT5 signal bot."""
 
+import time
+
 import config
 import mt5_connector
-from mt5_connector import connect
-from signal_output import print_startup_summary
+from indicators import calculate_bollinger_bands, calculate_ema, calculate_rsi
+from mt5_connector import connect, get_ohlcv
+from signal_output import print_heartbeat, print_startup_summary
 
 
 def main() -> bool:
@@ -19,6 +22,41 @@ def main() -> bool:
 
 	print_startup_summary(account_info, config)
 	return True
+
+
+def polling_loop() -> None:
+	"""Fetch M5, M15, H1 data every poll cycle and calculate indicators."""
+	try:
+		from MetaTrader5 import TIMEFRAME_M5, TIMEFRAME_M15, TIMEFRAME_H1
+	except ImportError:
+		import mt5_mock as _mt5
+		TIMEFRAME_M5 = _mt5.TIMEFRAME_M5
+		TIMEFRAME_M15 = _mt5.TIMEFRAME_M15
+		TIMEFRAME_H1 = _mt5.TIMEFRAME_H1
+
+	while True:
+		m5_df = get_ohlcv(config.SYMBOL, TIMEFRAME_M5, config.N_BARS)
+		m15_df = get_ohlcv(config.SYMBOL, TIMEFRAME_M15, config.N_BARS)
+		h1_df = get_ohlcv(config.SYMBOL, TIMEFRAME_H1, config.N_BARS)
+
+		if m5_df is not None:
+			m5_df = calculate_bollinger_bands(m5_df, config.BB_PERIOD, config.BB_STD_DEV)
+			m5_df = calculate_rsi(m5_df, config.RSI_PERIOD)
+			m5_df = calculate_ema(m5_df, config.EMA_PERIOD)
+
+		if m15_df is not None:
+			m15_df = calculate_bollinger_bands(m15_df, config.BB_PERIOD, config.BB_STD_DEV)
+			m15_df = calculate_rsi(m15_df, config.RSI_PERIOD)
+			m15_df = calculate_ema(m15_df, config.EMA_PERIOD)
+
+		if h1_df is not None:
+			h1_df = calculate_ema(h1_df, config.EMA_PERIOD)
+
+		if m5_df is not None:
+			latest = m5_df.iloc[-1]
+			print_heartbeat(str(latest["time"]), float(latest["close"]))
+
+		time.sleep(config.POLL_INTERVAL_SECONDS)
 
 
 if __name__ == "__main__":
