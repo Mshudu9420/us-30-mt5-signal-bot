@@ -253,3 +253,24 @@ def test_polling_loop_skips_email_when_not_high_confidence(monkeypatch):
         pass
 
     assert len(email_calls) == 0
+
+
+# --- Task 7.6 KeyboardInterrupt handling ---
+
+def test_polling_loop_handles_keyboard_interrupt(monkeypatch, capsys):
+    disconnect_calls = []
+
+    monkeypatch.setattr(main, "get_ohlcv", lambda symbol, tf, n: _make_ohlcv(n))
+    monkeypatch.setattr(main, "get_h1_bias", lambda df: "UNCLEAR")
+    monkeypatch.setattr(main, "check_signal", lambda df, tf, bias: None)
+    monkeypatch.setattr(main, "is_high_confidence", lambda m5, m15: False)
+    monkeypatch.setattr(main, "calculate_risk_amount", lambda capital, mode: 5.0)
+    monkeypatch.setattr(main, "print_heartbeat", lambda ts, price: None)
+    monkeypatch.setattr(main, "disconnect", lambda: disconnect_calls.append(True))
+    monkeypatch.setattr(main.time, "sleep", lambda s: (_ for _ in ()).throw(KeyboardInterrupt()))
+
+    main.polling_loop()  # must NOT raise
+
+    output = capsys.readouterr().out
+    assert "bot stopped" in output.lower()
+    assert len(disconnect_calls) == 1
