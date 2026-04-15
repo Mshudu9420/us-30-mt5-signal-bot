@@ -71,3 +71,21 @@ def calculate_sl_price(direction: str, band_value: float, buffer_pips: float) ->
         return band_value + buffer_pips
     else:
         raise ValueError(f"Unknown direction '{direction}'. Expected 'BUY' or 'SELL'.")
+
+
+def calculate_tp_price(direction: str, midline: float) -> float:
+    """Return take-profit price level at the Bollinger Band midline.
+
+    Args:
+        direction: "BUY" or "SELL".
+        midline: The Bollinger Band midline price.
+
+    Returns:
+        TP price as a float.
+
+    Raises:
+        ValueError: If direction is not "BUY" or "SELL".
+    """
+    if direction not in {"BUY", "SELL"}:
+        raise ValueError(f"Unknown direction '{direction}'. Expected 'BUY' or 'SELL'.")
+    return midline

@@ -4,7 +4,12 @@ import sys
 import os
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from risk_manager import calculate_risk_amount, calculate_lot_size, calculate_sl_price
+from risk_manager import (
+    calculate_lot_size,
+    calculate_risk_amount,
+    calculate_sl_price,
+    calculate_tp_price,
+)
 
 
 # --- 5.1 calculate_risk_amount ---
@@ -76,3 +81,20 @@ def test_sl_price_sell():
 def test_sl_price_invalid_direction_raises():
     with pytest.raises(ValueError):
         calculate_sl_price("HOLD", 39000.0, 10)
+
+
+# --- 5.4 calculate_tp_price ---
+
+def test_tp_price_buy_returns_midline():
+    result = calculate_tp_price("BUY", 39250.0)
+    assert result == pytest.approx(39250.0)
+
+
+def test_tp_price_sell_returns_midline():
+    result = calculate_tp_price("SELL", 39250.0)
+    assert result == pytest.approx(39250.0)
+
+
+def test_tp_price_invalid_direction_raises():
+    with pytest.raises(ValueError):
+        calculate_tp_price("HOLD", 39250.0)
