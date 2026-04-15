@@ -124,7 +124,7 @@ def test_polling_loop_calls_strategy_and_prints_signal(monkeypatch):
             return {"direction": "BUY", "timeframe": "M5", "entry_price": 39010.0, "timestamp": "t"}
         return None
 
-    def fake_print_signal(signal):
+    def fake_print_signal(signal, risk):
         signal_print_calls.append(signal["direction"])
 
     def fake_sleep(seconds):
@@ -148,3 +148,41 @@ def test_polling_loop_calls_strategy_and_prints_signal(monkeypatch):
     assert "M5" in signal_calls
     assert "M15" in signal_calls
     assert "BUY" in signal_print_calls
+
+
+# --- Task 7.4 risk manager integration ---
+
+def test_polling_loop_calculates_risk_and_passes_to_print_signal(monkeypatch):
+    printed = []
+    iteration = {"count": 0}
+
+    def fake_get_ohlcv(symbol, timeframe, n_bars):
+        return _make_ohlcv(n_bars)
+
+    monkeypatch.setattr(main, "get_ohlcv", fake_get_ohlcv)
+    monkeypatch.setattr(main, "get_h1_bias", lambda df: "BULLISH")
+    monkeypatch.setattr(main, "check_signal", lambda df, tf, bias: (
+        {"direction": "BUY", "timeframe": tf, "entry_price": 39010.0, "timestamp": "t"}
+        if tf == "M5" else None
+    ))
+    monkeypatch.setattr(main, "calculate_risk_amount", lambda capital, mode: 5.0)
+    monkeypatch.setattr(main, "calculate_sl_price", lambda direction, band, buf: 38990.0)
+    monkeypatch.setattr(main, "calculate_tp_price", lambda direction, mid: 39030.0)
+    monkeypatch.setattr(main, "calculate_lot_size", lambda risk, sl_pips, pip_val: 0.25)
+    monkeypatch.setattr(main, "calculate_rr_ratio", lambda entry, sl, tp: 1.0)
+    monkeypatch.setattr(main, "print_signal", lambda sig, risk: printed.append((sig, risk)))
+    monkeypatch.setattr(main, "print_heartbeat", lambda ts, price: None)
+    monkeypatch.setattr(main.time, "sleep", lambda s: (_ for _ in ()).throw(StopIteration()))
+
+    try:
+        main.polling_loop()
+    except StopIteration:
+        pass
+
+    assert len(printed) == 1
+    sig, risk = printed[0]
+    assert sig["direction"] == "BUY"
+    assert risk["sl"] == 38990.0
+    assert risk["tp"] == 39030.0
+    assert risk["lot_size"] == 0.25
+    assert risk["rr_ratio"] == 1.0

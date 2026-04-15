@@ -99,7 +99,7 @@
   - [x] 7.1 Write `main.py` — initialise MT5 connection and print startup summary on launch
   - [x] 7.2 Add the main polling loop — fetch M5, M15, H1 data every N seconds (from config), calculate all indicators
   - [x] 7.3 Call strategy functions inside the loop — get H1 bias, check M5 signal, check M15 signal
-  - [ ] 7.4 Call risk manager for any valid signal — calculate lot, SL, TP, RR and pass to signal output
+  - [x] 7.4 Call risk manager for any valid signal — calculate lot, SL, TP, RR and pass to signal output
   - [ ] 7.5 Call `is_high_confidence` — if True, trigger `send_email_alert`
   - [ ] 7.6 Handle `KeyboardInterrupt` (Ctrl+C) gracefully — print "Bot stopped by user" and call `disconnect()`
   - [ ] 7.7 End-to-end smoke test inside Windows 11 VM — run `main.py` against live Exness MT5, confirm startup summary prints, heartbeat runs, and at least one signal or suppression message appears

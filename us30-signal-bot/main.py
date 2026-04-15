@@ -6,6 +6,13 @@ import config
 import mt5_connector
 from indicators import calculate_bollinger_bands, calculate_ema, calculate_rsi
 from mt5_connector import connect, get_ohlcv
+from risk_manager import (
+	calculate_lot_size,
+	calculate_risk_amount,
+	calculate_rr_ratio,
+	calculate_sl_price,
+	calculate_tp_price,
+)
 from signal_output import print_heartbeat, print_signal, print_startup_summary
 from strategy import check_signal, get_h1_bias
 
@@ -58,9 +65,22 @@ def polling_loop() -> None:
 		m5_signal = check_signal(m5_df, "M5", h1_bias) if m5_df is not None else None
 		m15_signal = check_signal(m15_df, "M15", h1_bias) if m15_df is not None else None
 
-		for signal in (m5_signal, m15_signal):
-			if signal is not None:
-				print_signal(signal)
+		risk_amount = calculate_risk_amount(config.INITIAL_CAPITAL, config.RISK_MODE)
+
+		for signal, df in ((m5_signal, m5_df), (m15_signal, m15_df)):
+			if signal is None or df is None:
+				continue
+			direction = signal["direction"]
+			entry = float(signal["entry_price"])
+			latest_row = df.iloc[-1]
+			sl_band = float(latest_row["bb_lower"] if direction == "BUY" else latest_row["bb_upper"])
+			mid = float(latest_row["bb_mid"])
+			sl = calculate_sl_price(direction, sl_band, config.SL_BUFFER_PIPS)
+			tp = calculate_tp_price(direction, mid)
+			lot = calculate_lot_size(risk_amount, abs(entry - sl), config.DEFAULT_PIP_VALUE)
+			rr = calculate_rr_ratio(entry, sl, tp)
+			risk_dict = {"lot_size": lot, "sl": sl, "tp": tp, "rr_ratio": rr}
+			print_signal(signal, risk_dict)
 
 		if m5_df is not None:
 			latest = m5_df.iloc[-1]
