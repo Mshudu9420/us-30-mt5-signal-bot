@@ -5,7 +5,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import config
-from signal_output import print_heartbeat, print_startup_summary
+from signal_output import print_heartbeat, print_signal, print_startup_summary
 
 
 def test_print_startup_summary_outputs_settings_block(capsys):
@@ -69,3 +69,63 @@ def test_print_heartbeat_uses_low_prominence_formatting(capsys):
 
 	output = capsys.readouterr().out
 	assert "\x1b[" in output
+
+
+def test_print_signal_outputs_block_with_risk_fields(capsys):
+	signal_dict = {
+		"direction": "BUY",
+		"timeframe": "M5",
+		"entry_price": 39210.50,
+		"timestamp": "2026-04-15 10:35:00 UTC",
+	}
+	risk_dict = {
+		"lot_size": 0.25,
+		"sl": 39190.50,
+		"tp": 39240.50,
+		"rr_ratio": 1.50,
+	}
+
+	print_signal(signal_dict, risk_dict)
+
+	output = capsys.readouterr().out
+	assert "-" * 60 in output
+	assert "SIGNAL" in output
+	assert "BUY" in output
+	assert "TIMEFRAME" in output
+	assert "M5" in output
+	assert "ENTRY" in output
+	assert "39210.50" in output
+	assert "LOT SIZE" in output
+	assert "0.25" in output
+	assert "SL" in output
+	assert "39190.50" in output
+	assert "TP" in output
+	assert "39240.50" in output
+	assert "RR" in output
+	assert "1.50" in output
+
+
+def test_print_signal_colors_direction(capsys):
+	buy_signal = {
+		"direction": "BUY",
+		"timeframe": "M5",
+		"entry_price": 39210.50,
+		"timestamp": "2026-04-15 10:35:00 UTC",
+	}
+	risk_dict = {
+		"lot_size": 0.25,
+		"sl": 39190.50,
+		"tp": 39240.50,
+		"rr_ratio": 1.50,
+	}
+
+	print_signal(buy_signal, risk_dict)
+	buy_output = capsys.readouterr().out
+
+	sell_signal = dict(buy_signal)
+	sell_signal["direction"] = "SELL"
+	print_signal(sell_signal, risk_dict)
+	sell_output = capsys.readouterr().out
+
+	assert "\x1b[" in buy_output
+	assert "\x1b[" in sell_output
