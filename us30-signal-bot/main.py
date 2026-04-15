@@ -6,7 +6,8 @@ import config
 import mt5_connector
 from indicators import calculate_bollinger_bands, calculate_ema, calculate_rsi
 from mt5_connector import connect, get_ohlcv
-from signal_output import print_heartbeat, print_startup_summary
+from signal_output import print_heartbeat, print_signal, print_startup_summary
+from strategy import check_signal, get_h1_bias
 
 
 def main() -> bool:
@@ -51,6 +52,15 @@ def polling_loop() -> None:
 
 		if h1_df is not None:
 			h1_df = calculate_ema(h1_df, config.EMA_PERIOD)
+
+		h1_bias = get_h1_bias(h1_df) if h1_df is not None else "UNCLEAR"
+
+		m5_signal = check_signal(m5_df, "M5", h1_bias) if m5_df is not None else None
+		m15_signal = check_signal(m15_df, "M15", h1_bias) if m15_df is not None else None
+
+		for signal in (m5_signal, m15_signal):
+			if signal is not None:
+				print_signal(signal)
 
 		if m5_df is not None:
 			latest = m5_df.iloc[-1]

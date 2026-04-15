@@ -101,3 +101,50 @@ def test_polling_loop_fetches_data_and_prints_heartbeat(monkeypatch):
     assert mt5_mock.TIMEFRAME_M15 in fetch_calls
     assert mt5_mock.TIMEFRAME_H1 in fetch_calls
     assert len(heartbeat_calls) >= 1
+
+
+# --- Task 7.3 strategy calls ---
+
+def test_polling_loop_calls_strategy_and_prints_signal(monkeypatch):
+    bias_calls = []
+    signal_calls = []
+    signal_print_calls = []
+    iteration = {"count": 0}
+
+    def fake_get_ohlcv(symbol, timeframe, n_bars):
+        return _make_ohlcv(n_bars)
+
+    def fake_get_h1_bias(h1_df):
+        bias_calls.append(True)
+        return "BULLISH"
+
+    def fake_check_signal(df, timeframe, h1_bias):
+        signal_calls.append(timeframe)
+        if timeframe == "M5":
+            return {"direction": "BUY", "timeframe": "M5", "entry_price": 39010.0, "timestamp": "t"}
+        return None
+
+    def fake_print_signal(signal):
+        signal_print_calls.append(signal["direction"])
+
+    def fake_sleep(seconds):
+        iteration["count"] += 1
+        if iteration["count"] >= 1:
+            raise StopIteration
+
+    monkeypatch.setattr(main, "get_ohlcv", fake_get_ohlcv)
+    monkeypatch.setattr(main, "get_h1_bias", fake_get_h1_bias)
+    monkeypatch.setattr(main, "check_signal", fake_check_signal)
+    monkeypatch.setattr(main, "print_signal", fake_print_signal)
+    monkeypatch.setattr(main, "print_heartbeat", lambda ts, price: None)
+    monkeypatch.setattr(main.time, "sleep", fake_sleep)
+
+    try:
+        main.polling_loop()
+    except StopIteration:
+        pass
+
+    assert len(bias_calls) >= 1
+    assert "M5" in signal_calls
+    assert "M15" in signal_calls
+    assert "BUY" in signal_print_calls
