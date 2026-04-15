@@ -186,3 +186,70 @@ def test_polling_loop_calculates_risk_and_passes_to_print_signal(monkeypatch):
     assert risk["tp"] == 39030.0
     assert risk["lot_size"] == 0.25
     assert risk["rr_ratio"] == 1.0
+
+
+# --- Task 7.5 high-confidence email alert ---
+
+def test_polling_loop_sends_email_when_high_confidence(monkeypatch):
+    email_calls = []
+    iteration = {"count": 0}
+
+    buy_signal = {"direction": "BUY", "timeframe": "M5", "entry_price": 39010.0, "timestamp": "t"}
+
+    def fake_get_ohlcv(symbol, timeframe, n_bars):
+        return _make_ohlcv(n_bars)
+
+    # Both M5 and M15 return matching BUY signals → high confidence
+    monkeypatch.setattr(main, "get_ohlcv", fake_get_ohlcv)
+    monkeypatch.setattr(main, "get_h1_bias", lambda df: "BULLISH")
+    monkeypatch.setattr(main, "check_signal", lambda df, tf, bias: dict(buy_signal, timeframe=tf))
+    monkeypatch.setattr(main, "is_high_confidence", lambda m5, m15: True)
+    monkeypatch.setattr(main, "calculate_risk_amount", lambda capital, mode: 5.0)
+    monkeypatch.setattr(main, "calculate_sl_price", lambda d, band, buf: 38990.0)
+    monkeypatch.setattr(main, "calculate_tp_price", lambda d, mid: 39030.0)
+    monkeypatch.setattr(main, "calculate_lot_size", lambda risk, sl_pips, pip_val: 0.25)
+    monkeypatch.setattr(main, "calculate_rr_ratio", lambda e, sl, tp: 1.0)
+    monkeypatch.setattr(main, "print_signal", lambda sig, risk: None)
+    monkeypatch.setattr(main, "print_heartbeat", lambda ts, price: None)
+    monkeypatch.setattr(main, "send_email_alert", lambda sig, risk: email_calls.append(sig["direction"]))
+    monkeypatch.setattr(main.time, "sleep", lambda s: (_ for _ in ()).throw(StopIteration()))
+
+    try:
+        main.polling_loop()
+    except StopIteration:
+        pass
+
+    assert len(email_calls) >= 1
+    assert "BUY" in email_calls
+
+
+def test_polling_loop_skips_email_when_not_high_confidence(monkeypatch):
+    email_calls = []
+
+    def fake_get_ohlcv(symbol, timeframe, n_bars):
+        return _make_ohlcv(n_bars)
+
+    monkeypatch.setattr(main, "get_ohlcv", fake_get_ohlcv)
+    monkeypatch.setattr(main, "get_h1_bias", lambda df: "BULLISH")
+    # M5 returns BUY, M15 returns None → not high confidence
+    monkeypatch.setattr(main, "check_signal", lambda df, tf, bias: (
+        {"direction": "BUY", "timeframe": tf, "entry_price": 39010.0, "timestamp": "t"}
+        if tf == "M5" else None
+    ))
+    monkeypatch.setattr(main, "is_high_confidence", lambda m5, m15: False)
+    monkeypatch.setattr(main, "calculate_risk_amount", lambda capital, mode: 5.0)
+    monkeypatch.setattr(main, "calculate_sl_price", lambda d, band, buf: 38990.0)
+    monkeypatch.setattr(main, "calculate_tp_price", lambda d, mid: 39030.0)
+    monkeypatch.setattr(main, "calculate_lot_size", lambda risk, sl_pips, pip_val: 0.25)
+    monkeypatch.setattr(main, "calculate_rr_ratio", lambda e, sl, tp: 1.0)
+    monkeypatch.setattr(main, "print_signal", lambda sig, risk: None)
+    monkeypatch.setattr(main, "print_heartbeat", lambda ts, price: None)
+    monkeypatch.setattr(main, "send_email_alert", lambda sig, risk: email_calls.append(sig))
+    monkeypatch.setattr(main.time, "sleep", lambda s: (_ for _ in ()).throw(StopIteration()))
+
+    try:
+        main.polling_loop()
+    except StopIteration:
+        pass
+
+    assert len(email_calls) == 0
