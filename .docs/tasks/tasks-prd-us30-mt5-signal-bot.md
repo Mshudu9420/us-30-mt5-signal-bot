@@ -79,7 +79,7 @@
 - [ ] 5.0 Risk Manager (Lot Sizing, SL, TP)
 
   - [x] 5.1 Write `calculate_risk_amount(capital, risk_mode)` in `risk_manager.py` — returns dollar risk based on RISK_MODE ("conservative"=5%, "aggressive"=10%)
-  - [ ] 5.2 Write `calculate_lot_size(risk_amount, sl_pips, pip_value)` — returns lot size rounded down to nearest 0.01, with minimum lot enforcement
+  - [x] 5.2 Write `calculate_lot_size(risk_amount, sl_pips, pip_value)` — returns lot size rounded down to nearest 0.01, with minimum lot enforcement
   - [ ] 5.3 Write `calculate_sl_price(direction, band_value, buffer_pips)` — returns SL price level below lower band (BUY) or above upper band (SELL)
   - [ ] 5.4 Write `calculate_tp_price(direction, midline)` — returns TP price at BB midline
   - [ ] 5.5 Write `calculate_rr_ratio(entry, sl, tp)` — returns risk:reward ratio as a float rounded to 2 decimal places
