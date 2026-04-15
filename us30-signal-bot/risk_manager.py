@@ -89,3 +89,24 @@ def calculate_tp_price(direction: str, midline: float) -> float:
     if direction not in {"BUY", "SELL"}:
         raise ValueError(f"Unknown direction '{direction}'. Expected 'BUY' or 'SELL'.")
     return midline
+
+
+def calculate_rr_ratio(entry: float, sl: float, tp: float) -> float:
+    """Return the risk-reward ratio rounded to 2 decimal places.
+
+    Args:
+        entry: Entry price.
+        sl: Stop-loss price.
+        tp: Take-profit price.
+
+    Returns:
+        Risk-reward ratio as a float.
+
+    Raises:
+        ValueError: If the stop-loss distance from entry is zero.
+    """
+    risk_distance = abs(entry - sl)
+    if risk_distance == 0:
+        raise ValueError("entry and sl must not be equal.")
+    reward_distance = abs(tp - entry)
+    return round(reward_distance / risk_distance, 2)

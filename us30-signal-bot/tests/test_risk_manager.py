@@ -7,6 +7,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from risk_manager import (
     calculate_lot_size,
     calculate_risk_amount,
+    calculate_rr_ratio,
     calculate_sl_price,
     calculate_tp_price,
 )
@@ -98,3 +99,25 @@ def test_tp_price_sell_returns_midline():
 def test_tp_price_invalid_direction_raises():
     with pytest.raises(ValueError):
         calculate_tp_price("HOLD", 39250.0)
+
+
+# --- 5.5 calculate_rr_ratio ---
+
+def test_rr_ratio_buy_trade():
+    result = calculate_rr_ratio(39000.0, 38990.0, 39020.0)
+    assert result == pytest.approx(2.0)
+
+
+def test_rr_ratio_sell_trade():
+    result = calculate_rr_ratio(39000.0, 39010.0, 38980.0)
+    assert result == pytest.approx(2.0)
+
+
+def test_rr_ratio_rounds_to_two_decimals():
+    result = calculate_rr_ratio(100.0, 97.0, 107.0)
+    assert result == pytest.approx(2.33)
+
+
+def test_rr_ratio_zero_risk_distance_raises():
+    with pytest.raises(ValueError):
+        calculate_rr_ratio(39000.0, 39000.0, 39020.0)
