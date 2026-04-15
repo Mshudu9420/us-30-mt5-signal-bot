@@ -2,6 +2,7 @@
 
 import os
 import smtplib
+from dotenv import load_dotenv
 
 import config
 
@@ -22,6 +23,9 @@ def send_email_alert(signal_dict, risk_dict) -> bool:
 
 	if not config.ENABLE_EMAIL_ALERTS:
 		return False
+
+	# Load runtime secrets (GMAIL_USER/GMAIL_APP_PASSWORD) from .env if present.
+	load_dotenv()
 
 	gmail_user = os.getenv("GMAIL_USER")
 	gmail_app_password = os.getenv("GMAIL_APP_PASSWORD")

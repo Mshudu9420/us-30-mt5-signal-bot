@@ -91,7 +91,7 @@
   - [x] 6.2 Write `print_heartbeat(timestamp, current_price)` — prints a low-prominence one-liner each poll cycle
   - [x] 6.3 Write `print_signal(signal_dict, risk_dict)` — prints a visually distinct signal block (dashed border) with direction in colour, lot size, SL, TP, and RR ratio
   - [x] 6.4 Write `send_email_alert(signal_dict, risk_dict)` in `alerts.py` — sends Gmail SMTP email with signal details when `is_high_confidence` is True
-  - [ ] 6.5 Add `.env` loading via `python-dotenv` in `alerts.py` — reads `GMAIL_USER` and `GMAIL_APP_PASSWORD` at runtime
+  - [x] 6.5 Add `.env` loading via `python-dotenv` in `alerts.py` — reads `GMAIL_USER` and `GMAIL_APP_PASSWORD` at runtime
   - [ ] 6.6 Write unit tests in `tests/test_alerts.py` — test email body formatting and that send is only triggered on high-confidence signals (mock smtplib)
 
 - [ ] 7.0 Main Polling Loop & Entry Point

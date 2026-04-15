@@ -32,12 +32,18 @@ class DummySMTP:
 
 def test_send_email_alert_sends_when_high_confidence(monkeypatch):
 	created = {}
+	dotenv_called = {"value": False}
 
 	def fake_smtp(host, port):
 		created["client"] = DummySMTP(host, port)
 		return created["client"]
 
+	def fake_load_dotenv():
+		dotenv_called["value"] = True
+
 	monkeypatch.setattr(alerts.smtplib, "SMTP", fake_smtp)
+	monkeypatch.setattr(alerts, "load_dotenv", fake_load_dotenv)
+	monkeypatch.setattr(alerts.config, "ENABLE_EMAIL_ALERTS", True)
 	monkeypatch.setenv("GMAIL_USER", "bot@example.com")
 	monkeypatch.setenv("GMAIL_APP_PASSWORD", "app-password")
 	monkeypatch.setattr(alerts.config, "EMAIL_RECIPIENT", ("receiver@example.com",))
@@ -66,6 +72,7 @@ def test_send_email_alert_sends_when_high_confidence(monkeypatch):
 	assert client.login_args == ("bot@example.com", "app-password")
 	assert client.sendmail_args is not None
 	assert "BUY" in client.sendmail_args[2]
+	assert dotenv_called["value"] is True
 
 
 def test_send_email_alert_skips_when_not_high_confidence(monkeypatch):
