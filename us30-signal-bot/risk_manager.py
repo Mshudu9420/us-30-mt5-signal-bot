@@ -46,3 +46,28 @@ def calculate_lot_size(risk_amount: float, sl_pips: float, pip_value: float) -> 
     # Floor to nearest 0.01
     lot = math.floor(raw * 100) / 100
     return max(lot, config.MIN_LOT_SIZE)
+
+
+def calculate_sl_price(direction: str, band_value: float, buffer_pips: float) -> float:
+    """Return stop-loss price level.
+
+    BUY signals: SL is placed below the lower Bollinger Band.
+    SELL signals: SL is placed above the upper Bollinger Band.
+
+    Args:
+        direction: "BUY" or "SELL".
+        band_value: The relevant band price (lower for BUY, upper for SELL).
+        buffer_pips: Additional pips buffer beyond the band.
+
+    Returns:
+        SL price as a float.
+
+    Raises:
+        ValueError: If direction is not "BUY" or "SELL".
+    """
+    if direction == "BUY":
+        return band_value - buffer_pips
+    elif direction == "SELL":
+        return band_value + buffer_pips
+    else:
+        raise ValueError(f"Unknown direction '{direction}'. Expected 'BUY' or 'SELL'.")

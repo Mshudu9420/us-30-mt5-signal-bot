@@ -4,7 +4,7 @@ import sys
 import os
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from risk_manager import calculate_risk_amount, calculate_lot_size
+from risk_manager import calculate_risk_amount, calculate_lot_size, calculate_sl_price
 
 
 # --- 5.1 calculate_risk_amount ---
@@ -57,3 +57,22 @@ def test_lot_size_zero_pip_value_raises():
 def test_lot_size_zero_sl_pips_raises():
     with pytest.raises(ValueError):
         calculate_lot_size(50.0, 0, 1.0)
+
+
+# --- 5.3 calculate_sl_price ---
+
+def test_sl_price_buy():
+    # BUY: SL = band_value - buffer_pips (below lower band)
+    result = calculate_sl_price("BUY", 39000.0, 10)
+    assert result == pytest.approx(38990.0)
+
+
+def test_sl_price_sell():
+    # SELL: SL = band_value + buffer_pips (above upper band)
+    result = calculate_sl_price("SELL", 39500.0, 10)
+    assert result == pytest.approx(39510.0)
+
+
+def test_sl_price_invalid_direction_raises():
+    with pytest.raises(ValueError):
+        calculate_sl_price("HOLD", 39000.0, 10)
