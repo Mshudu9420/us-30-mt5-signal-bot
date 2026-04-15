@@ -35,3 +35,13 @@ def print_startup_summary(account_info, config) -> None:
 	print(line("ACCOUNT SERVER", str(account_info.server)))
 	print(line("ACCOUNT BALANCE", f"{account_info.balance:.2f}"))
 	print(border)
+
+
+def print_heartbeat(timestamp, current_price: float) -> None:
+	"""Print a low-prominence one-line heartbeat for each poll cycle."""
+	init(autoreset=True, strip=False)
+	message = (
+		f"{Style.DIM}{Fore.WHITE}heartbeat | {timestamp} | "
+		f"price={current_price:.2f}{Style.RESET_ALL}"
+	)
+	print(message)
