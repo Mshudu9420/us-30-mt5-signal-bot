@@ -23,6 +23,7 @@
 - `.gitignore` — Excludes .env, __pycache__, *.log, venv/
 - `requirements.txt` — All pip dependencies
 - `README.md` — Setup and usage instructions
+- `tests/test_mt5_connector.py` — Unit tests for connect, disconnect, get_ohlcv using mt5_mock
 - `tests/test_indicators.py` — Unit tests for BB, RSI, EMA functions
 - `tests/test_strategy.py` — Unit tests for signal logic and H1 filter
 - `tests/test_risk_manager.py` — Unit tests for lot sizing, SL, TP
@@ -53,7 +54,6 @@
   - [x] 1.6 Initialise Git repo, create GitHub repository, and push initial project skeleton
 
 - [ ] 2.0 MT5 Connection & Data Feed
-- [x] 2.0 MT5 Connection & Data Feed
 
   - [x] 2.1 Create `mt5_mock.py` — stub that mimics `MetaTrader5` module interface (initialize, shutdown, account_info, copy_rates_from_pos) returning dummy data, for use on Linux
   - [x] 2.2 Write `mt5_connector.py` — `connect()` function that initialises MT5, prints account info (login, server, balance), and returns connection status
@@ -61,15 +61,14 @@
   - [x] 2.4 Write `get_ohlcv(symbol, timeframe, n_bars)` function that fetches N bars of OHLCV data and returns a pandas DataFrame
   - [x] 2.5 Add retry logic to `connect()` — if connection fails, wait 10 seconds and retry up to `MAX_RETRIES` (from config), then exit gracefully
   - [ ] 2.6 Write unit tests in `tests/test_mt5_connector.py` using `mt5_mock.py` to test connect, disconnect, and get_ohlcv without a live MT5 terminal
-  - [x] 2.6 Write unit tests in `tests/test_mt5_connector.py` using `mt5_mock.py` to test connect, disconnect, and get_ohlcv without a live MT5 terminal
 
-- [ ] 3.0 Indicators Module (BB, RSI, EMA)
+- [x] 3.0 Indicators Module (BB, RSI, EMA)
 
-  - [ ] 3.1 Write `calculate_bollinger_bands(df, period, std_dev)` in `indicators.py` — returns upper band, lower band, and midline as new DataFrame columns
-  - [ ] 3.2 Write `calculate_rsi(df, period)` in `indicators.py` — returns RSI as a new DataFrame column
-  - [ ] 3.3 Write `calculate_ema(df, period)` in `indicators.py` — returns EMA as a new DataFrame column
-  - [ ] 3.4 Write `get_latest_values(df)` helper — returns the most recent row's BB, RSI, EMA, and close price as a dict
-  - [ ] 3.5 Write unit tests in `tests/test_indicators.py` using synthetic OHLCV DataFrames — test BB, RSI, EMA output types, shapes, and known values
+  - [x] 3.1 Write `calculate_bollinger_bands(df, period, std_dev)` in `indicators.py` — returns upper band, lower band, and midline as new DataFrame columns
+  - [x] 3.2 Write `calculate_rsi(df, period)` in `indicators.py` — returns RSI as a new DataFrame column
+  - [x] 3.3 Write `calculate_ema(df, period)` in `indicators.py` — returns EMA as a new DataFrame column
+  - [x] 3.4 Write `get_latest_values(df)` helper — returns the most recent row's BB, RSI, EMA, and close price as a dict
+  - [x] 3.5 Write unit tests in `tests/test_indicators.py` using synthetic OHLCV DataFrames — test BB, RSI, EMA output types, shapes, and known values
 
 - [ ] 4.0 Strategy & Signal Logic (with H1 Filter)
 
