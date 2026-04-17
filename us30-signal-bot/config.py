@@ -37,5 +37,5 @@ MAX_RETRIES = 3
 RETRY_DELAY_SECONDS = 10
 
 # Alerts
-ENABLE_EMAIL_ALERTS = False
-EMAIL_RECIPIENT = ""
+ENABLE_EMAIL_ALERTS = True
+EMAIL_RECIPIENT = "mmathidi01@gmail.com", "mementorelo@gmail.com"
