@@ -54,10 +54,21 @@ def get_ohlcv(symbol: str, timeframe: int, n_bars: int) -> pd.DataFrame | None:
 	  time, open, high, low, close, tick_volume, spread, real_volume.
 	Returns None if no data is returned by MT5.
 	"""
-	rates = mt5.copy_rates_from_pos(symbol, timeframe, 0, n_bars)
-	if not rates:
-		print(f"get_ohlcv: no data returned for {symbol} tf={timeframe}")
-		return None
-	df = pd.DataFrame(rates)
-	df["time"] = pd.to_datetime(df["time"], unit="s", utc=True)
-	return df
+	fallbacks = list(getattr(config, "SYMBOL_FALLBACKS", []))
+	candidates: list[str] = []
+	for candidate in [symbol, *fallbacks]:
+		if candidate and candidate not in candidates:
+			candidates.append(candidate)
+
+	for candidate_symbol in candidates:
+		rates = mt5.copy_rates_from_pos(candidate_symbol, timeframe, 0, n_bars)
+		if not rates:
+			continue
+		if candidate_symbol != symbol:
+			print(f"get_ohlcv: using fallback symbol {candidate_symbol} for requested {symbol}")
+		df = pd.DataFrame(rates)
+		df["time"] = pd.to_datetime(df["time"], unit="s", utc=True)
+		return df
+
+	print(f"get_ohlcv: no data returned for {symbol} tf={timeframe}")
+	return None

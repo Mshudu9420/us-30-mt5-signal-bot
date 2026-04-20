@@ -143,6 +143,66 @@ def test_get_ohlcv_returns_none_when_no_data(monkeypatch):
 	assert result is None
 
 
+def test_get_ohlcv_uses_fallback_symbol_when_primary_has_no_data(monkeypatch):
+	calls = []
+
+	class FallbackMT5:
+		@staticmethod
+		def copy_rates_from_pos(symbol, timeframe, start, count):
+			calls.append(symbol)
+			if symbol == "US30":
+				return []
+			if symbol == "US30.cash":
+				return [{
+					"time": 1710000000,
+					"open": 1.0,
+					"high": 1.0,
+					"low": 1.0,
+					"close": 1.0,
+					"tick_volume": 1,
+					"spread": 0,
+					"real_volume": 1,
+				}]
+			return []
+
+	monkeypatch.setattr(mt5_connector, "mt5", FallbackMT5)
+	monkeypatch.setattr(mt5_connector.config, "SYMBOL_FALLBACKS", ["US30.cash", "DJIA"])
+
+	df = mt5_connector.get_ohlcv("US30", 5, 50)
+
+	assert df is not None
+	assert calls[:2] == ["US30", "US30.cash"]
+
+
+def test_get_ohlcv_stops_after_primary_symbol_success(monkeypatch):
+	calls = []
+
+	class PrimaryWinsMT5:
+		@staticmethod
+		def copy_rates_from_pos(symbol, timeframe, start, count):
+			calls.append(symbol)
+			if symbol == "US30":
+				return [{
+					"time": 1710000000,
+					"open": 1.0,
+					"high": 1.0,
+					"low": 1.0,
+					"close": 1.0,
+					"tick_volume": 1,
+					"spread": 0,
+					"real_volume": 1,
+				}]
+			return []
+
+	monkeypatch.setattr(mt5_connector, "mt5", PrimaryWinsMT5)
+	monkeypatch.setattr(mt5_connector.config, "SYMBOL_FALLBACKS", ["US30.cash", "DJIA"])
+
+	df = mt5_connector.get_ohlcv("US30", 5, 50)
+
+	assert df is not None
+	assert calls == ["US30"]
+
+
 # --- mt5_mock.py integration tests (Task 2.6) ---
 
 def test_disconnect_via_mock_resets_initialized_state(monkeypatch, capsys):
