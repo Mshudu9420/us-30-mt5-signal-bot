@@ -111,4 +111,5 @@ def polling_loop() -> None:
 
 
 if __name__ == "__main__":
-	main()
+	if main():
+		polling_loop()
