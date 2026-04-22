@@ -60,7 +60,9 @@ def send_email_alert(signal_dict, risk_dict) -> bool:
 
 	message = f"Subject: {subject}\n\n{body}"
 
-	with smtplib.SMTP("smtp.gmail.com", 587) as server:
+	# For Gmail this used smtp.gmail.com; to test with Yahoo use smtp.mail.yahoo.com
+	# Yahoo supports STARTTLS on port 587 or implicit SSL on port 465.
+	with smtplib.SMTP("smtp.mail.yahoo.com", 587) as server:
 		server.starttls()
 		server.login(gmail_user, gmail_app_password)
 		server.sendmail(gmail_user, recipients, message)
