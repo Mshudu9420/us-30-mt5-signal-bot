@@ -62,27 +62,20 @@ def get_ohlcv(symbol: str, timeframe: int, n_bars: int) -> pd.DataFrame | None:
 
 	for candidate_symbol in candidates:
 		rates = mt5.copy_rates_from_pos(candidate_symbol, timeframe, 0, n_bars)
-		if not rates:
+		# mt5.copy_rates_from_pos may return None, an empty sequence, or array-like.
+		# Avoid using `if not rates:` because pandas DataFrame truth-value is ambiguous
+		# and raises ValueError. Check explicitly for None or empty length instead.
+		if rates is None:
 			continue
+		if hasattr(rates, "__len__") and len(rates) == 0:
+			continue
+
 		if candidate_symbol != symbol:
 			print(f"get_ohlcv: using fallback symbol {candidate_symbol} for requested {symbol}")
+
 		df = pd.DataFrame(rates)
 		df["time"] = pd.to_datetime(df["time"], unit="s", utc=True)
 		return df
 
 	print(f"get_ohlcv: no data returned for {symbol} tf={timeframe}")
 	return None
-	rates = mt5.copy_rates_from_pos(symbol, timeframe, 0, n_bars)
-	# mt5.copy_rates_from_pos may return None, an empty sequence, or array-like.
-	# Avoid using `if not rates:` because pandas DataFrame truth-value is ambiguous
-	# and raises ValueError. Check explicitly for None or empty length instead.
-	if rates is None:
-		print(f"get_ohlcv: no data returned for {symbol} tf={timeframe}")
-		return None
-	# If rates supports len(), treat zero-length as no data
-	if hasattr(rates, "__len__") and len(rates) == 0:
-		print(f"get_ohlcv: no data returned for {symbol} tf={timeframe}")
-		return None
-	df = pd.DataFrame(rates)
-	df["time"] = pd.to_datetime(df["time"], unit="s", utc=True)
-	return df
