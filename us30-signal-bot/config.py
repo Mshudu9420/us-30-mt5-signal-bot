@@ -2,7 +2,7 @@
 
 # Broker and symbol settings
 BROKER_NAME = "Exness"
-SYMBOL = "US30"
+SYMBOL = "US30m"
 SYMBOL_FALLBACKS = ["US30.cash", "US30Cash", "DJIA"]
 
 # Account and risk configuration

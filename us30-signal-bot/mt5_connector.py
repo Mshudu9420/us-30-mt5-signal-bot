@@ -55,7 +55,14 @@ def get_ohlcv(symbol: str, timeframe: int, n_bars: int) -> pd.DataFrame | None:
 	Returns None if no data is returned by MT5.
 	"""
 	rates = mt5.copy_rates_from_pos(symbol, timeframe, 0, n_bars)
-	if not rates:
+	# mt5.copy_rates_from_pos may return None, an empty sequence, or array-like.
+	# Avoid using `if not rates:` because pandas DataFrame truth-value is ambiguous
+	# and raises ValueError. Check explicitly for None or empty length instead.
+	if rates is None:
+		print(f"get_ohlcv: no data returned for {symbol} tf={timeframe}")
+		return None
+	# If rates supports len(), treat zero-length as no data
+	if hasattr(rates, "__len__") and len(rates) == 0:
 		print(f"get_ohlcv: no data returned for {symbol} tf={timeframe}")
 		return None
 	df = pd.DataFrame(rates)
