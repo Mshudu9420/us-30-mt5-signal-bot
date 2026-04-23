@@ -44,11 +44,19 @@ def polling_loop() -> None:
 		TIMEFRAME_H1 = _mt5.TIMEFRAME_H1
 
 	while True:
+		# Use monotonic clock to keep a fixed-rate polling interval and report step timings.
+		cycle_start = time.monotonic()
 		try:
+			step_times = {}
+			# Fetch OHLCV
+			fetch_start = time.monotonic()
 			m5_df = get_ohlcv(config.SYMBOL, TIMEFRAME_M5, config.N_BARS)
 			m15_df = get_ohlcv(config.SYMBOL, TIMEFRAME_M15, config.N_BARS)
 			h1_df = get_ohlcv(config.SYMBOL, TIMEFRAME_H1, config.N_BARS)
+			step_times["fetch"] = time.monotonic() - fetch_start
 
+			# Indicators
+			ind_start = time.monotonic()
 			if m5_df is not None:
 				m5_df = calculate_bollinger_bands(m5_df, config.BB_PERIOD, config.BB_STD_DEV)
 				m5_df = calculate_rsi(m5_df, config.RSI_PERIOD)
@@ -61,7 +69,10 @@ def polling_loop() -> None:
 
 			if h1_df is not None:
 				h1_df = calculate_ema(h1_df, config.EMA_PERIOD)
+			step_times["indicators"] = time.monotonic() - ind_start
 
+			# Signals and risk
+			sig_start = time.monotonic()
 			h1_bias = get_h1_bias(h1_df) if h1_df is not None else "UNCLEAR"
 
 			m5_signal = check_signal(m5_df, "M5", h1_bias) if m5_df is not None else None
@@ -83,7 +94,10 @@ def polling_loop() -> None:
 				rr = calculate_rr_ratio(entry, sl, tp)
 				risk_dict = {"lot_size": lot, "sl": sl, "tp": tp, "rr_ratio": rr}
 				print_signal(signal, risk_dict)
+			step_times["signals"] = time.monotonic() - sig_start
 
+			# High-confidence handling: order + alert
+			order_start = time.monotonic()
 			if is_high_confidence(m5_signal, m15_signal):
 				_sig = m5_signal or m15_signal
 				_df = m5_df if m5_signal is not None else m15_df
@@ -98,13 +112,9 @@ def polling_loop() -> None:
 				_alert_sig = dict(_sig, is_high_confidence=True)
 				_risk_dict = {"lot_size": _lot, "sl": _sl, "tp": _tp, "rr_ratio": _rr}
 
-				# Place order automatically if enabled. This is opt-in and disabled by default.
 				order_response = None
 				order_summary = None
 				if config.ENABLE_AUTO_TRADES:
-					# Additional safety gate: require ENABLE_LIVE_TRADES to be True to execute
-					# real orders against a live account. This prevents accidental live
-					# execution while experimenting with automated logic.
 					if config.ENABLE_LIVE_TRADES:
 						order_response = mt5_connector.place_market_order(
 							config.SYMBOL,
@@ -118,27 +128,49 @@ def polling_loop() -> None:
 						order_summary = mt5_connector.summarize_order_result(order_response)
 						print(f"auto-trade summary: {order_summary}")
 					else:
-						# Auto-trades requested but live trading is disabled; report as such
 						order_summary = {"success": False, "error": "LIVE_TRADES_DISABLED"}
 						print("auto-trade skipped: live trading disabled (ENABLE_LIVE_TRADES=False)")
 
-				# Include order summary and raw response in alert payload so recipients can see what happened
 				if order_summary is not None:
 					_alert_sig["order_summary"] = order_summary
 				if order_response is not None:
 					_alert_sig["order_info"] = order_response
 
+				# send alert (could block on SMTP)
+				email_start = time.monotonic()
 				send_email_alert(_alert_sig, _risk_dict)
+				step_times["order_and_email"] = time.monotonic() - order_start
+				step_times["email_send"] = time.monotonic() - email_start
 
+			# Heartbeat (print latest close/time)
 			if m5_df is not None:
 				latest = m5_df.iloc[-1]
 				print_heartbeat(str(latest["time"]), float(latest["close"]))
 
-			time.sleep(config.POLL_INTERVAL_SECONDS)
+			# Total cycle time and sleep to keep a fixed-rate cadence
+			cycle_elapsed = time.monotonic() - cycle_start
+			# report timings for debugging
+			print(
+				f"timings (s): fetch={step_times.get('fetch',0):.3f} indicators={step_times.get('indicators',0):.3f} signals={step_times.get('signals',0):.3f} order_and_email={step_times.get('order_and_email',0):.3f} total={cycle_elapsed:.3f}"
+			)
+
+			sleep_for = max(0.0, config.POLL_INTERVAL_SECONDS - cycle_elapsed)
+			if sleep_for > 0:
+				time.sleep(sleep_for)
 		except KeyboardInterrupt:
 			print("Bot stopped by user.")
 			disconnect()
 			break
+		except Exception as exc:
+			# Log unexpected exceptions and continue; don't crash the loop on transient errors.
+			print("Unexpected error in polling loop:", exc)
+			try:
+				import traceback
+				traceback.print_exc()
+			except Exception:
+				pass
+			# Sleep a bit before retrying to avoid tight error loops
+			time.sleep(min(5, config.POLL_INTERVAL_SECONDS))
 
 
 if __name__ == "__main__":
