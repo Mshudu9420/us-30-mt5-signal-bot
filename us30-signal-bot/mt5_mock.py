@@ -12,12 +12,12 @@ from typing import Any
 
 
 # Minimal timeframe constants used by the strategy.
+TIMEFRAME_M1 = 1
 TIMEFRAME_M5 = 5
 TIMEFRAME_M15 = 15
-# Use MT5-style constant for H1 to match test expectations.
-# Some MT5 builds expose a large integer for timeframe constants; tests
-# expect the H1 value used by MetaTrader5 wrappers (16385) rather than
-# a simple minute count. Use that value so unit tests are consistent.
+# Use MT5-style constant for H1 to match test expectations. Some MT5 builds
+# expose a large integer for timeframe constants; tests expect the H1 value
+# used by MetaTrader5 wrappers (16385) rather than a simple minute count.
 TIMEFRAME_H1 = 16385
 
 
@@ -110,6 +110,9 @@ def version() -> tuple[int, int, str]:
 
 
 def _timeframe_to_minutes(timeframe: int) -> int:
+	# Map known timeframe constants (including MT5-style H1) to minute counts.
+	if timeframe == TIMEFRAME_M1:
+		return 1
 	if timeframe == TIMEFRAME_M5:
 		return 5
 	if timeframe == TIMEFRAME_M15:

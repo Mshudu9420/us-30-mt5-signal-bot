@@ -36,9 +36,10 @@ def main() -> bool:
 def polling_loop() -> None:
 	"""Fetch M5, M15, H1 data every poll cycle and calculate indicators."""
 	try:
-		from MetaTrader5 import TIMEFRAME_M5, TIMEFRAME_M15, TIMEFRAME_H1
+		from MetaTrader5 import TIMEFRAME_M1, TIMEFRAME_M5, TIMEFRAME_M15, TIMEFRAME_H1
 	except ImportError:
 		import mt5_mock as _mt5
+		TIMEFRAME_M1 = _mt5.TIMEFRAME_M1
 		TIMEFRAME_M5 = _mt5.TIMEFRAME_M5
 		TIMEFRAME_M15 = _mt5.TIMEFRAME_M15
 		TIMEFRAME_H1 = _mt5.TIMEFRAME_H1
@@ -48,8 +49,9 @@ def polling_loop() -> None:
 		cycle_start = time.monotonic()
 		try:
 			step_times = {}
-			# Fetch OHLCV
+			# Fetch OHLCV (now includes 1-minute timeframe)
 			fetch_start = time.monotonic()
+			m1_df = get_ohlcv(config.SYMBOL, TIMEFRAME_M1, config.N_BARS)
 			m5_df = get_ohlcv(config.SYMBOL, TIMEFRAME_M5, config.N_BARS)
 			m15_df = get_ohlcv(config.SYMBOL, TIMEFRAME_M15, config.N_BARS)
 			h1_df = get_ohlcv(config.SYMBOL, TIMEFRAME_H1, config.N_BARS)
@@ -57,6 +59,11 @@ def polling_loop() -> None:
 
 			# Indicators
 			ind_start = time.monotonic()
+			# Calculate indicators for 1-minute timeframe (Bollinger + RSI)
+			if m1_df is not None:
+				m1_df = calculate_bollinger_bands(m1_df, config.BB_PERIOD, config.BB_STD_DEV)
+				m1_df = calculate_rsi(m1_df, config.RSI_PERIOD)
+
 			if m5_df is not None:
 				m5_df = calculate_bollinger_bands(m5_df, config.BB_PERIOD, config.BB_STD_DEV)
 				m5_df = calculate_rsi(m5_df, config.RSI_PERIOD)
@@ -68,6 +75,9 @@ def polling_loop() -> None:
 				m15_df = calculate_ema(m15_df, config.EMA_PERIOD)
 
 			if h1_df is not None:
+				# Calculate Bollinger + RSI for H1 as well (used for multi-timeframe checks)
+				h1_df = calculate_bollinger_bands(h1_df, config.BB_PERIOD, config.BB_STD_DEV)
+				h1_df = calculate_rsi(h1_df, config.RSI_PERIOD)
 				h1_df = calculate_ema(h1_df, config.EMA_PERIOD)
 			step_times["indicators"] = time.monotonic() - ind_start
 
@@ -75,12 +85,13 @@ def polling_loop() -> None:
 			sig_start = time.monotonic()
 			h1_bias = get_h1_bias(h1_df) if h1_df is not None else "UNCLEAR"
 
+			m1_signal = check_signal(m1_df, "M1", h1_bias) if m1_df is not None else None
 			m5_signal = check_signal(m5_df, "M5", h1_bias) if m5_df is not None else None
 			m15_signal = check_signal(m15_df, "M15", h1_bias) if m15_df is not None else None
 
 			risk_amount = calculate_risk_amount(config.INITIAL_CAPITAL, config.RISK_MODE)
 
-			for signal, df in ((m5_signal, m5_df), (m15_signal, m15_df)):
+			for signal, df in ((m1_signal, m1_df), (m5_signal, m5_df), (m15_signal, m15_df)):
 				if signal is None or df is None:
 					continue
 				direction = signal["direction"]
@@ -98,8 +109,8 @@ def polling_loop() -> None:
 
 			# High-confidence handling: order + alert
 			order_start = time.monotonic()
-			if is_high_confidence(m5_signal, m15_signal):
-				_sig = m5_signal or m15_signal
+			if is_high_confidence(m1_signal, m5_signal, m15_signal, h1_bias):
+				_sig = m1_signal or m5_signal or m15_signal
 				_df = m5_df if m5_signal is not None else m15_df
 				_direction = _sig["direction"]
 				_entry = float(_sig["entry_price"])

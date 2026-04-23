@@ -133,27 +133,34 @@ def test_check_signal_suppresses_all_signals_when_h1_bias_unclear():
 	assert result is None
 
 
-def test_is_high_confidence_true_when_m5_and_m15_same_direction():
+def test_is_high_confidence_true_when_m1_m5_m15_and_h1_agree():
+	m1_signal = {"direction": "BUY", "timeframe": "M1"}
 	m5_signal = {"direction": "BUY", "timeframe": "M5"}
 	m15_signal = {"direction": "BUY", "timeframe": "M15"}
 
-	result = strategy.is_high_confidence(m5_signal, m15_signal)
+	result = strategy.is_high_confidence(m1_signal, m5_signal, m15_signal, "BULLISH")
 
 	assert result is True
 
 
 def test_is_high_confidence_false_when_directions_differ():
+	m1_signal = {"direction": "BUY", "timeframe": "M1"}
 	m5_signal = {"direction": "BUY", "timeframe": "M5"}
 	m15_signal = {"direction": "SELL", "timeframe": "M15"}
 
-	result = strategy.is_high_confidence(m5_signal, m15_signal)
+	result = strategy.is_high_confidence(m1_signal, m5_signal, m15_signal, "BULLISH")
 
 	assert result is False
 
 
 def test_is_high_confidence_false_when_any_signal_missing():
-	result_with_missing_m5 = strategy.is_high_confidence(None, {"direction": "BUY"})
-	result_with_missing_m15 = strategy.is_high_confidence({"direction": "BUY"}, None)
+	# Missing m1
+	result_missing_m1 = strategy.is_high_confidence(None, {"direction": "BUY"}, {"direction": "BUY"}, "BULLISH")
+	# Missing m5
+	result_missing_m5 = strategy.is_high_confidence({"direction": "BUY"}, None, {"direction": "BUY"}, "BULLISH")
+	# Missing m15
+	result_missing_m15 = strategy.is_high_confidence({"direction": "BUY"}, {"direction": "BUY"}, None, "BULLISH")
 
-	assert result_with_missing_m5 is False
-	assert result_with_missing_m15 is False
+	assert result_missing_m1 is False
+	assert result_missing_m5 is False
+	assert result_missing_m15 is False

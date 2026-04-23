@@ -99,6 +99,7 @@ def test_polling_loop_fetches_data_and_prints_heartbeat(monkeypatch):
         pass
 
     import mt5_mock
+    assert mt5_mock.TIMEFRAME_M1 in fetch_calls
     assert mt5_mock.TIMEFRAME_M5 in fetch_calls
     assert mt5_mock.TIMEFRAME_M15 in fetch_calls
     assert mt5_mock.TIMEFRAME_H1 in fetch_calls
@@ -205,7 +206,7 @@ def test_polling_loop_sends_email_when_high_confidence(monkeypatch):
     monkeypatch.setattr(main, "get_ohlcv", fake_get_ohlcv)
     monkeypatch.setattr(main, "get_h1_bias", lambda df: "BULLISH")
     monkeypatch.setattr(main, "check_signal", lambda df, tf, bias: dict(buy_signal, timeframe=tf))
-    monkeypatch.setattr(main, "is_high_confidence", lambda m5, m15: True)
+    monkeypatch.setattr(main, "is_high_confidence", lambda m1, m5, m15, h1: True)
     monkeypatch.setattr(main, "calculate_risk_amount", lambda capital, mode: 5.0)
     monkeypatch.setattr(main, "calculate_sl_price", lambda d, band, buf: 38990.0)
     monkeypatch.setattr(main, "calculate_tp_price", lambda d, mid: 39030.0)
@@ -238,7 +239,7 @@ def test_polling_loop_skips_email_when_not_high_confidence(monkeypatch):
         {"direction": "BUY", "timeframe": tf, "entry_price": 39010.0, "timestamp": "t"}
         if tf == "M5" else None
     ))
-    monkeypatch.setattr(main, "is_high_confidence", lambda m5, m15: False)
+    monkeypatch.setattr(main, "is_high_confidence", lambda m1, m5, m15, h1: False)
     monkeypatch.setattr(main, "calculate_risk_amount", lambda capital, mode: 5.0)
     monkeypatch.setattr(main, "calculate_sl_price", lambda d, band, buf: 38990.0)
     monkeypatch.setattr(main, "calculate_tp_price", lambda d, mid: 39030.0)
@@ -265,7 +266,7 @@ def test_polling_loop_handles_keyboard_interrupt(monkeypatch, capsys):
     monkeypatch.setattr(main, "get_ohlcv", lambda symbol, tf, n: _make_ohlcv(n))
     monkeypatch.setattr(main, "get_h1_bias", lambda df: "UNCLEAR")
     monkeypatch.setattr(main, "check_signal", lambda df, tf, bias: None)
-    monkeypatch.setattr(main, "is_high_confidence", lambda m5, m15: False)
+    monkeypatch.setattr(main, "is_high_confidence", lambda m1, m5, m15, h1: False)
     monkeypatch.setattr(main, "calculate_risk_amount", lambda capital, mode: 5.0)
     monkeypatch.setattr(main, "print_heartbeat", lambda ts, price: None)
     monkeypatch.setattr(main, "disconnect", lambda: disconnect_calls.append(True))

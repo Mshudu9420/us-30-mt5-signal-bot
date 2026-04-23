@@ -53,8 +53,30 @@ def check_signal(df: pd.DataFrame, timeframe: str, h1_bias: str) -> dict[str, ob
 	return None
 
 
-def is_high_confidence(m5_signal: dict[str, object] | None, m15_signal: dict[str, object] | None) -> bool:
-	"""Return True when M5 and M15 signals both exist and match direction."""
-	if not m5_signal or not m15_signal:
+
+def is_high_confidence(
+    m1_signal: dict[str, object] | None,
+    m5_signal: dict[str, object] | None,
+    m15_signal: dict[str, object] | None,
+    h1_bias: str,
+) -> bool:
+	"""Return True when M1 and M5 agree and M15 and H1 match the same direction.
+
+	Rules:
+	- M1 and M5 must both exist and have the same `direction`.
+	- M15 must exist and have the same `direction` as M1/M5.
+	- H1 bias must match the direction (BUY -> BULLISH, SELL -> BEARISH).
+	"""
+	if not m1_signal or not m5_signal or not m15_signal:
 		return False
-	return m5_signal.get("direction") == m15_signal.get("direction")
+	dir1 = m1_signal.get("direction")
+	dir5 = m5_signal.get("direction")
+	dir15 = m15_signal.get("direction")
+	if dir1 != dir5 or dir1 != dir15:
+		return False
+	# Map direction to H1 bias
+	if dir1 == "BUY" and h1_bias == "BULLISH":
+		return True
+	if dir1 == "SELL" and h1_bias == "BEARISH":
+		return True
+	return False
