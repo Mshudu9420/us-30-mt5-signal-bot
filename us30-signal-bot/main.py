@@ -99,22 +99,34 @@ def polling_loop() -> None:
 				_risk_dict = {"lot_size": _lot, "sl": _sl, "tp": _tp, "rr_ratio": _rr}
 
 				# Place order automatically if enabled. This is opt-in and disabled by default.
-				order_info = None
+				order_response = None
+				order_summary = None
 				if config.ENABLE_AUTO_TRADES:
-					order_info = mt5_connector.place_market_order(
-						config.SYMBOL,
-						_direction,
-						_lot,
-						_sl,
-						_tp,
-						deviation=getattr(config, "ORDER_DEVIATION", None),
-						magic=getattr(config, "ORDER_MAGIC", None),
-					)
-					print(f"auto-trade attempt result: {order_info}")
+					# Additional safety gate: require ENABLE_LIVE_TRADES to be True to execute
+					# real orders against a live account. This prevents accidental live
+					# execution while experimenting with automated logic.
+					if config.ENABLE_LIVE_TRADES:
+						order_response = mt5_connector.place_market_order(
+							config.SYMBOL,
+							_direction,
+							_lot,
+							_sl,
+							_tp,
+							deviation=getattr(config, "ORDER_DEVIATION", None),
+							magic=getattr(config, "ORDER_MAGIC", None),
+						)
+						order_summary = mt5_connector.summarize_order_result(order_response)
+						print(f"auto-trade summary: {order_summary}")
+					else:
+						# Auto-trades requested but live trading is disabled; report as such
+						order_summary = {"success": False, "error": "LIVE_TRADES_DISABLED"}
+						print("auto-trade skipped: live trading disabled (ENABLE_LIVE_TRADES=False)")
 
-				# Include order info in alert payload so recipients can see what happened
-				if order_info is not None:
-					_alert_sig["order_info"] = order_info
+				# Include order summary and raw response in alert payload so recipients can see what happened
+				if order_summary is not None:
+					_alert_sig["order_summary"] = order_summary
+				if order_response is not None:
+					_alert_sig["order_info"] = order_response
 
 				send_email_alert(_alert_sig, _risk_dict)
 

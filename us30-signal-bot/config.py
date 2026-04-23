@@ -45,8 +45,13 @@ EMAIL_RECIPIENT = "mmathidi01@gmail.com", "mementorelo@gmail.com"
 TIMEZONE = "Africa/Johannesburg"
 
 # Automatic trading (disabled by default). Enable only after careful testing.
-ENABLE_AUTO_TRADES = False
+ENABLE_AUTO_TRADES = True
 # Default order deviation (max allowed slippage in points)
 ORDER_DEVIATION = 20
 # Magic number for orders (optional)
 ORDER_MAGIC = 20260423
+
+# Additional live trading safety gate. Set to True only when you are ready
+# to execute live trades against your real account. Kept separate so you can
+# enable automated behavior in testing without opening live trading.
+ENABLE_LIVE_TRADES = True

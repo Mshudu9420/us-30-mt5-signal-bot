@@ -60,10 +60,20 @@ def send_email_alert(signal_dict, risk_dict) -> bool:
 
 	message = f"Subject: {subject}\n\n{body}"
 
-	# Append order info to the email body if the signal includes it
+	# Append order info / summary to the email body if the signal includes it
 	order_info = signal_dict.get("order_info")
 	if order_info is not None:
-		message += f"\nORDER INFO:\n{order_info}\n"
+		message += f"\nORDER INFO (raw):\n{order_info}\n"
+
+	order_summary = signal_dict.get("order_summary")
+	if order_summary is not None:
+		# order_summary is expected to be a dict; format key: value lines for readability
+		message += "\nORDER SUMMARY:\n"
+		if isinstance(order_summary, dict):
+			for k, v in order_summary.items():
+				message += f"- {k}: {v}\n"
+		else:
+			message += f"{order_summary}\n"
 
 	# The bot only supports Gmail SMTP for sending alerts.
 	# Use smtp.gmail.com with STARTTLS on port 587 and optional DEBUG_SMTP.

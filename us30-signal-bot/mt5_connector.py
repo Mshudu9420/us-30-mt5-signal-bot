@@ -156,3 +156,45 @@ def place_market_order(
 		return {"success": True, "result": result, "retcode": retcode}
 	except Exception as exc:
 		return {"success": False, "error": str(exc)}
+
+
+def summarize_order_result(order_response: dict) -> dict:
+	"""Return a concise, JSON-serializable summary for order responses.
+
+	Accepts the dict returned by place_market_order and extracts the
+	most useful fields for console/email reporting.
+	"""
+	summary: dict = {"success": bool(order_response.get("success", False))}
+	if not summary["success"]:
+		summary["error"] = order_response.get("error")
+		return summary
+
+	# Try to extract MT5 result details safely
+	result = order_response.get("result")
+	retcode = order_response.get("retcode")
+	summary["retcode"] = retcode
+
+	# Many MT5 wrappers return an object with 'order' or 'order_id' attributes
+	order_id = None
+	try:
+		order_id = getattr(result, "order", None)
+	except Exception:
+		order_id = None
+	if order_id is None:
+		try:
+			order_id = getattr(result, "order_id", None)
+		except Exception:
+			order_id = None
+	if order_id is not None:
+		summary["order_id"] = int(order_id)
+
+	# Try to surface executed price/volume if available
+	try:
+		req = getattr(result, "request", None)
+		if req and isinstance(req, dict):
+			summary["volume"] = float(req.get("volume", 0))
+			summary["price"] = float(req.get("price", 0))
+	except Exception:
+		pass
+
+	return summary
