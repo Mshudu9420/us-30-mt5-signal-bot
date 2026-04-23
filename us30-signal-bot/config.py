@@ -17,7 +17,7 @@ DEFAULT_PIP_VALUE = 1.0
 
 # Timeframe configuration
 TIMEFRAMES = {
-	"entry": ["M5", "M15"],
+	"entry": ["M1", "M5", "M15"],
 	"bias": "H1",
 }
 N_BARS = 250
