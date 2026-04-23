@@ -73,8 +73,12 @@ def get_ohlcv(symbol: str, timeframe: int, n_bars: int) -> pd.DataFrame | None:
 		if candidate_symbol != symbol:
 			print(f"get_ohlcv: using fallback symbol {candidate_symbol} for requested {symbol}")
 
+		# Build DataFrame and convert timestamps to configured timezone
 		df = pd.DataFrame(rates)
-		df["time"] = pd.to_datetime(df["time"], unit="s", utc=True)
+		# Parse MT5 timestamps as UTC then convert to configured timezone (SAST by default)
+		# config.TIMEZONE is read from config.py and should be a tz database name
+		# supported by pandas (e.g. 'Africa/Johannesburg').
+		df["time"] = pd.to_datetime(df["time"], unit="s", utc=True).dt.tz_convert(config.TIMEZONE)
 		return df
 
 	print(f"get_ohlcv: no data returned for {symbol} tf={timeframe}")

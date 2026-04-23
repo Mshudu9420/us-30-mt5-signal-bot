@@ -39,3 +39,7 @@ RETRY_DELAY_SECONDS = 10
 # Alerts
 ENABLE_EMAIL_ALERTS = True
 EMAIL_RECIPIENT = "mmathidi01@gmail.com", "mementorelo@gmail.com"
+
+# Timezone for timestamp display and logging. Default: South African Standard Time (SAST).
+# Use a tz database name recognized by pandas (e.g. 'Africa/Johannesburg').
+TIMEZONE = "Africa/Johannesburg"
