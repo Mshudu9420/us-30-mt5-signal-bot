@@ -114,7 +114,7 @@ def test_get_ohlcv_returns_dataframe_with_correct_shape(monkeypatch):
 	monkeypatch.setattr(mt5_connector, "mt5", mt5_mock)
 	mt5_mock.initialize()
 
-	df = mt5_connector.get_ohlcv("US30", mt5_mock.TIMEFRAME_M5, 50)
+	df = mt5_connector.get_ohlcv(config.SYMBOL, mt5_mock.TIMEFRAME_M5, 50)
 
 	assert isinstance(df, pd.DataFrame)
 	assert len(df) == 50
@@ -124,7 +124,7 @@ def test_get_ohlcv_dataframe_has_required_columns(monkeypatch):
 	monkeypatch.setattr(mt5_connector, "mt5", mt5_mock)
 	mt5_mock.initialize()
 
-	df = mt5_connector.get_ohlcv("US30", mt5_mock.TIMEFRAME_M15, 10)
+	df = mt5_connector.get_ohlcv(config.SYMBOL, mt5_mock.TIMEFRAME_M15, 10)
 
 	for col in ("time", "open", "high", "low", "close", "tick_volume"):
 		assert col in df.columns, f"Missing column: {col}"
@@ -138,7 +138,7 @@ def test_get_ohlcv_returns_none_when_no_data(monkeypatch):
 
 	monkeypatch.setattr(mt5_connector, "mt5", EmptyMT5)
 
-	result = mt5_connector.get_ohlcv("US30", 5, 50)
+	result = mt5_connector.get_ohlcv(config.SYMBOL, 5, 50)
 
 	assert result is None
 
@@ -150,7 +150,7 @@ def test_get_ohlcv_uses_fallback_symbol_when_primary_has_no_data(monkeypatch):
 		@staticmethod
 		def copy_rates_from_pos(symbol, timeframe, start, count):
 			calls.append(symbol)
-			if symbol == "US30":
+			if symbol == config.SYMBOL:
 				return []
 			if symbol == "US30.cash":
 				return [{
@@ -168,10 +168,10 @@ def test_get_ohlcv_uses_fallback_symbol_when_primary_has_no_data(monkeypatch):
 	monkeypatch.setattr(mt5_connector, "mt5", FallbackMT5)
 	monkeypatch.setattr(mt5_connector.config, "SYMBOL_FALLBACKS", ["US30.cash", "DJIA"])
 
-	df = mt5_connector.get_ohlcv("US30", 5, 50)
+	df = mt5_connector.get_ohlcv(config.SYMBOL, 5, 50)
 
 	assert df is not None
-	assert calls[:2] == ["US30", "US30.cash"]
+	assert calls[:2] == [config.SYMBOL, "US30.cash"]
 
 
 def test_get_ohlcv_stops_after_primary_symbol_success(monkeypatch):
@@ -181,7 +181,7 @@ def test_get_ohlcv_stops_after_primary_symbol_success(monkeypatch):
 		@staticmethod
 		def copy_rates_from_pos(symbol, timeframe, start, count):
 			calls.append(symbol)
-			if symbol == "US30":
+			if symbol == config.SYMBOL:
 				return [{
 					"time": 1710000000,
 					"open": 1.0,
@@ -197,10 +197,10 @@ def test_get_ohlcv_stops_after_primary_symbol_success(monkeypatch):
 	monkeypatch.setattr(mt5_connector, "mt5", PrimaryWinsMT5)
 	monkeypatch.setattr(mt5_connector.config, "SYMBOL_FALLBACKS", ["US30.cash", "DJIA"])
 
-	df = mt5_connector.get_ohlcv("US30", 5, 50)
+	df = mt5_connector.get_ohlcv(config.SYMBOL, 5, 50)
 
 	assert df is not None
-	assert calls == ["US30"]
+	assert calls == [config.SYMBOL]
 
 
 # --- mt5_mock.py integration tests (Task 2.6) ---
@@ -221,7 +221,7 @@ def test_get_ohlcv_returns_none_when_mock_not_initialized(monkeypatch):
 	monkeypatch.setattr(mt5_connector, "mt5", mt5_mock)
 	mt5_mock.shutdown()  # ensure uninitialized
 
-	result = mt5_connector.get_ohlcv("US30", mt5_mock.TIMEFRAME_H1, 20)
+	result = mt5_connector.get_ohlcv(config.SYMBOL, mt5_mock.TIMEFRAME_H1, 20)
 
 	assert result is None
 
@@ -231,7 +231,7 @@ def test_get_ohlcv_time_column_is_utc_datetime(monkeypatch):
 	monkeypatch.setattr(mt5_connector, "mt5", mt5_mock)
 	mt5_mock.initialize()
 
-	df = mt5_connector.get_ohlcv("US30", mt5_mock.TIMEFRAME_H1, 5)
+	df = mt5_connector.get_ohlcv(config.SYMBOL, mt5_mock.TIMEFRAME_H1, 5)
 
 	assert pd.api.types.is_datetime64_any_dtype(df["time"])
 	assert df["time"].dt.tz is not None

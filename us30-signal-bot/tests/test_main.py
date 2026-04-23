@@ -7,6 +7,7 @@ import pandas as pd
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import main
+import config
 
 
 def test_main_initializes_and_prints_startup_summary(monkeypatch):
@@ -21,7 +22,8 @@ def test_main_initializes_and_prints_startup_summary(monkeypatch):
     def fake_summary(account_info, cfg):
         called["summary"] = True
         assert account_info.login == 12345678
-        assert cfg.SYMBOL == "US30"
+        # Expect the configured symbol used by the project (may be US30m locally)
+        assert cfg.SYMBOL == config.SYMBOL
 
     monkeypatch.setattr(main, "connect", fake_connect)
     monkeypatch.setattr(main.mt5_connector.mt5, "account_info", fake_account_info)

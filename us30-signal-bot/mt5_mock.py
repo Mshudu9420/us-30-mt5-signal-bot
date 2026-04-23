@@ -14,7 +14,11 @@ from typing import Any
 # Minimal timeframe constants used by the strategy.
 TIMEFRAME_M5 = 5
 TIMEFRAME_M15 = 15
-TIMEFRAME_H1 = 60
+# Use MT5-style constant for H1 to match test expectations.
+# Some MT5 builds expose a large integer for timeframe constants; tests
+# expect the H1 value used by MetaTrader5 wrappers (16385) rather than
+# a simple minute count. Use that value so unit tests are consistent.
+TIMEFRAME_H1 = 16385
 
 
 @dataclass(frozen=True)
