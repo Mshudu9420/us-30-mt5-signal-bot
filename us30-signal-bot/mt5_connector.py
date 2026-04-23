@@ -83,3 +83,76 @@ def get_ohlcv(symbol: str, timeframe: int, n_bars: int) -> pd.DataFrame | None:
 
 	print(f"get_ohlcv: no data returned for {symbol} tf={timeframe}")
 	return None
+
+
+def place_market_order(
+	symbol: str,
+	direction: str,
+	volume: float,
+	sl: float | None = None,
+	tp: float | None = None,
+	deviation: int | None = None,
+	magic: int | None = None,
+) -> dict:
+	"""Place a market order using the MetaTrader5 terminal.
+
+	Returns a dict containing at least `success` (bool) and either `order` or
+	`error` keys with additional details.
+
+	Note: This function will attempt to use the real MetaTrader5 API when
+	available. In test/mock environments it will return an explanatory
+	failure message.
+	"""
+	# Provide defaults from config when not specified
+	if deviation is None:
+		deviation = getattr(config, "ORDER_DEVIATION", 20)
+	if magic is None:
+		magic = getattr(config, "ORDER_MAGIC", 0)
+
+	# Ensure MT5 API is available
+	if not hasattr(mt5, "order_send"):
+		return {"success": False, "error": "MT5 order_send not available in this environment"}
+
+	try:
+		tick = mt5.symbol_info_tick(symbol)
+		if tick is None:
+			return {"success": False, "error": f"symbol tick info unavailable for {symbol}"}
+
+		if direction == "BUY":
+			price = float(tick.ask)
+			order_type = mt5.ORDER_TYPE_BUY if hasattr(mt5, "ORDER_TYPE_BUY") else 0
+		else:
+			price = float(tick.bid)
+			order_type = mt5.ORDER_TYPE_SELL if hasattr(mt5, "ORDER_TYPE_SELL") else 1
+
+		request = {
+			"action": mt5.TRADE_ACTION_DEAL,
+			"symbol": symbol,
+			"volume": float(volume),
+			"type": order_type,
+			"price": price,
+			"sl": float(sl) if sl is not None else 0.0,
+			"tp": float(tp) if tp is not None else 0.0,
+			"deviation": int(deviation),
+			"magic": int(magic),
+			"comment": "us30-signal-bot",
+			# default time/type if available
+		}
+
+		# Provide sensible defaults for filling/time if attributes exist
+		if hasattr(mt5, "ORDER_TIME_GTC"):
+			request["type_time"] = mt5.ORDER_TIME_GTC
+		if hasattr(mt5, "ORDER_FILLING_FOK"):
+			request["type_filling"] = mt5.ORDER_FILLING_FOK
+
+		result = mt5.order_send(request)
+
+		# Some MT5 wrappers return an object with retcode and order fields
+		try:
+			retcode = getattr(result, "retcode", None)
+		except Exception:
+			retcode = None
+
+		return {"success": True, "result": result, "retcode": retcode}
+	except Exception as exc:
+		return {"success": False, "error": str(exc)}

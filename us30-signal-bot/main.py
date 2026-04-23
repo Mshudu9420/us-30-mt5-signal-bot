@@ -97,6 +97,25 @@ def polling_loop() -> None:
 				_rr = calculate_rr_ratio(_entry, _sl, _tp)
 				_alert_sig = dict(_sig, is_high_confidence=True)
 				_risk_dict = {"lot_size": _lot, "sl": _sl, "tp": _tp, "rr_ratio": _rr}
+
+				# Place order automatically if enabled. This is opt-in and disabled by default.
+				order_info = None
+				if config.ENABLE_AUTO_TRADES:
+					order_info = mt5_connector.place_market_order(
+						config.SYMBOL,
+						_direction,
+						_lot,
+						_sl,
+						_tp,
+						deviation=getattr(config, "ORDER_DEVIATION", None),
+						magic=getattr(config, "ORDER_MAGIC", None),
+					)
+					print(f"auto-trade attempt result: {order_info}")
+
+				# Include order info in alert payload so recipients can see what happened
+				if order_info is not None:
+					_alert_sig["order_info"] = order_info
+
 				send_email_alert(_alert_sig, _risk_dict)
 
 			if m5_df is not None:

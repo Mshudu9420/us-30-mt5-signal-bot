@@ -60,7 +60,16 @@ def send_email_alert(signal_dict, risk_dict) -> bool:
 
 	message = f"Subject: {subject}\n\n{body}"
 
+	# Append order info to the email body if the signal includes it
+	order_info = signal_dict.get("order_info")
+	if order_info is not None:
+		message += f"\nORDER INFO:\n{order_info}\n"
+
+	# The bot only supports Gmail SMTP for sending alerts.
+	# Use smtp.gmail.com with STARTTLS on port 587 and optional DEBUG_SMTP.
 	with smtplib.SMTP("smtp.gmail.com", 587) as server:
+		if os.getenv("DEBUG_SMTP", "").lower() in ("1", "true", "yes"):
+			server.set_debuglevel(1)
 		server.starttls()
 		server.login(gmail_user, gmail_app_password)
 		server.sendmail(gmail_user, recipients, message)

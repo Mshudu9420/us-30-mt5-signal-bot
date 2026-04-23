@@ -43,3 +43,10 @@ EMAIL_RECIPIENT = "mmathidi01@gmail.com", "mementorelo@gmail.com"
 # Timezone for timestamp display and logging. Default: South African Standard Time (SAST).
 # Use a tz database name recognized by pandas (e.g. 'Africa/Johannesburg').
 TIMEZONE = "Africa/Johannesburg"
+
+# Automatic trading (disabled by default). Enable only after careful testing.
+ENABLE_AUTO_TRADES = False
+# Default order deviation (max allowed slippage in points)
+ORDER_DEVIATION = 20
+# Magic number for orders (optional)
+ORDER_MAGIC = 20260423
