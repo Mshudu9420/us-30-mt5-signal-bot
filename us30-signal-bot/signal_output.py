@@ -59,10 +59,19 @@ def print_signal(signal_dict, risk_dict) -> None:
 	else:
 		direction_text = f"{Fore.YELLOW}{Style.BRIGHT}{direction}{Style.RESET_ALL}"
 
+	# Confidence tier label and colour
+	if signal_dict.get("is_high_confidence"):
+		confidence_text = f"{Fore.GREEN}{Style.BRIGHT}HIGH CONFIDENCE{Style.RESET_ALL}"
+	elif signal_dict.get("is_medium_confidence"):
+		confidence_text = f"{Fore.YELLOW}{Style.BRIGHT}MEDIUM CONFIDENCE{Style.RESET_ALL}"
+	else:
+		confidence_text = f"{Style.DIM}UNCONFIRMED{Style.RESET_ALL}"
+
 	border = f"{Fore.CYAN}{'-' * 60}{Style.RESET_ALL}"
 
 	print(border)
 	print(f"{Fore.MAGENTA}{Style.BRIGHT}SIGNAL{Style.RESET_ALL} {direction_text}")
+	print(f"{Fore.GREEN}CONFIDENCE{Style.RESET_ALL}    {confidence_text}")
 	print(f"{Fore.GREEN}TIMEFRAME{Style.RESET_ALL}      {signal_dict.get('timeframe', '-')}")
 	print(f"{Fore.GREEN}TIMESTAMP{Style.RESET_ALL}      {signal_dict.get('timestamp', '-')}")
 	print(f"{Fore.GREEN}ENTRY{Style.RESET_ALL}          {float(signal_dict.get('entry_price', 0.0)):.2f}")
