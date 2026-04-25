@@ -33,6 +33,9 @@ EMA_PERIOD = 50
 
 # Signal/risk parameters
 SL_BUFFER_PIPS = 10
+# Maximum allowed daily loss as a fraction of opening balance.
+# Once this threshold is reached the bot stops placing orders for the rest of the day.
+MAX_DAILY_LOSS_PCT = 0.05  # 5%
 # Lot-size multiplier applied to medium-confidence (M5+M15) entries.
 # Full-lot high-confidence entries always use 1.0.
 MEDIUM_CONFIDENCE_LOT_MULTIPLIER = 0.5

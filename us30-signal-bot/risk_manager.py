@@ -1,6 +1,45 @@
 """Risk management — lot sizing, SL, TP, RR calculations."""
 import math
+from datetime import date as _date
 import config
+
+
+class DailyLossTracker:
+    """Track intra-day drawdown and trigger a circuit breaker when the threshold is hit.
+
+    The opening balance is recorded the first time `update` is called each calendar
+    day (based on the local system date).  When the current balance has fallen by
+    `max_loss_pct` or more relative to that opening balance the circuit breaker is
+    considered triggered and no new orders should be placed.
+
+    The tracker resets automatically at midnight — the next call to `update` on a
+    new calendar date records a fresh opening balance.
+    """
+
+    def __init__(self, max_loss_pct: float) -> None:
+        self._max_loss_pct = max_loss_pct
+        self._opening_balance: float | None = None
+        self._trading_date: _date | None = None
+
+    def update(self, current_balance: float, today: _date | None = None) -> None:
+        """Record opening balance for the day; resets automatically on a new calendar date."""
+        if today is None:
+            today = _date.today()
+        if self._trading_date != today:
+            self._opening_balance = current_balance
+            self._trading_date = today
+
+    def is_triggered(self, current_balance: float) -> bool:
+        """Return True when today's loss has reached or exceeded the configured threshold."""
+        if self._opening_balance is None or self._opening_balance == 0:
+            return False
+        loss = self._opening_balance - current_balance
+        return loss >= self._opening_balance * self._max_loss_pct
+
+    @property
+    def opening_balance(self) -> float | None:
+        """The recorded opening balance for the current trading day."""
+        return self._opening_balance
 
 
 def calculate_risk_amount(capital: float, risk_mode: str) -> float:

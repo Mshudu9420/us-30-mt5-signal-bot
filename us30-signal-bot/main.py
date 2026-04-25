@@ -13,6 +13,7 @@ from risk_manager import (
 	calculate_rr_ratio,
 	calculate_sl_price,
 	calculate_tp_price,
+	DailyLossTracker,
 )
 from signal_output import print_heartbeat, print_signal, print_startup_summary
 from strategy import check_signal, get_h1_bias, get_macro_fvg_signal, is_high_confidence, is_medium_confidence
@@ -43,6 +44,8 @@ def polling_loop() -> None:
 		TIMEFRAME_M5 = _mt5.TIMEFRAME_M5
 		TIMEFRAME_M15 = _mt5.TIMEFRAME_M15
 		TIMEFRAME_H1 = _mt5.TIMEFRAME_H1
+
+	_daily_loss_tracker = DailyLossTracker(config.MAX_DAILY_LOSS_PCT)
 
 	while True:
 		# Use monotonic clock to keep a fixed-rate polling interval and report step timings.
@@ -98,6 +101,10 @@ def polling_loop() -> None:
 			_capital = float(_account_info.balance) if _account_info is not None else config.INITIAL_CAPITAL
 			risk_amount = calculate_risk_amount(_capital, config.RISK_MODE)
 
+			# Update daily loss tracker with the current balance so it can detect
+			# a new trading day and record the opening balance automatically.
+			_daily_loss_tracker.update(_capital)
+
 			# Evaluate confidence tiers up-front so every signal print can show the label.
 			_high_conf = is_high_confidence(m1_signal, m5_signal, m15_signal, h1_bias)
 			_med_conf = (not _high_conf) and is_medium_confidence(m5_signal, m15_signal, h1_bias)
@@ -152,7 +159,16 @@ def polling_loop() -> None:
 
 				order_response = None
 				order_summary = None
-				if config.ENABLE_AUTO_TRADES:
+				if _daily_loss_tracker.is_triggered(_capital):
+					print(
+						f"circuit-breaker: daily loss limit reached "
+						f"(opening={_daily_loss_tracker.opening_balance:.2f} "
+						f"current={_capital:.2f} "
+						f"limit={config.MAX_DAILY_LOSS_PCT * 100:.0f}%). "
+						f"No orders will be placed today."
+					)
+					order_summary = {"success": False, "error": "DAILY_LOSS_LIMIT_HIT"}
+				elif config.ENABLE_AUTO_TRADES:
 					if config.ENABLE_LIVE_TRADES:
 						if mt5_connector.has_open_position(config.SYMBOL, _direction):
 							print(f"auto-trade skipped: open {_direction} position already exists for {config.SYMBOL}")
