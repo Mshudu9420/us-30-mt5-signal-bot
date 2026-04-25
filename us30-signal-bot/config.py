@@ -57,6 +57,13 @@ EMAIL_RECIPIENT = "mmathidi01@gmail.com", "mementorelo@gmail.com"
 # Use a tz database name recognized by pandas (e.g. 'Africa/Johannesburg').
 TIMEZONE = "Africa/Johannesburg"
 
+# Logging
+# Log files are written to the 'logs/' subdirectory next to this file.
+# Each file is capped at 10 MB; up to 7 backups are kept (roughly one week of history).
+LOG_DIR = "logs"
+LOG_MAX_BYTES = 10 * 1024 * 1024  # 10 MB
+LOG_BACKUP_COUNT = 7
+
 # Automatic trading (disabled by default). Enable only after careful testing.
 ENABLE_AUTO_TRADES = True
 # Default order deviation (max allowed slippage in points)

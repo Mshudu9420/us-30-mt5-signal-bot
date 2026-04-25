@@ -6,6 +6,7 @@ import config
 import mt5_connector
 from alerts import send_email_alert
 from indicators import calculate_bollinger_bands, calculate_ema, calculate_macd, calculate_rsi, detect_fvg
+from logger import get_logger
 from mt5_connector import connect, disconnect, get_ohlcv
 from risk_manager import (
 	calculate_lot_size,
@@ -18,16 +19,18 @@ from risk_manager import (
 from signal_output import print_heartbeat, print_signal, print_startup_summary
 from strategy import check_signal, get_h1_bias, get_macro_fvg_signal, is_high_confidence, is_medium_confidence
 
+_log = get_logger()
+
 
 def main() -> bool:
 	"""Initialize MT5 and print startup summary on launch."""
 	if not connect():
-		print("Startup aborted: MT5 connection failed.")
+		_log.error("Startup aborted: MT5 connection failed.")
 		return False
 
 	account_info = mt5_connector.mt5.account_info()
 	if account_info is None:
-		print("Startup aborted: account info unavailable.")
+		_log.error("Startup aborted: account info unavailable.")
 		return False
 
 	print_startup_summary(account_info, config)
@@ -136,7 +139,7 @@ def polling_loop() -> None:
 				_now = __import__("pandas").Timestamp(m1_df.iloc[-1]["time"])
 				macro_sig = get_macro_fvg_signal(m1_df, m1_fvgs, _now)
 				if macro_sig is not None:
-					print(
+					_log.info(
 						f"macro-fvg | direction={macro_sig['direction']} "
 						f"fvg=[{macro_sig['fvg_bottom']}-{macro_sig['fvg_top']}] "
 						f"type={macro_sig['fvg_type']} "
@@ -163,7 +166,7 @@ def polling_loop() -> None:
 				order_response = None
 				order_summary = None
 				if _daily_loss_tracker.is_triggered(_capital):
-					print(
+					_log.warning(
 						f"circuit-breaker: daily loss limit reached "
 						f"(opening={_daily_loss_tracker.opening_balance:.2f} "
 						f"current={_capital:.2f} "
@@ -174,7 +177,7 @@ def polling_loop() -> None:
 				elif config.ENABLE_AUTO_TRADES:
 					if config.ENABLE_LIVE_TRADES:
 						if mt5_connector.has_open_position(config.SYMBOL, _direction):
-							print(f"auto-trade skipped: open {_direction} position already exists for {config.SYMBOL}")
+							_log.info(f"auto-trade skipped: open {_direction} position already exists for {config.SYMBOL}")
 							order_summary = {"success": False, "error": "DUPLICATE_POSITION"}
 						else:
 							order_response = mt5_connector.place_market_order(
@@ -187,10 +190,10 @@ def polling_loop() -> None:
 								magic=getattr(config, "ORDER_MAGIC", None),
 							)
 							order_summary = mt5_connector.summarize_order_result(order_response)
-							print(f"auto-trade summary: {order_summary}")
+							_log.info(f"auto-trade summary: {order_summary}")
 					else:
 						order_summary = {"success": False, "error": "LIVE_TRADES_DISABLED"}
-						print("auto-trade skipped: live trading disabled (ENABLE_LIVE_TRADES=False)")
+						_log.info("auto-trade skipped: live trading disabled (ENABLE_LIVE_TRADES=False)")
 
 				if order_summary is not None:
 					_alert_sig["order_summary"] = order_summary
@@ -219,7 +222,7 @@ def polling_loop() -> None:
 				_rr = calculate_rr_ratio(_entry, _sl, _tp)
 				_alert_sig = dict(_sig, is_medium_confidence=True)
 				_risk_dict = {"lot_size": _lot, "sl": _sl, "tp": _tp, "rr_ratio": _rr}
-				print(f"medium-confidence signal: {_direction} lot={_lot:.2f} (alert only, no auto-trade)")
+				_log.info(f"medium-confidence signal: {_direction} lot={_lot:.2f} (alert only, no auto-trade)")
 				if not step_times.get("order_and_email"):
 					email_start = time.monotonic()
 					send_email_alert(_alert_sig, _risk_dict)
@@ -233,27 +236,23 @@ def polling_loop() -> None:
 
 			# Total cycle time and sleep to keep a fixed-rate cadence
 			cycle_elapsed = time.monotonic() - cycle_start
-			# report timings for debugging
-			print(
-				f"timings (s): fetch={step_times.get('fetch',0):.3f} indicators={step_times.get('indicators',0):.3f} signals={step_times.get('signals',0):.3f} order_and_email={step_times.get('order_and_email',0):.3f} total={cycle_elapsed:.3f}"
+			_log.debug(
+				f"timings (s): fetch={step_times.get('fetch',0):.3f} "
+				f"indicators={step_times.get('indicators',0):.3f} "
+				f"signals={step_times.get('signals',0):.3f} "
+				f"order_and_email={step_times.get('order_and_email',0):.3f} "
+				f"total={cycle_elapsed:.3f}"
 			)
 
 			sleep_for = max(0.0, config.POLL_INTERVAL_SECONDS - cycle_elapsed)
 			if sleep_for > 0:
 				time.sleep(sleep_for)
 		except KeyboardInterrupt:
-			print("Bot stopped by user.")
+			_log.info("Bot stopped by user.")
 			disconnect()
 			break
 		except Exception as exc:
-			# Log unexpected exceptions and continue; don't crash the loop on transient errors.
-			print("Unexpected error in polling loop:", exc)
-			try:
-				import traceback
-				traceback.print_exc()
-			except Exception:
-				pass
-			# Sleep a bit before retrying to avoid tight error loops
+			_log.exception("Unexpected error in polling loop: %s", exc)
 			time.sleep(min(5, config.POLL_INTERVAL_SECONDS))
 
 
