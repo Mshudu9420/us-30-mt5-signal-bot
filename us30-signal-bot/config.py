@@ -6,6 +6,9 @@ SYMBOL = "BTCUSDm"
 SYMBOL_FALLBACKS = ["BTCUSD.cash", "BTCUSDCash", "BTCUSD"]
 
 # Account and risk configuration
+# INITIAL_CAPITAL is used as a fallback when the live MT5 account balance is
+# unavailable (e.g. in tests or mock mode). In live operation the bot fetches
+# the real account balance each cycle and uses that for lot-size calculations.
 INITIAL_CAPITAL = 100.0
 RISK_MODE = "conservative"  # Allowed: "conservative" (5%), "aggressive" (10%)
 RISK_PERCENTS = {

@@ -92,7 +92,11 @@ def polling_loop() -> None:
 			m5_signal = check_signal(m5_df, "M5", h1_bias) if m5_df is not None else None
 			m15_signal = check_signal(m15_df, "M15", h1_bias) if m15_df is not None else None
 
-			risk_amount = calculate_risk_amount(config.INITIAL_CAPITAL, config.RISK_MODE)
+			# Use live account balance for risk calculations; fall back to config
+			# INITIAL_CAPITAL if account info is unavailable (e.g. in tests/mock mode).
+			_account_info = mt5_connector.mt5.account_info()
+			_capital = float(_account_info.balance) if _account_info is not None else config.INITIAL_CAPITAL
+			risk_amount = calculate_risk_amount(_capital, config.RISK_MODE)
 
 			# Evaluate confidence tiers up-front so every signal print can show the label.
 			_high_conf = is_high_confidence(m1_signal, m5_signal, m15_signal, h1_bias)
