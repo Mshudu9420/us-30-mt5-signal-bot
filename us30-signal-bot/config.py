@@ -2,8 +2,8 @@
 
 # Broker and symbol settings
 BROKER_NAME = "Exness"
-SYMBOL = "US30m"
-SYMBOL_FALLBACKS = ["US30.cash", "US30Cash", "DJIA"]
+SYMBOL = "USTECm"
+SYMBOL_FALLBACKS = ["USTEC.cash", "USTECCash", "NASDAQ"]
 
 # Account and risk configuration
 INITIAL_CAPITAL = 100.0
