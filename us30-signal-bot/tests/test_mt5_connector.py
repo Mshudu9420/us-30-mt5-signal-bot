@@ -235,3 +235,72 @@ def test_get_ohlcv_time_column_is_utc_datetime(monkeypatch):
 
 	assert pd.api.types.is_datetime64_any_dtype(df["time"])
 	assert df["time"].dt.tz is not None
+
+
+# --- has_open_position tests ---
+
+def test_has_open_position_returns_false_when_no_positions(monkeypatch):
+	"""Returns False when positions_get returns an empty list."""
+	class NoPositionsMT5:
+		@staticmethod
+		def positions_get(symbol=None):
+			return []
+
+	monkeypatch.setattr(mt5_connector, "mt5", NoPositionsMT5)
+
+	assert mt5_connector.has_open_position("BTCUSDm", "BUY") is False
+	assert mt5_connector.has_open_position("BTCUSDm", "SELL") is False
+
+
+def test_has_open_position_returns_true_for_matching_buy(monkeypatch):
+	"""Returns True when a BUY position (type=0) already exists."""
+	class FakePosition:
+		type = 0  # MT5 BUY
+
+	class WithBuyMT5:
+		@staticmethod
+		def positions_get(symbol=None):
+			return [FakePosition()]
+
+	monkeypatch.setattr(mt5_connector, "mt5", WithBuyMT5)
+
+	assert mt5_connector.has_open_position("BTCUSDm", "BUY") is True
+	assert mt5_connector.has_open_position("BTCUSDm", "SELL") is False
+
+
+def test_has_open_position_returns_true_for_matching_sell(monkeypatch):
+	"""Returns True when a SELL position (type=1) already exists."""
+	class FakePosition:
+		type = 1  # MT5 SELL
+
+	class WithSellMT5:
+		@staticmethod
+		def positions_get(symbol=None):
+			return [FakePosition()]
+
+	monkeypatch.setattr(mt5_connector, "mt5", WithSellMT5)
+
+	assert mt5_connector.has_open_position("BTCUSDm", "SELL") is True
+	assert mt5_connector.has_open_position("BTCUSDm", "BUY") is False
+
+
+def test_has_open_position_returns_false_when_positions_get_missing(monkeypatch):
+	"""Returns False gracefully when positions_get is not available."""
+	class NoAttrMT5:
+		pass  # no positions_get attribute
+
+	monkeypatch.setattr(mt5_connector, "mt5", NoAttrMT5)
+
+	assert mt5_connector.has_open_position("BTCUSDm", "BUY") is False
+
+
+def test_has_open_position_returns_false_when_positions_get_raises(monkeypatch):
+	"""Returns False when positions_get raises an unexpected exception."""
+	class BrokenMT5:
+		@staticmethod
+		def positions_get(symbol=None):
+			raise RuntimeError("MT5 error")
+
+	monkeypatch.setattr(mt5_connector, "mt5", BrokenMT5)
+
+	assert mt5_connector.has_open_position("BTCUSDm", "BUY") is False

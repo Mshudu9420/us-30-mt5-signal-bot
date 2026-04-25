@@ -122,6 +122,13 @@ def _timeframe_to_minutes(timeframe: int) -> int:
 	return 1
 
 
+def positions_get(symbol: str | None = None) -> list:
+	"""Return an empty list — mock has no open positions by default."""
+	if not _initialized:
+		return []
+	return []
+
+
 def _set_error(code: int, message: str) -> None:
 	global _last_error
 	_last_error = (code, message)

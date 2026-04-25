@@ -198,3 +198,30 @@ def summarize_order_result(order_response: dict) -> dict:
 		pass
 
 	return summary
+
+
+def has_open_position(symbol: str, direction: str) -> bool:
+	"""Return True if there is already an open position for symbol in the given direction.
+
+	MT5 position type: 0 = BUY, 1 = SELL.
+	Uses positions_get to fetch live positions; falls back to False if the call
+	is unavailable (e.g. in mock environments that return an empty list).
+	"""
+	if not hasattr(mt5, "positions_get"):
+		return False
+	try:
+		positions = mt5.positions_get(symbol=symbol)
+	except Exception:
+		return False
+	if not positions:
+		return False
+
+	# Map direction string to MT5 position type integer
+	target_type = 0 if direction == "BUY" else 1
+	for pos in positions:
+		pos_type = getattr(pos, "type", None)
+		if pos_type is None and isinstance(pos, dict):
+			pos_type = pos.get("type")
+		if pos_type == target_type:
+			return True
+	return False

@@ -154,17 +154,21 @@ def polling_loop() -> None:
 				order_summary = None
 				if config.ENABLE_AUTO_TRADES:
 					if config.ENABLE_LIVE_TRADES:
-						order_response = mt5_connector.place_market_order(
-							config.SYMBOL,
-							_direction,
-							_lot,
-							_sl,
-							_tp,
-							deviation=getattr(config, "ORDER_DEVIATION", None),
-							magic=getattr(config, "ORDER_MAGIC", None),
-						)
-						order_summary = mt5_connector.summarize_order_result(order_response)
-						print(f"auto-trade summary: {order_summary}")
+						if mt5_connector.has_open_position(config.SYMBOL, _direction):
+							print(f"auto-trade skipped: open {_direction} position already exists for {config.SYMBOL}")
+							order_summary = {"success": False, "error": "DUPLICATE_POSITION"}
+						else:
+							order_response = mt5_connector.place_market_order(
+								config.SYMBOL,
+								_direction,
+								_lot,
+								_sl,
+								_tp,
+								deviation=getattr(config, "ORDER_DEVIATION", None),
+								magic=getattr(config, "ORDER_MAGIC", None),
+							)
+							order_summary = mt5_connector.summarize_order_result(order_response)
+							print(f"auto-trade summary: {order_summary}")
 					else:
 						order_summary = {"success": False, "error": "LIVE_TRADES_DISABLED"}
 						print("auto-trade skipped: live trading disabled (ENABLE_LIVE_TRADES=False)")
