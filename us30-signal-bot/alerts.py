@@ -17,8 +17,10 @@ def _normalize_recipients(recipients_value):
 
 
 def send_email_alert(signal_dict, risk_dict) -> bool:
-	"""Send a Gmail SMTP alert only when the signal is high confidence."""
-	if not signal_dict.get("is_high_confidence", False):
+	"""Send a Gmail SMTP alert for high-confidence or medium-confidence signals."""
+	is_high = signal_dict.get("is_high_confidence", False)
+	is_medium = signal_dict.get("is_medium_confidence", False)
+	if not is_high and not is_medium:
 		return False
 
 	if not config.ENABLE_EMAIL_ALERTS:
@@ -45,17 +47,18 @@ def send_email_alert(signal_dict, risk_dict) -> bool:
 	tp = float(risk_dict.get("tp", 0.0))
 	rr_ratio = float(risk_dict.get("rr_ratio", 0.0))
 
-	subject = f"US30 Signal Alert - {direction} ({timeframe})"
+	tier = "HIGH CONFIDENCE" if is_high else "MEDIUM CONFIDENCE"
+	subject = f"US30 Signal Alert [{tier}] - {direction} ({timeframe})"
 	body = (
-		f"High-confidence US30 signal detected.\n\n"
-		f"Direction: {direction}\n"
-		f"Timeframe: {timeframe}\n"
-		f"Timestamp: {timestamp}\n"
-		f"Entry: {entry_price:.2f}\n"
-		f"Lot Size: {lot_size:.2f}\n"
-		f"SL: {sl:.2f}\n"
-		f"TP: {tp:.2f}\n"
-		f"RR: {rr_ratio:.2f}\n"
+		f"{tier} signal detected.\n\n"
+		f"Direction:  {direction}\n"
+		f"Timeframe:  {timeframe}\n"
+		f"Timestamp:  {timestamp}\n"
+		f"Entry:      {entry_price:.2f}\n"
+		f"Lot Size:   {lot_size:.2f}\n"
+		f"SL:         {sl:.2f}\n"
+		f"TP:         {tp:.2f}\n"
+		f"RR:         {rr_ratio:.2f}\n"
 	)
 
 	message = f"Subject: {subject}\n\n{body}"
