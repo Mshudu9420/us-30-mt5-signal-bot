@@ -164,3 +164,67 @@ def test_is_high_confidence_false_when_any_signal_missing():
 	assert result_missing_m1 is False
 	assert result_missing_m5 is False
 	assert result_missing_m15 is False
+
+
+# --- Medium-confidence tests ---
+
+def test_is_medium_confidence_true_when_m5_m15_and_h1_agree_buy():
+	m5_signal = {"direction": "BUY", "timeframe": "M5"}
+	m15_signal = {"direction": "BUY", "timeframe": "M15"}
+
+	result = strategy.is_medium_confidence(m5_signal, m15_signal, "BULLISH")
+
+	assert result is True
+
+
+def test_is_medium_confidence_true_when_m5_m15_and_h1_agree_sell():
+	m5_signal = {"direction": "SELL", "timeframe": "M5"}
+	m15_signal = {"direction": "SELL", "timeframe": "M15"}
+
+	result = strategy.is_medium_confidence(m5_signal, m15_signal, "BEARISH")
+
+	assert result is True
+
+
+def test_is_medium_confidence_false_when_m5_and_m15_directions_differ():
+	m5_signal = {"direction": "BUY", "timeframe": "M5"}
+	m15_signal = {"direction": "SELL", "timeframe": "M15"}
+
+	result = strategy.is_medium_confidence(m5_signal, m15_signal, "BULLISH")
+
+	assert result is False
+
+
+def test_is_medium_confidence_false_when_h1_bias_does_not_match():
+	m5_signal = {"direction": "BUY", "timeframe": "M5"}
+	m15_signal = {"direction": "BUY", "timeframe": "M15"}
+
+	# H1 says BEARISH — should not confirm a BUY
+	result = strategy.is_medium_confidence(m5_signal, m15_signal, "BEARISH")
+
+	assert result is False
+
+
+def test_is_medium_confidence_false_when_h1_bias_unclear():
+	m5_signal = {"direction": "BUY", "timeframe": "M5"}
+	m15_signal = {"direction": "BUY", "timeframe": "M15"}
+
+	result = strategy.is_medium_confidence(m5_signal, m15_signal, "UNCLEAR")
+
+	assert result is False
+
+
+def test_is_medium_confidence_false_when_either_signal_missing():
+	assert strategy.is_medium_confidence(None, {"direction": "BUY"}, "BULLISH") is False
+	assert strategy.is_medium_confidence({"direction": "BUY"}, None, "BULLISH") is False
+
+
+def test_is_medium_confidence_fires_without_m1():
+	"""Medium-confidence must not require M1 — M5+M15+H1 alone is sufficient."""
+	m5_signal = {"direction": "SELL", "timeframe": "M5"}
+	m15_signal = {"direction": "SELL", "timeframe": "M15"}
+
+	# No m1 signal — should still return True
+	result = strategy.is_medium_confidence(m5_signal, m15_signal, "BEARISH")
+
+	assert result is True

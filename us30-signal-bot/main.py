@@ -15,7 +15,7 @@ from risk_manager import (
 	calculate_tp_price,
 )
 from signal_output import print_heartbeat, print_signal, print_startup_summary
-from strategy import check_signal, get_h1_bias, is_high_confidence
+from strategy import check_signal, get_h1_bias, is_high_confidence, is_medium_confidence
 
 
 def main() -> bool:
@@ -152,6 +152,29 @@ def polling_loop() -> None:
 				send_email_alert(_alert_sig, _risk_dict)
 				step_times["order_and_email"] = time.monotonic() - order_start
 				step_times["email_send"] = time.monotonic() - email_start
+
+			# Medium-confidence handling: alert only, half lot, no auto-trade.
+			# Only fires when high-confidence did not already fire.
+			elif is_medium_confidence(m5_signal, m15_signal, h1_bias):
+				_sig = m5_signal
+				_df = m5_df
+				_direction = _sig["direction"]
+				_entry = float(_sig["entry_price"])
+				_row = _df.iloc[-1]
+				_sl_band = float(_row["bb_lower"] if _direction == "BUY" else _row["bb_upper"])
+				_sl = calculate_sl_price(_direction, _sl_band, config.SL_BUFFER_PIPS)
+				_tp = calculate_tp_price(_direction, float(_row["bb_mid"]))
+				_lot = calculate_lot_size(risk_amount, abs(_entry - _sl), config.DEFAULT_PIP_VALUE)
+				_lot = round(_lot * getattr(config, "MEDIUM_CONFIDENCE_LOT_MULTIPLIER", 0.5), 2)
+				_rr = calculate_rr_ratio(_entry, _sl, _tp)
+				_alert_sig = dict(_sig, is_medium_confidence=True)
+				_risk_dict = {"lot_size": _lot, "sl": _sl, "tp": _tp, "rr_ratio": _rr}
+				print(f"medium-confidence signal: {_direction} lot={_lot:.2f} (alert only, no auto-trade)")
+				if not step_times.get("order_and_email"):
+					email_start = time.monotonic()
+					send_email_alert(_alert_sig, _risk_dict)
+					step_times["order_and_email"] = time.monotonic() - order_start
+					step_times["email_send"] = time.monotonic() - email_start
 
 			# Heartbeat (print latest close/time)
 			if m5_df is not None:

@@ -80,3 +80,30 @@ def is_high_confidence(
 	if dir1 == "SELL" and h1_bias == "BEARISH":
 		return True
 	return False
+
+
+def is_medium_confidence(
+    m5_signal: dict[str, object] | None,
+    m15_signal: dict[str, object] | None,
+    h1_bias: str,
+) -> bool:
+	"""Return True when M5 and M15 agree and H1 bias matches (M1 not required).
+
+	This tier fires more frequently than high-confidence and triggers an alert
+	only (no auto-trade). Lot size is reduced by MEDIUM_CONFIDENCE_LOT_MULTIPLIER.
+
+	Rules:
+	- M5 and M15 must both exist and share the same `direction`.
+	- H1 bias must match the direction (BUY -> BULLISH, SELL -> BEARISH).
+	"""
+	if not m5_signal or not m15_signal:
+		return False
+	dir5 = m5_signal.get("direction")
+	dir15 = m15_signal.get("direction")
+	if dir5 != dir15:
+		return False
+	if dir5 == "BUY" and h1_bias == "BULLISH":
+		return True
+	if dir5 == "SELL" and h1_bias == "BEARISH":
+		return True
+	return False

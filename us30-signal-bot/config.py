@@ -30,6 +30,9 @@ EMA_PERIOD = 20
 
 # Signal/risk parameters
 SL_BUFFER_PIPS = 10
+# Lot-size multiplier applied to medium-confidence (M5+M15) entries.
+# Full-lot high-confidence entries always use 1.0.
+MEDIUM_CONFIDENCE_LOT_MULTIPLIER = 0.5
 
 # Runtime behavior
 POLL_INTERVAL_SECONDS = 60
