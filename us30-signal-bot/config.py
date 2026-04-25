@@ -2,8 +2,8 @@
 
 # Broker and symbol settings
 BROKER_NAME = "Exness"
-SYMBOL = "USTECm"
-SYMBOL_FALLBACKS = ["USTEC.cash", "USTECCash", "NASDAQ"]
+SYMBOL = "BTCUSDm"
+SYMBOL_FALLBACKS = ["BTCUSD.cash", "BTCUSDCash", "BTCUSD"]
 
 # Account and risk configuration
 INITIAL_CAPITAL = 100.0
