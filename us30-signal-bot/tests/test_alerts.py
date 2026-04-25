@@ -75,15 +75,15 @@ def test_send_email_alert_sends_when_high_confidence(monkeypatch):
 	assert client.sendmail_args[1] == ["receiver@example.com"]
 	message = client.sendmail_args[2]
 	assert "Subject: US30 Signal Alert [HIGH CONFIDENCE] - BUY (M5)" in message
-	assert "High-confidence US30 signal detected." in message
-	assert "Direction: BUY" in message
-	assert "Timeframe: M5" in message
-	assert "Timestamp: 2026-04-15 11:00:00 UTC" in message
-	assert "Entry: 39210.50" in message
-	assert "Lot Size: 0.25" in message
-	assert "SL: 39190.50" in message
-	assert "TP: 39240.50" in message
-	assert "RR: 1.50" in message
+	assert "HIGH CONFIDENCE signal detected." in message
+	assert "Direction:  BUY" in message
+	assert "Timeframe:  M5" in message
+	assert "Timestamp:  2026-04-15 11:00:00 UTC" in message
+	assert "Entry:      39210.50" in message
+	assert "Lot Size:   0.25" in message
+	assert "SL:         39190.50" in message
+	assert "TP:         39240.50" in message
+	assert "RR:         1.50" in message
 	assert dotenv_called["value"] is True
 
 
