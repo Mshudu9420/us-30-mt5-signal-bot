@@ -74,7 +74,7 @@ def test_send_email_alert_sends_when_high_confidence(monkeypatch):
 	assert client.sendmail_args[0] == "bot@example.com"
 	assert client.sendmail_args[1] == ["receiver@example.com"]
 	message = client.sendmail_args[2]
-	assert "Subject: US30 Signal Alert - BUY (M5)" in message
+	assert "Subject: US30 Signal Alert [HIGH CONFIDENCE] - BUY (M5)" in message
 	assert "High-confidence US30 signal detected." in message
 	assert "Direction: BUY" in message
 	assert "Timeframe: M5" in message

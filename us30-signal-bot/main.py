@@ -5,7 +5,7 @@ import time
 import config
 import mt5_connector
 from alerts import send_email_alert
-from indicators import calculate_bollinger_bands, calculate_ema, calculate_rsi
+from indicators import calculate_bollinger_bands, calculate_ema, calculate_rsi, detect_fvg
 from mt5_connector import connect, disconnect, get_ohlcv
 from risk_manager import (
 	calculate_lot_size,
@@ -15,7 +15,7 @@ from risk_manager import (
 	calculate_tp_price,
 )
 from signal_output import print_heartbeat, print_signal, print_startup_summary
-from strategy import check_signal, get_h1_bias, is_high_confidence, is_medium_confidence
+from strategy import check_signal, get_h1_bias, get_macro_fvg_signal, is_high_confidence, is_medium_confidence
 
 
 def main() -> bool:
@@ -63,6 +63,9 @@ def polling_loop() -> None:
 			if m1_df is not None:
 				m1_df = calculate_bollinger_bands(m1_df, config.BB_PERIOD, config.BB_STD_DEV)
 				m1_df = calculate_rsi(m1_df, config.RSI_PERIOD)
+				m1_fvgs = detect_fvg(m1_df)
+			else:
+				m1_fvgs = []
 
 			if m5_df is not None:
 				m5_df = calculate_bollinger_bands(m5_df, config.BB_PERIOD, config.BB_STD_DEV)
@@ -91,6 +94,10 @@ def polling_loop() -> None:
 
 			risk_amount = calculate_risk_amount(config.INITIAL_CAPITAL, config.RISK_MODE)
 
+			# Evaluate confidence tiers up-front so every signal print can show the label.
+			_high_conf = is_high_confidence(m1_signal, m5_signal, m15_signal, h1_bias)
+			_med_conf = (not _high_conf) and is_medium_confidence(m5_signal, m15_signal, h1_bias)
+
 			for signal, df in ((m1_signal, m1_df), (m5_signal, m5_df), (m15_signal, m15_df)):
 				if signal is None or df is None:
 					continue
@@ -104,12 +111,28 @@ def polling_loop() -> None:
 				lot = calculate_lot_size(risk_amount, abs(entry - sl), config.DEFAULT_PIP_VALUE)
 				rr = calculate_rr_ratio(entry, sl, tp)
 				risk_dict = {"lot_size": lot, "sl": sl, "tp": tp, "rr_ratio": rr}
-				print_signal(signal, risk_dict)
+				# Tag signal with confidence tier for display in print_signal
+				tagged = dict(signal, is_high_confidence=_high_conf, is_medium_confidence=_med_conf)
+				print_signal(tagged, risk_dict)
 			step_times["signals"] = time.monotonic() - sig_start
+
+			# Macro FVG analysis: use the latest M1 bar time as 'now' to stay
+			# timezone-consistent with the fetched data.
+			if m1_df is not None:
+				_now = __import__("pandas").Timestamp(m1_df.iloc[-1]["time"])
+				macro_sig = get_macro_fvg_signal(m1_df, m1_fvgs, _now)
+				if macro_sig is not None:
+					print(
+						f"macro-fvg | direction={macro_sig['direction']} "
+						f"fvg=[{macro_sig['fvg_bottom']}-{macro_sig['fvg_top']}] "
+						f"type={macro_sig['fvg_type']} "
+						f"liquidity_target={macro_sig['liquidity_target']} "
+						f"entry={macro_sig['entry_price']}"
+					)
 
 			# High-confidence handling: order + alert
 			order_start = time.monotonic()
-			if is_high_confidence(m1_signal, m5_signal, m15_signal, h1_bias):
+			if _high_conf:
 				_sig = m1_signal or m5_signal or m15_signal
 				_df = m5_df if m5_signal is not None else m15_df
 				_direction = _sig["direction"]
@@ -155,7 +178,7 @@ def polling_loop() -> None:
 
 			# Medium-confidence handling: alert only, half lot, no auto-trade.
 			# Only fires when high-confidence did not already fire.
-			elif is_medium_confidence(m5_signal, m15_signal, h1_bias):
+			elif _med_conf:
 				_sig = m5_signal
 				_df = m5_df
 				_direction = _sig["direction"]
