@@ -26,7 +26,7 @@ N_BARS = 250
 BB_PERIOD = 20
 BB_STD_DEV = 2
 RSI_PERIOD = 14
-EMA_PERIOD = 20
+EMA_PERIOD = 50
 
 # Signal/risk parameters
 SL_BUFFER_PIPS = 10
