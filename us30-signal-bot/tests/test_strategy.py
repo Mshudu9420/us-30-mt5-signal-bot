@@ -375,3 +375,79 @@ def test_get_macro_fvg_signal_returns_none_when_no_post_macro_data():
 	result = strategy.get_macro_fvg_signal(df, fvgs, now)
 
 	assert result is None
+
+
+# --- MACD confirmation in check_signal ---
+
+def _buy_df(macd_histogram_prev: float, macd_histogram_curr: float) -> pd.DataFrame:
+	"""Build a 2-row DataFrame that triggers a BUY on the last row with given MACD histogram values."""
+	return pd.DataFrame({
+		"time": ["2026-04-14 10:00:00", "2026-04-14 10:01:00"],
+		"close": [38900.0, 38900.0],
+		"rsi": [25.0, 25.0],
+		"bb_lower": [38950.0, 38950.0],
+		"bb_upper": [39150.0, 39150.0],
+		"macd_histogram": [macd_histogram_prev, macd_histogram_curr],
+	})
+
+
+def _sell_df(macd_histogram_prev: float, macd_histogram_curr: float) -> pd.DataFrame:
+	"""Build a 2-row DataFrame that triggers a SELL on the last row with given MACD histogram values."""
+	return pd.DataFrame({
+		"time": ["2026-04-14 10:00:00", "2026-04-14 10:01:00"],
+		"close": [39200.0, 39200.0],
+		"rsi": [75.0, 75.0],
+		"bb_lower": [38950.0, 38950.0],
+		"bb_upper": [39150.0, 39150.0],
+		"macd_histogram": [macd_histogram_prev, macd_histogram_curr],
+	})
+
+
+def test_check_signal_buy_passes_when_macd_histogram_rising():
+	df = _buy_df(macd_histogram_prev=-0.5, macd_histogram_curr=0.2)
+
+	result = strategy.check_signal(df, timeframe="M5", h1_bias="BULLISH")
+
+	assert result is not None
+	assert result["direction"] == "BUY"
+
+
+def test_check_signal_buy_blocked_when_macd_histogram_falling():
+	df = _buy_df(macd_histogram_prev=0.5, macd_histogram_curr=-0.2)
+
+	result = strategy.check_signal(df, timeframe="M5", h1_bias="BULLISH")
+
+	assert result is None
+
+
+def test_check_signal_sell_passes_when_macd_histogram_falling():
+	df = _sell_df(macd_histogram_prev=0.5, macd_histogram_curr=-0.2)
+
+	result = strategy.check_signal(df, timeframe="M15", h1_bias="BEARISH")
+
+	assert result is not None
+	assert result["direction"] == "SELL"
+
+
+def test_check_signal_sell_blocked_when_macd_histogram_rising():
+	df = _sell_df(macd_histogram_prev=-0.5, macd_histogram_curr=0.2)
+
+	result = strategy.check_signal(df, timeframe="M15", h1_bias="BEARISH")
+
+	assert result is None
+
+
+def test_check_signal_buy_passes_when_macd_column_absent():
+	"""Soft gate: no macd_histogram column → MACD check is skipped."""
+	df = pd.DataFrame({
+		"time": ["2026-04-14 10:00:00"],
+		"close": [38900.0],
+		"rsi": [25.0],
+		"bb_lower": [38950.0],
+		"bb_upper": [39150.0],
+	})
+
+	result = strategy.check_signal(df, timeframe="M5", h1_bias="BULLISH")
+
+	assert result is not None
+	assert result["direction"] == "BUY"

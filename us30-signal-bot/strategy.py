@@ -23,7 +23,14 @@ def get_h1_bias(h1_df: pd.DataFrame) -> str:
 
 
 def check_signal(df: pd.DataFrame, timeframe: str, h1_bias: str) -> dict[str, object] | None:
-	"""Return a mean-reversion signal filtered by H1 trend bias."""
+	"""Return a mean-reversion signal filtered by H1 trend bias and MACD momentum.
+
+	MACD confirmation (soft gate): when the `macd_histogram` column is present,
+	a BUY is only returned when the histogram is rising (current > previous bar)
+	and a SELL only when it is falling (current < previous bar).  If the column
+	is absent the MACD check is skipped so that tests and callers that do not
+	compute MACD continue to work unchanged.
+	"""
 	latest = df.iloc[-1]
 	close = latest["close"]
 	rsi = latest["rsi"]
@@ -34,8 +41,19 @@ def check_signal(df: pd.DataFrame, timeframe: str, h1_bias: str) -> dict[str, ob
 	if h1_bias == "UNCLEAR":
 		return None
 
+	# Determine MACD histogram direction when the column is available.
+	_macd_rising: bool | None = None
+	if "macd_histogram" in df.columns and len(df) >= 2:
+		h_now = float(df.iloc[-1]["macd_histogram"])
+		h_prev = float(df.iloc[-2]["macd_histogram"])
+		if not (pd.isna(h_now) or pd.isna(h_prev)):
+			_macd_rising = h_now > h_prev
+
 	if close < bb_lower and rsi < 30:
 		if h1_bias == "BEARISH":
+			return None
+		# MACD gate: skip if histogram is confirmed falling (not rising)
+		if _macd_rising is False:
 			return None
 		return {
 			"direction": "BUY",
@@ -46,6 +64,9 @@ def check_signal(df: pd.DataFrame, timeframe: str, h1_bias: str) -> dict[str, ob
 
 	if close > bb_upper and rsi > 70:
 		if h1_bias == "BULLISH":
+			return None
+		# MACD gate: skip if histogram is confirmed rising (not falling)
+		if _macd_rising is True:
 			return None
 		return {
 			"direction": "SELL",

@@ -5,7 +5,7 @@ import time
 import config
 import mt5_connector
 from alerts import send_email_alert
-from indicators import calculate_bollinger_bands, calculate_ema, calculate_rsi, detect_fvg
+from indicators import calculate_bollinger_bands, calculate_ema, calculate_macd, calculate_rsi, detect_fvg
 from mt5_connector import connect, disconnect, get_ohlcv
 from risk_manager import (
 	calculate_lot_size,
@@ -66,6 +66,7 @@ def polling_loop() -> None:
 			if m1_df is not None:
 				m1_df = calculate_bollinger_bands(m1_df, config.BB_PERIOD, config.BB_STD_DEV)
 				m1_df = calculate_rsi(m1_df, config.RSI_PERIOD)
+				m1_df = calculate_macd(m1_df, config.MACD_FAST, config.MACD_SLOW, config.MACD_SIGNAL_PERIOD)
 				m1_fvgs = detect_fvg(m1_df)
 			else:
 				m1_fvgs = []
@@ -74,11 +75,13 @@ def polling_loop() -> None:
 				m5_df = calculate_bollinger_bands(m5_df, config.BB_PERIOD, config.BB_STD_DEV)
 				m5_df = calculate_rsi(m5_df, config.RSI_PERIOD)
 				m5_df = calculate_ema(m5_df, config.EMA_PERIOD)
+				m5_df = calculate_macd(m5_df, config.MACD_FAST, config.MACD_SLOW, config.MACD_SIGNAL_PERIOD)
 
 			if m15_df is not None:
 				m15_df = calculate_bollinger_bands(m15_df, config.BB_PERIOD, config.BB_STD_DEV)
 				m15_df = calculate_rsi(m15_df, config.RSI_PERIOD)
 				m15_df = calculate_ema(m15_df, config.EMA_PERIOD)
+				m15_df = calculate_macd(m15_df, config.MACD_FAST, config.MACD_SLOW, config.MACD_SIGNAL_PERIOD)
 
 			if h1_df is not None:
 				# Calculate Bollinger + RSI for H1 as well (used for multi-timeframe checks)

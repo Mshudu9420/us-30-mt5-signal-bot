@@ -46,6 +46,28 @@ def calculate_ema(df: pd.DataFrame, period: int) -> pd.DataFrame:
 	return result
 
 
+def calculate_macd(
+	df: pd.DataFrame,
+	fast: int,
+	slow: int,
+	signal: int,
+) -> pd.DataFrame:
+	"""Return a copy of df with MACD columns added.
+
+	Columns added:
+	- macd           : fast EMA minus slow EMA
+	- macd_signal    : EMA(signal) of the MACD line
+	- macd_histogram : macd minus macd_signal (positive = bullish momentum)
+	"""
+	result = df.copy()
+	fast_ema = result["close"].ewm(span=fast, adjust=False).mean()
+	slow_ema = result["close"].ewm(span=slow, adjust=False).mean()
+	result["macd"] = fast_ema - slow_ema
+	result["macd_signal"] = result["macd"].ewm(span=signal, adjust=False).mean()
+	result["macd_histogram"] = result["macd"] - result["macd_signal"]
+	return result
+
+
 def get_latest_values(df: pd.DataFrame) -> dict[str, float]:
 	"""Return the latest row values needed by strategy logic."""
 	latest = df.iloc[-1]

@@ -30,6 +30,10 @@ BB_PERIOD = 20
 BB_STD_DEV = 2
 RSI_PERIOD = 14
 EMA_PERIOD = 50
+# MACD settings (fast/slow EMA periods and signal line smoothing)
+MACD_FAST = 12
+MACD_SLOW = 26
+MACD_SIGNAL_PERIOD = 9
 
 # Signal/risk parameters
 SL_BUFFER_PIPS = 10

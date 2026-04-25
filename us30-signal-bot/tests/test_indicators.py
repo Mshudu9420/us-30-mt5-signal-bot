@@ -222,3 +222,67 @@ def test_get_latest_values_includes_rsi_key():
 
 	assert "rsi" in latest
 	assert round(latest["rsi"], 2) == 100.0
+
+
+# --- MACD tests ---
+
+def test_calculate_macd_adds_expected_columns():
+	df = pd.DataFrame({"close": [float(i) for i in range(1, 51)]})
+
+	result = indicators.calculate_macd(df, fast=3, slow=6, signal=3)
+
+	assert "macd" in result.columns
+	assert "macd_signal" in result.columns
+	assert "macd_histogram" in result.columns
+
+
+def test_calculate_macd_preserves_row_count():
+	df = pd.DataFrame({"close": [float(i) for i in range(1, 51)]})
+
+	result = indicators.calculate_macd(df, fast=3, slow=6, signal=3)
+
+	assert len(result) == len(df)
+
+
+def test_calculate_macd_histogram_is_macd_minus_signal():
+	df = pd.DataFrame({"close": [float(i) for i in range(1, 51)]})
+
+	result = indicators.calculate_macd(df, fast=3, slow=6, signal=3)
+
+	for idx in result.index:
+		h = result.loc[idx, "macd_histogram"]
+		m = result.loc[idx, "macd"]
+		s = result.loc[idx, "macd_signal"]
+		if not (pd.isna(h) or pd.isna(m) or pd.isna(s)):
+			assert abs(h - (m - s)) < 1e-9
+
+
+def test_calculate_macd_histogram_rises_on_uptrend():
+	# Steadily rising prices → fast EMA above slow EMA → histogram is positive
+	df = pd.DataFrame({"close": [float(i) for i in range(1, 51)]})
+
+	result = indicators.calculate_macd(df, fast=3, slow=6, signal=3)
+
+	# Skip the first bar (0.0 before warm-up) and verify all remaining values are positive
+	valid = result["macd_histogram"].dropna().iloc[1:]
+	assert (valid > 0).all(), "Expected histogram to be positive on a steady uptrend"
+
+
+def test_calculate_macd_histogram_falls_on_downtrend():
+	# Steadily falling prices → fast EMA below slow EMA → histogram is negative
+	df = pd.DataFrame({"close": [float(50 - i) for i in range(50)]})
+
+	result = indicators.calculate_macd(df, fast=3, slow=6, signal=3)
+
+	# Skip the first bar (0.0 before warm-up) and verify all remaining values are negative
+	valid = result["macd_histogram"].dropna().iloc[1:]
+	assert (valid < 0).all(), "Expected histogram to be negative on a steady downtrend"
+
+
+def test_calculate_macd_does_not_modify_original_df():
+	df = pd.DataFrame({"close": [float(i) for i in range(1, 21)]})
+	orig_cols = set(df.columns)
+
+	indicators.calculate_macd(df, fast=3, slow=6, signal=3)
+
+	assert set(df.columns) == orig_cols
