@@ -2,6 +2,7 @@
 import pytest
 import sys
 import os
+from datetime import date
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from risk_manager import (
@@ -10,6 +11,7 @@ from risk_manager import (
     calculate_rr_ratio,
     calculate_sl_price,
     calculate_tp_price,
+    DailyLossTracker,
 )
 
 
@@ -116,6 +118,74 @@ def test_rr_ratio_sell_trade():
 def test_rr_ratio_rounds_to_two_decimals():
     result = calculate_rr_ratio(100.0, 97.0, 107.0)
     assert result == pytest.approx(2.33)
+
+
+# --- DailyLossTracker ---
+
+def test_daily_loss_tracker_records_opening_balance_on_first_update():
+    tracker = DailyLossTracker(max_loss_pct=0.05)
+    today = date(2026, 4, 25)
+    tracker.update(1000.0, today=today)
+    assert tracker.opening_balance == pytest.approx(1000.0)
+
+
+def test_daily_loss_tracker_not_triggered_when_no_loss():
+    tracker = DailyLossTracker(max_loss_pct=0.05)
+    today = date(2026, 4, 25)
+    tracker.update(1000.0, today=today)
+    assert tracker.is_triggered(1000.0) is False
+
+
+def test_daily_loss_tracker_not_triggered_below_threshold():
+    tracker = DailyLossTracker(max_loss_pct=0.05)
+    today = date(2026, 4, 25)
+    tracker.update(1000.0, today=today)
+    # Loss of 4.9% — just under the 5% threshold
+    assert tracker.is_triggered(951.0) is False
+
+
+def test_daily_loss_tracker_triggered_at_exact_threshold():
+    tracker = DailyLossTracker(max_loss_pct=0.05)
+    today = date(2026, 4, 25)
+    tracker.update(1000.0, today=today)
+    # Exactly 5% loss (1000 - 50 = 950)
+    assert tracker.is_triggered(950.0) is True
+
+
+def test_daily_loss_tracker_triggered_above_threshold():
+    tracker = DailyLossTracker(max_loss_pct=0.05)
+    today = date(2026, 4, 25)
+    tracker.update(1000.0, today=today)
+    # 6% loss
+    assert tracker.is_triggered(940.0) is True
+
+
+def test_daily_loss_tracker_resets_on_new_day():
+    tracker = DailyLossTracker(max_loss_pct=0.05)
+    day1 = date(2026, 4, 25)
+    day2 = date(2026, 4, 26)
+    tracker.update(1000.0, today=day1)
+    # Simulate a 6% loss on day 1 — should be triggered
+    assert tracker.is_triggered(940.0) is True
+    # New day: balance recovered; tracker resets with new opening balance
+    tracker.update(1050.0, today=day2)
+    assert tracker.opening_balance == pytest.approx(1050.0)
+    assert tracker.is_triggered(1050.0) is False
+
+
+def test_daily_loss_tracker_not_triggered_before_first_update():
+    tracker = DailyLossTracker(max_loss_pct=0.05)
+    # No update called yet — should never block
+    assert tracker.is_triggered(0.0) is False
+
+
+def test_daily_loss_tracker_same_day_does_not_overwrite_opening_balance():
+    tracker = DailyLossTracker(max_loss_pct=0.05)
+    today = date(2026, 4, 25)
+    tracker.update(1000.0, today=today)
+    # Second call on same day with a lower balance — opening should stay at 1000
+    tracker.update(980.0, today=today)
+    assert tracker.opening_balance == pytest.approx(1000.0)
 
 
 def test_rr_ratio_zero_risk_distance_raises():
