@@ -228,3 +228,150 @@ def test_is_medium_confidence_fires_without_m1():
 	result = strategy.is_medium_confidence(m5_signal, m15_signal, "BEARISH")
 
 	assert result is True
+
+
+# ---------------------------------------------------------------------------
+# Macro FVG tests
+# ---------------------------------------------------------------------------
+
+from datetime import datetime, timedelta, timezone
+
+
+def _make_m1_df_with_times(base_time: datetime, prices: list[dict]) -> pd.DataFrame:
+	"""Build a minimal M1 OHLCV DataFrame with pd.Timestamp time column."""
+	rows = []
+	for i, p in enumerate(prices):
+		rows.append({
+			"time": pd.Timestamp(base_time + timedelta(minutes=i)),
+			"open": p["open"],
+			"high": p["high"],
+			"low": p["low"],
+			"close": p["close"],
+		})
+	return pd.DataFrame(rows)
+
+
+def test_get_last_completed_macro_window_returns_current_hour_when_past_10():
+	# 01:25 — current hour's macro (00:50–01:10) has ended
+	now = datetime(2026, 4, 25, 1, 25, tzinfo=timezone.utc)
+	start, end = strategy.get_last_completed_macro_window(now)
+	assert start == datetime(2026, 4, 25, 0, 50, tzinfo=timezone.utc)
+	assert end == datetime(2026, 4, 25, 1, 10, tzinfo=timezone.utc)
+
+
+def test_get_last_completed_macro_window_returns_prev_hour_when_inside_window():
+	# 01:05 — current hour's macro (00:50–01:10) is still in progress
+	now = datetime(2026, 4, 25, 1, 5, tzinfo=timezone.utc)
+	start, end = strategy.get_last_completed_macro_window(now)
+	assert start == datetime(2026, 4, 24, 23, 50, tzinfo=timezone.utc)
+	assert end == datetime(2026, 4, 25, 0, 10, tzinfo=timezone.utc)
+
+
+def test_is_in_macro_window_true_at_50_minutes():
+	now = datetime(2026, 4, 25, 0, 50, tzinfo=timezone.utc)
+	assert strategy.is_in_macro_window(now) is True
+
+
+def test_is_in_macro_window_true_at_10_past():
+	now = datetime(2026, 4, 25, 1, 10, tzinfo=timezone.utc)
+	assert strategy.is_in_macro_window(now) is True
+
+
+def test_is_in_macro_window_false_outside_window():
+	now = datetime(2026, 4, 25, 1, 30, tzinfo=timezone.utc)
+	assert strategy.is_in_macro_window(now) is False
+
+
+def test_get_macro_fvg_signal_returns_bullish_when_price_prints_above_fvg():
+	# Macro window: 00:50–01:10 UTC
+	# FVG completing candle at 01:00 (inside window): bullish FVG top=102, bottom=100
+	# Post-macro candle at 01:15 has high=105 > fvg_top=102 → BULLISH
+	base = datetime(2026, 4, 25, 0, 58, tzinfo=timezone.utc)
+	prices = [
+		# candle 0 (0:58) — FVG first candle, high=100
+		{"open": 98, "high": 100, "low": 97, "close": 99},
+		# candle 1 (0:59) — FVG middle candle
+		{"open": 99, "high": 101, "low": 98, "close": 100},
+		# candle 2 (1:00) — FVG third candle, low=102 → bullish FVG [100, 102]
+		{"open": 102, "high": 106, "low": 102, "close": 104},
+		# candle 3 (1:01) — still inside macro, irrelevant
+		{"open": 104, "high": 106, "low": 103, "close": 105},
+		# candle 4 (1:02–1:10 gap) — post-macro candle (time set manually below)
+		{"open": 103, "high": 105, "low": 102, "close": 104},
+	]
+	df = _make_m1_df_with_times(base, prices)
+	# Push last candle's time to post-macro (1:15)
+	df.at[4, "time"] = pd.Timestamp(datetime(2026, 4, 25, 1, 15, tzinfo=timezone.utc))
+
+	from indicators import detect_fvg
+	fvgs = detect_fvg(df)
+
+	now = datetime(2026, 4, 25, 1, 25, tzinfo=timezone.utc)
+	result = strategy.get_macro_fvg_signal(df, fvgs, now)
+
+	assert result is not None
+	assert result["direction"] == "BULLISH"
+	assert result["fvg_type"] == "bullish"
+
+
+def test_get_macro_fvg_signal_returns_bearish_when_price_fails_above_fvg():
+	# Same FVG as above, but post-macro candle never exceeds fvg_top=102
+	base = datetime(2026, 4, 25, 0, 58, tzinfo=timezone.utc)
+	prices = [
+		{"open": 98, "high": 100, "low": 97, "close": 99},
+		{"open": 99, "high": 101, "low": 98, "close": 100},
+		{"open": 102, "high": 106, "low": 102, "close": 104},
+		{"open": 104, "high": 106, "low": 103, "close": 105},
+		# post-macro candle high=101 — below fvg_top=102 → BEARISH
+		{"open": 101, "high": 101, "low": 99, "close": 100},
+	]
+	df = _make_m1_df_with_times(base, prices)
+	df.at[4, "time"] = pd.Timestamp(datetime(2026, 4, 25, 1, 15, tzinfo=timezone.utc))
+
+	from indicators import detect_fvg
+	fvgs = detect_fvg(df)
+
+	now = datetime(2026, 4, 25, 1, 25, tzinfo=timezone.utc)
+	result = strategy.get_macro_fvg_signal(df, fvgs, now)
+
+	assert result is not None
+	assert result["direction"] == "BEARISH"
+
+
+def test_get_macro_fvg_signal_returns_none_when_no_fvg_in_window():
+	# All candles overlap — no FVG formed
+	base = datetime(2026, 4, 25, 0, 58, tzinfo=timezone.utc)
+	prices = [
+		{"open": 100, "high": 102, "low": 99, "close": 101},
+		{"open": 101, "high": 103, "low": 100, "close": 102},
+		{"open": 102, "high": 104, "low": 101, "close": 103},
+	]
+	df = _make_m1_df_with_times(base, prices)
+
+	from indicators import detect_fvg
+	fvgs = detect_fvg(df)
+
+	now = datetime(2026, 4, 25, 1, 25, tzinfo=timezone.utc)
+	result = strategy.get_macro_fvg_signal(df, fvgs, now)
+
+	assert result is None
+
+
+def test_get_macro_fvg_signal_returns_none_when_no_post_macro_data():
+	# FVG exists in window but no candles after macro_end yet
+	base = datetime(2026, 4, 25, 0, 58, tzinfo=timezone.utc)
+	prices = [
+		{"open": 98, "high": 100, "low": 97, "close": 99},
+		{"open": 99, "high": 101, "low": 98, "close": 100},
+		{"open": 102, "high": 106, "low": 102, "close": 104},
+	]
+	df = _make_m1_df_with_times(base, prices)
+
+	from indicators import detect_fvg
+	fvgs = detect_fvg(df)
+
+	# now = 1:08, still inside the macro window (00:50–01:10) → no post-macro data
+	now = datetime(2026, 4, 25, 1, 8, tzinfo=timezone.utc)
+	result = strategy.get_macro_fvg_signal(df, fvgs, now)
+
+	assert result is None

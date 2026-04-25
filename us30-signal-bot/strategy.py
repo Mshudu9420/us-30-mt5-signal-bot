@@ -2,7 +2,11 @@
 
 from __future__ import annotations
 
+from datetime import datetime, timedelta
+
 import pandas as pd
+
+from indicators import find_nearest_liquidity
 
 
 def get_h1_bias(h1_df: pd.DataFrame) -> str:
@@ -107,3 +111,98 @@ def is_medium_confidence(
 	if dir5 == "SELL" and h1_bias == "BEARISH":
 		return True
 	return False
+
+
+# ---------------------------------------------------------------------------
+# Macro-time Fair Value Gap analysis
+# ---------------------------------------------------------------------------
+
+def get_last_completed_macro_window(now: datetime) -> tuple[datetime, datetime]:
+	"""Return (macro_start, macro_end) for the most recently completed macro window.
+
+	A macro window spans 10 minutes before to 10 minutes after the top of each
+	hour (e.g. 00:50–01:10, 01:50–02:10, ...). 'Completed' means macro_end < now.
+	"""
+	hour_top = now.replace(minute=0, second=0, microsecond=0)
+	macro_end = hour_top + timedelta(minutes=10)
+	if now >= macro_end:
+		# Current hour's macro has already ended
+		return hour_top - timedelta(minutes=10), macro_end
+	# Current hour's macro is still in progress — use the previous hour
+	prev_hour_top = hour_top - timedelta(hours=1)
+	return prev_hour_top - timedelta(minutes=10), prev_hour_top + timedelta(minutes=10)
+
+
+def is_in_macro_window(now: datetime) -> bool:
+	"""Return True when now falls within any 20-minute macro window (HH:50–HH+1:10)."""
+	hour_top = now.replace(minute=0, second=0, microsecond=0)
+	# Check window centred on current hour top
+	if hour_top - timedelta(minutes=10) <= now <= hour_top + timedelta(minutes=10):
+		return True
+	# Check window centred on next hour top (covers :50–:59 before the next hour)
+	next_hour_top = hour_top + timedelta(hours=1)
+	return next_hour_top - timedelta(minutes=10) <= now <= next_hour_top + timedelta(minutes=10)
+
+
+def get_macro_fvg_signal(
+	m1_df: pd.DataFrame,
+	fvgs: list[dict],
+	now: datetime,
+) -> dict[str, object] | None:
+	"""Analyse the first M1 FVG from the last completed macro window and return a signal.
+
+	Steps:
+	1. Determine the last completed macro window.
+	2. Find the first FVG whose completing candle falls inside that window.
+	3. Examine post-macro M1 candles:
+	   - Any candle HIGH above the FVG top  → BULLISH (price confirmed above gap).
+	   - No candle above the FVG top        → BEARISH (price failed to reclaim gap).
+	4. Seek the nearest liquidity:
+	   - BULLISH → equal highs above current price (buy-side target).
+	   - BEARISH → equal lows  below current price (sell-side target).
+	5. Return a signal dict, or None when no qualifying FVG is found.
+	"""
+	if m1_df is None or not fvgs:
+		return None
+
+	macro_start, macro_end = get_last_completed_macro_window(now)
+	_ms = pd.Timestamp(macro_start)
+	_me = pd.Timestamp(macro_end)
+
+	# First FVG whose completing candle time falls within the macro window
+	macro_fvgs = [
+		fvg for fvg in fvgs
+		if fvg["time"] is not None and _ms <= pd.Timestamp(fvg["time"]) <= _me
+	]
+	if not macro_fvgs:
+		return None
+
+	first_fvg = macro_fvgs[0]
+	fvg_top = first_fvg["top"]
+	fvg_bottom = first_fvg["bottom"]
+
+	# Post-macro candles — bars whose time is strictly after macro_end
+	post_macro = m1_df[m1_df["time"].apply(pd.Timestamp) > _me]
+	if post_macro.empty:
+		return None  # macro hasn't fully closed yet or no M1 data after it
+
+	latest_close = float(m1_df.iloc[-1]["close"])
+
+	# Determine direction from post-macro price action relative to the FVG
+	candle_above_fvg = bool((post_macro["high"] > fvg_top).any())
+	direction = "BULLISH" if candle_above_fvg else "BEARISH"
+
+	liquidity_target = find_nearest_liquidity(m1_df, direction, latest_close)
+
+	return {
+		"source": "macro_fvg",
+		"direction": direction,
+		"fvg_top": round(fvg_top, 2),
+		"fvg_bottom": round(fvg_bottom, 2),
+		"fvg_type": first_fvg["type"],
+		"macro_start": str(macro_start),
+		"macro_end": str(macro_end),
+		"liquidity_target": liquidity_target,
+		"entry_price": round(latest_close, 2),
+		"timeframe": "M1",
+	}
