@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
+from zoneinfo import ZoneInfo
 
 import pandas as pd
 
@@ -20,6 +21,38 @@ def get_h1_bias(h1_df: pd.DataFrame) -> str:
 	if close > ema:
 		return "BULLISH"
 	return "BEARISH"
+
+
+def is_in_trading_session(now: datetime | None = None) -> bool:
+	"""Return True if *now* falls within the configured New York trading session.
+
+	The session window (09:30–16:00 ET) is read from config so it can be
+	overridden without touching this module.  DST transitions are handled
+	automatically by ``zoneinfo``.
+
+	Parameters
+	----------
+	now:
+		Reference timestamp.  If ``None``, the current UTC wall-clock time is
+		used.  Pass a timezone-aware ``datetime`` for testing.
+	"""
+	import config as _cfg
+
+	if now is None:
+		now = datetime.now(tz=timezone.utc)
+	elif now.tzinfo is None:
+		now = now.replace(tzinfo=timezone.utc)
+
+	ny_tz = ZoneInfo(_cfg.TRADING_SESSION_TZ)
+	ny_now = now.astimezone(ny_tz)
+
+	start_h, start_m = _cfg.TRADING_SESSION_START
+	end_h, end_m = _cfg.TRADING_SESSION_END
+
+	session_start = ny_now.replace(hour=start_h, minute=start_m, second=0, microsecond=0)
+	session_end = ny_now.replace(hour=end_h, minute=end_m, second=0, microsecond=0)
+
+	return session_start <= ny_now < session_end
 
 
 def check_signal(df: pd.DataFrame, timeframe: str, h1_bias: str) -> dict[str, object] | None:

@@ -62,3 +62,26 @@ timestamp,level,message
 2026-04-26 01:34:48,ERROR,Unexpected error in polling loop: 
 2026-04-26 01:34:49,DEBUG,timings (s): fetch=0.003 indicators=0.229 signals=0.000 order_and_email=0.000 total=0.233
 2026-04-26 01:34:49,INFO,Bot stopped by user.
+2026-04-26 02:36:40,ERROR,Startup aborted: MT5 connection failed.
+2026-04-26 02:36:40,ERROR,Startup aborted: account info unavailable.
+2026-04-26 02:36:40,DEBUG,session filter: outside NY trading hours (09:30–16:00 ET) — no orders or alerts placed.
+2026-04-26 02:36:40,DEBUG,timings (s): fetch=0.014 indicators=0.151 signals=0.002 order_and_email=0.000 total=0.192
+2026-04-26 02:36:40,ERROR,Unexpected error in polling loop: 
+2026-04-26 02:36:40,DEBUG,session filter: outside NY trading hours (09:30–16:00 ET) — no orders or alerts placed.
+2026-04-26 02:36:40,DEBUG,timings (s): fetch=0.003 indicators=0.160 signals=0.000 order_and_email=0.000 total=0.164
+2026-04-26 02:36:40,ERROR,Unexpected error in polling loop: 
+2026-04-26 02:36:41,DEBUG,session filter: outside NY trading hours (09:30–16:00 ET) — no orders or alerts placed.
+2026-04-26 02:36:41,DEBUG,timings (s): fetch=0.004 indicators=0.163 signals=0.000 order_and_email=0.000 total=0.168
+2026-04-26 02:36:41,ERROR,Unexpected error in polling loop: 
+2026-04-26 02:36:41,DEBUG,session filter: outside NY trading hours (09:30–16:00 ET) — no orders or alerts placed.
+2026-04-26 02:36:41,DEBUG,timings (s): fetch=0.003 indicators=0.153 signals=0.000 order_and_email=0.000 total=0.158
+2026-04-26 02:36:41,ERROR,Unexpected error in polling loop: 
+2026-04-26 02:36:41,DEBUG,session filter: outside NY trading hours (09:30–16:00 ET) — no orders or alerts placed.
+2026-04-26 02:36:41,DEBUG,timings (s): fetch=0.003 indicators=0.239 signals=0.000 order_and_email=0.000 total=0.243
+2026-04-26 02:36:41,ERROR,Unexpected error in polling loop: 
+2026-04-26 02:36:41,DEBUG,session filter: outside NY trading hours (09:30–16:00 ET) — no orders or alerts placed.
+2026-04-26 02:36:41,DEBUG,timings (s): fetch=0.004 indicators=0.205 signals=0.000 order_and_email=0.000 total=0.210
+2026-04-26 02:36:41,INFO,Bot stopped by user.
+2026-04-26 02:36:59,DEBUG,session filter: outside NY trading hours (09:30–16:00 ET) — no orders or alerts placed.
+2026-04-26 02:36:59,DEBUG,timings (s): fetch=0.004 indicators=0.170 signals=0.001 order_and_email=0.000 total=0.224
+2026-04-26 02:36:59,ERROR,Unexpected error in polling loop: 

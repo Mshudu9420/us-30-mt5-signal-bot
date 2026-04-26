@@ -64,6 +64,12 @@ LOG_DIR = "logs"
 LOG_MAX_BYTES = 10 * 1024 * 1024  # 10 MB
 LOG_BACKUP_COUNT = 7
 
+# Trading session filter (New York time).
+# Orders and alerts are suppressed outside this window.
+TRADING_SESSION_TZ = "America/New_York"
+TRADING_SESSION_START = (9, 30)   # 09:30 NY time
+TRADING_SESSION_END = (16, 0)     # 16:00 NY time
+
 # Automatic trading (disabled by default). Enable only after careful testing.
 ENABLE_AUTO_TRADES = True
 # Default order deviation (max allowed slippage in points)

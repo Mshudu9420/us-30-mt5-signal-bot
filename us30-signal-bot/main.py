@@ -17,7 +17,7 @@ from risk_manager import (
 	DailyLossTracker,
 )
 from signal_output import print_heartbeat, print_signal, print_startup_summary
-from strategy import check_signal, get_h1_bias, get_macro_fvg_signal, is_high_confidence, is_medium_confidence
+from strategy import check_signal, get_h1_bias, get_macro_fvg_signal, is_high_confidence, is_in_trading_session, is_medium_confidence
 
 _log = get_logger()
 
@@ -149,7 +149,14 @@ def polling_loop() -> None:
 
 			# High-confidence handling: order + alert
 			order_start = time.monotonic()
-			if _high_conf:
+			if not is_in_trading_session():
+				_log.debug(
+					f"session filter: outside NY trading hours "
+					f"({config.TRADING_SESSION_START[0]:02d}:{config.TRADING_SESSION_START[1]:02d}–"
+					f"{config.TRADING_SESSION_END[0]:02d}:{config.TRADING_SESSION_END[1]:02d} ET) — "
+					f"no orders or alerts placed."
+				)
+			elif _high_conf:
 				_sig = m1_signal or m5_signal or m15_signal
 				_df = m5_df if m5_signal is not None else m15_df
 				_direction = _sig["direction"]

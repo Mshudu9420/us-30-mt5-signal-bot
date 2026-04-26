@@ -207,6 +207,7 @@ def test_polling_loop_sends_email_when_high_confidence(monkeypatch):
     monkeypatch.setattr(main, "get_h1_bias", lambda df: "BULLISH")
     monkeypatch.setattr(main, "check_signal", lambda df, tf, bias: dict(buy_signal, timeframe=tf))
     monkeypatch.setattr(main, "is_high_confidence", lambda m1, m5, m15, h1: True)
+    monkeypatch.setattr(main, "is_in_trading_session", lambda: True)
     monkeypatch.setattr(main, "calculate_risk_amount", lambda capital, mode: 5.0)
     monkeypatch.setattr(main, "calculate_sl_price", lambda d, band, buf: 38990.0)
     monkeypatch.setattr(main, "calculate_tp_price", lambda d, mid: 39030.0)

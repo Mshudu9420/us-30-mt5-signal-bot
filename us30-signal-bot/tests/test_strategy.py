@@ -451,3 +451,65 @@ def test_check_signal_buy_passes_when_macd_column_absent():
 
 	assert result is not None
 	assert result["direction"] == "BUY"
+
+
+# ---------------------------------------------------------------------------
+# NY trading session filter
+# ---------------------------------------------------------------------------
+
+def _ny(hour: int, minute: int = 0) -> datetime:
+	"""Return a timezone-aware datetime at the given NY (ET) wall-clock time."""
+	from zoneinfo import ZoneInfo
+	return datetime(2026, 4, 26, hour, minute, tzinfo=ZoneInfo("America/New_York"))
+
+
+def test_is_in_trading_session_true_at_open():
+	assert strategy.is_in_trading_session(_ny(9, 30)) is True
+
+
+def test_is_in_trading_session_true_during_session():
+	assert strategy.is_in_trading_session(_ny(12, 0)) is True
+
+
+def test_is_in_trading_session_true_one_minute_before_close():
+	assert strategy.is_in_trading_session(_ny(15, 59)) is True
+
+
+def test_is_in_trading_session_false_at_close():
+	# 16:00 is exclusive (half-open interval [09:30, 16:00))
+	assert strategy.is_in_trading_session(_ny(16, 0)) is False
+
+
+def test_is_in_trading_session_false_before_open():
+	assert strategy.is_in_trading_session(_ny(9, 29)) is False
+
+
+def test_is_in_trading_session_false_after_close():
+	assert strategy.is_in_trading_session(_ny(16, 1)) is False
+
+
+def test_is_in_trading_session_false_overnight():
+	assert strategy.is_in_trading_session(_ny(2, 0)) is False
+
+
+def test_is_in_trading_session_uses_current_time_when_now_is_none(monkeypatch):
+	"""When now=None the function should call datetime.now(UTC) internally."""
+	from zoneinfo import ZoneInfo
+
+	# Freeze time to 11:00 ET (well within session)
+	fixed = datetime(2026, 4, 26, 11, 0, tzinfo=ZoneInfo("America/New_York"))
+
+	import strategy as _strat
+	original_now = _strat.datetime.now  # type: ignore[attr-defined]
+
+	# monkeypatch datetime.now inside the strategy module
+	class _FakeDatetime(datetime):
+		@classmethod
+		def now(cls, tz=None):
+			return fixed.astimezone(tz) if tz else fixed
+
+	monkeypatch.setattr(_strat, "datetime", _FakeDatetime)
+	result = _strat.is_in_trading_session(None)
+	monkeypatch.setattr(_strat, "datetime", datetime)  # restore
+
+	assert result is True
