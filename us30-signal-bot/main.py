@@ -149,7 +149,7 @@ def polling_loop() -> None:
 
 			# High-confidence handling: order + alert
 			order_start = time.monotonic()
-			if not is_in_trading_session():
+			if not is_in_trading_session(symbol=config.SYMBOL):
 				_log.debug(
 					f"session filter: outside NY trading hours "
 					f"({config.TRADING_SESSION_START[0]:02d}:{config.TRADING_SESSION_START[1]:02d}–"

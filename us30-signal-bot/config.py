@@ -69,6 +69,9 @@ LOG_BACKUP_COUNT = 7
 TRADING_SESSION_TZ = "America/New_York"
 TRADING_SESSION_START = (9, 30)   # 09:30 NY time
 TRADING_SESSION_END = (16, 0)     # 16:00 NY time
+# Symbols that trade 24/7 and are exempt from the NY session filter.
+# Substrings are matched case-insensitively (e.g. "btc" matches "BTCUSDm").
+SESSION_EXEMPT_SYMBOLS = ["btc", "eth", "xbt"]
 
 # Automatic trading (disabled by default). Enable only after careful testing.
 ENABLE_AUTO_TRADES = True

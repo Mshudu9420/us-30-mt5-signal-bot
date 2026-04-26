@@ -23,20 +23,29 @@ def get_h1_bias(h1_df: pd.DataFrame) -> str:
 	return "BEARISH"
 
 
-def is_in_trading_session(now: datetime | None = None) -> bool:
-	"""Return True if *now* falls within the configured New York trading session.
+def is_in_trading_session(now: datetime | None = None, symbol: str = "") -> bool:
+	"""Return True if trading is allowed for *symbol* at *now*.
 
-	The session window (09:30–16:00 ET) is read from config so it can be
-	overridden without touching this module.  DST transitions are handled
-	automatically by ``zoneinfo``.
+	24/7 instruments (BTC, ETH, etc.) listed in ``config.SESSION_EXEMPT_SYMBOLS``
+	always return True regardless of the time.  All other symbols must fall
+	within the configured New York session window (09:30–16:00 ET).
+	DST transitions are handled automatically by ``zoneinfo``.
 
 	Parameters
 	----------
 	now:
 		Reference timestamp.  If ``None``, the current UTC wall-clock time is
 		used.  Pass a timezone-aware ``datetime`` for testing.
+	symbol:
+		Broker symbol string (e.g. ``"BTCUSDm"``).  Case-insensitive substring
+		match against ``config.SESSION_EXEMPT_SYMBOLS``.
 	"""
 	import config as _cfg
+
+	# Exempt 24/7 instruments from the session gate entirely.
+	symbol_lower = symbol.lower()
+	if any(exempt in symbol_lower for exempt in _cfg.SESSION_EXEMPT_SYMBOLS):
+		return True
 
 	if now is None:
 		now = datetime.now(tz=timezone.utc)

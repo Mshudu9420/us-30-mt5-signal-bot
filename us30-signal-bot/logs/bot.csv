@@ -85,3 +85,197 @@ timestamp,level,message
 2026-04-26 02:36:59,DEBUG,session filter: outside NY trading hours (09:30–16:00 ET) — no orders or alerts placed.
 2026-04-26 02:36:59,DEBUG,timings (s): fetch=0.004 indicators=0.170 signals=0.001 order_and_email=0.000 total=0.224
 2026-04-26 02:36:59,ERROR,Unexpected error in polling loop: 
+2026-04-26 02:39:15,ERROR,Startup aborted: MT5 connection failed.
+2026-04-26 02:39:15,ERROR,Startup aborted: account info unavailable.
+2026-04-26 02:39:16,DEBUG,session filter: outside NY trading hours (09:30–16:00 ET) — no orders or alerts placed.
+2026-04-26 02:39:16,DEBUG,timings (s): fetch=0.004 indicators=0.163 signals=0.001 order_and_email=0.000 total=0.176
+2026-04-26 02:39:16,ERROR,Unexpected error in polling loop: 
+2026-04-26 02:39:16,DEBUG,session filter: outside NY trading hours (09:30–16:00 ET) — no orders or alerts placed.
+2026-04-26 02:39:16,DEBUG,timings (s): fetch=0.004 indicators=0.170 signals=0.000 order_and_email=0.000 total=0.175
+2026-04-26 02:39:16,ERROR,Unexpected error in polling loop: 
+2026-04-26 02:39:16,DEBUG,session filter: outside NY trading hours (09:30–16:00 ET) — no orders or alerts placed.
+2026-04-26 02:39:16,DEBUG,timings (s): fetch=0.004 indicators=0.162 signals=0.000 order_and_email=0.000 total=0.167
+2026-04-26 02:39:16,ERROR,Unexpected error in polling loop: 
+2026-04-26 02:39:16,INFO,"auto-trade summary: {'success': False, 'error': 'symbol tick info unavailable for BTCUSDm'}"
+2026-04-26 02:39:16,DEBUG,timings (s): fetch=0.003 indicators=0.155 signals=0.000 order_and_email=0.006 total=0.165
+2026-04-26 02:39:16,ERROR,Unexpected error in polling loop: 
+2026-04-26 02:39:16,DEBUG,session filter: outside NY trading hours (09:30–16:00 ET) — no orders or alerts placed.
+2026-04-26 02:39:16,DEBUG,timings (s): fetch=0.003 indicators=0.155 signals=0.000 order_and_email=0.000 total=0.159
+2026-04-26 02:39:16,ERROR,Unexpected error in polling loop: 
+2026-04-26 02:39:16,DEBUG,session filter: outside NY trading hours (09:30–16:00 ET) — no orders or alerts placed.
+2026-04-26 02:39:16,DEBUG,timings (s): fetch=0.003 indicators=0.158 signals=0.000 order_and_email=0.000 total=0.162
+2026-04-26 02:39:16,INFO,Bot stopped by user.
+2026-04-26 02:39:46,ERROR,Startup aborted: MT5 connection failed.
+2026-04-26 02:39:46,ERROR,Startup aborted: account info unavailable.
+2026-04-26 02:39:46,DEBUG,session filter: outside NY trading hours (09:30–16:00 ET) — no orders or alerts placed.
+2026-04-26 02:39:46,DEBUG,timings (s): fetch=0.004 indicators=0.165 signals=0.001 order_and_email=0.000 total=0.177
+2026-04-26 02:39:46,ERROR,Unexpected error in polling loop: 
+2026-04-26 02:39:46,DEBUG,session filter: outside NY trading hours (09:30–16:00 ET) — no orders or alerts placed.
+2026-04-26 02:39:46,DEBUG,timings (s): fetch=0.003 indicators=0.169 signals=0.000 order_and_email=0.000 total=0.173
+2026-04-26 02:39:46,ERROR,Unexpected error in polling loop: 
+2026-04-26 02:39:46,DEBUG,session filter: outside NY trading hours (09:30–16:00 ET) — no orders or alerts placed.
+2026-04-26 02:39:46,DEBUG,timings (s): fetch=0.003 indicators=0.155 signals=0.000 order_and_email=0.000 total=0.158
+2026-04-26 02:39:46,ERROR,Unexpected error in polling loop: 
+2026-04-26 02:39:46,INFO,"auto-trade summary: {'success': False, 'error': 'symbol tick info unavailable for BTCUSDm'}"
+2026-04-26 02:39:46,DEBUG,timings (s): fetch=0.003 indicators=0.150 signals=0.000 order_and_email=0.001 total=0.154
+2026-04-26 02:39:46,ERROR,Unexpected error in polling loop: 
+2026-04-26 02:39:46,DEBUG,session filter: outside NY trading hours (09:30–16:00 ET) — no orders or alerts placed.
+2026-04-26 02:39:46,DEBUG,timings (s): fetch=0.003 indicators=0.149 signals=0.000 order_and_email=0.000 total=0.153
+2026-04-26 02:39:46,ERROR,Unexpected error in polling loop: 
+2026-04-26 02:39:47,DEBUG,session filter: outside NY trading hours (09:30–16:00 ET) — no orders or alerts placed.
+2026-04-26 02:39:47,DEBUG,timings (s): fetch=0.003 indicators=0.154 signals=0.000 order_and_email=0.000 total=0.158
+2026-04-26 02:39:47,INFO,Bot stopped by user.
+2026-04-26 02:41:19,INFO,macro-fvg | direction=BEARISH fvg=[77618.97-77620.44] type=bullish liquidity_target=77515.67 entry=77550.3
+2026-04-26 02:41:19,DEBUG,session filter: outside NY trading hours (09:30–16:00 ET) — no orders or alerts placed.
+2026-04-26 02:41:19,DEBUG,timings (s): fetch=0.114 indicators=0.167 signals=0.001 order_and_email=0.000 total=0.307
+2026-04-26 02:42:19,INFO,macro-fvg | direction=BEARISH fvg=[77618.97-77620.44] type=bullish liquidity_target=77513.11 entry=77545.23
+2026-04-26 02:42:19,DEBUG,session filter: outside NY trading hours (09:30–16:00 ET) — no orders or alerts placed.
+2026-04-26 02:42:19,DEBUG,timings (s): fetch=0.005 indicators=0.152 signals=0.001 order_and_email=0.000 total=0.167
+2026-04-26 02:42:26,INFO,Bot stopped by user.
+2026-04-26 02:46:34,INFO,macro-fvg | direction=BEARISH fvg=[77618.97-77620.44] type=bullish liquidity_target=77565.05 entry=77567.81
+2026-04-26 02:46:34,DEBUG,session filter: outside NY trading hours (09:30–16:00 ET) — no orders or alerts placed.
+2026-04-26 02:46:34,DEBUG,timings (s): fetch=0.021 indicators=0.159 signals=0.001 order_and_email=0.000 total=0.194
+2026-04-26 02:47:34,INFO,macro-fvg | direction=BEARISH fvg=[77618.97-77620.44] type=bullish liquidity_target=77518.64 entry=77551.39
+2026-04-26 02:47:34,DEBUG,session filter: outside NY trading hours (09:30–16:00 ET) — no orders or alerts placed.
+2026-04-26 02:47:34,DEBUG,timings (s): fetch=0.005 indicators=0.151 signals=0.001 order_and_email=0.000 total=0.170
+2026-04-26 02:48:34,INFO,macro-fvg | direction=BEARISH fvg=[77618.97-77620.44] type=bullish liquidity_target=77564.28 entry=77568.66
+2026-04-26 02:48:34,DEBUG,session filter: outside NY trading hours (09:30–16:00 ET) — no orders or alerts placed.
+2026-04-26 02:48:34,DEBUG,timings (s): fetch=0.005 indicators=0.151 signals=0.001 order_and_email=0.000 total=0.166
+2026-04-26 02:49:34,INFO,macro-fvg | direction=BEARISH fvg=[77618.97-77620.44] type=bullish liquidity_target=77567.05 entry=77570.01
+2026-04-26 02:49:34,DEBUG,session filter: outside NY trading hours (09:30–16:00 ET) — no orders or alerts placed.
+2026-04-26 02:49:34,DEBUG,timings (s): fetch=0.005 indicators=0.152 signals=0.001 order_and_email=0.000 total=0.167
+2026-04-26 02:50:34,INFO,macro-fvg | direction=BEARISH fvg=[77618.97-77620.44] type=bullish liquidity_target=77564.21 entry=77564.97
+2026-04-26 02:50:34,DEBUG,session filter: outside NY trading hours (09:30–16:00 ET) — no orders or alerts placed.
+2026-04-26 02:50:34,DEBUG,timings (s): fetch=0.005 indicators=0.151 signals=0.001 order_and_email=0.000 total=0.168
+2026-04-26 02:51:34,INFO,macro-fvg | direction=BEARISH fvg=[77618.97-77620.44] type=bullish liquidity_target=77521.59 entry=77562.76
+2026-04-26 02:51:34,DEBUG,session filter: outside NY trading hours (09:30–16:00 ET) — no orders or alerts placed.
+2026-04-26 02:51:34,DEBUG,timings (s): fetch=0.005 indicators=0.151 signals=0.001 order_and_email=0.000 total=0.179
+2026-04-26 02:52:34,INFO,macro-fvg | direction=BEARISH fvg=[77618.97-77620.44] type=bullish liquidity_target=77579.91 entry=77594.24
+2026-04-26 02:52:34,DEBUG,session filter: outside NY trading hours (09:30–16:00 ET) — no orders or alerts placed.
+2026-04-26 02:52:34,DEBUG,timings (s): fetch=0.005 indicators=0.158 signals=0.001 order_and_email=0.000 total=0.191
+2026-04-26 02:53:34,INFO,macro-fvg | direction=BEARISH fvg=[77618.97-77620.44] type=bullish liquidity_target=77581.21 entry=77600.6
+2026-04-26 02:53:34,DEBUG,session filter: outside NY trading hours (09:30–16:00 ET) — no orders or alerts placed.
+2026-04-26 02:53:34,DEBUG,timings (s): fetch=0.005 indicators=0.153 signals=0.001 order_and_email=0.000 total=0.209
+2026-04-26 02:54:34,INFO,macro-fvg | direction=BEARISH fvg=[77618.97-77620.44] type=bullish liquidity_target=77563.93 entry=77564.54
+2026-04-26 02:54:34,DEBUG,session filter: outside NY trading hours (09:30–16:00 ET) — no orders or alerts placed.
+2026-04-26 02:54:34,DEBUG,timings (s): fetch=0.005 indicators=0.151 signals=0.001 order_and_email=0.000 total=0.226
+2026-04-26 02:55:34,INFO,macro-fvg | direction=BEARISH fvg=[77618.97-77620.44] type=bullish liquidity_target=77512.86 entry=77540.36
+2026-04-26 02:55:34,DEBUG,session filter: outside NY trading hours (09:30–16:00 ET) — no orders or alerts placed.
+2026-04-26 02:55:34,DEBUG,timings (s): fetch=0.006 indicators=0.163 signals=0.002 order_and_email=0.000 total=0.298
+2026-04-26 02:56:34,INFO,macro-fvg | direction=BEARISH fvg=[77618.97-77620.44] type=bullish liquidity_target=77495.36 entry=77499.67
+2026-04-26 02:56:34,DEBUG,session filter: outside NY trading hours (09:30–16:00 ET) — no orders or alerts placed.
+2026-04-26 02:56:34,DEBUG,timings (s): fetch=0.005 indicators=0.158 signals=0.001 order_and_email=0.000 total=0.397
+2026-04-26 02:57:34,INFO,macro-fvg | direction=BEARISH fvg=[77618.97-77620.44] type=bullish liquidity_target=77495.61 entry=77500.8
+2026-04-26 02:57:34,DEBUG,session filter: outside NY trading hours (09:30–16:00 ET) — no orders or alerts placed.
+2026-04-26 02:57:35,DEBUG,timings (s): fetch=0.005 indicators=0.156 signals=0.001 order_and_email=0.000 total=0.611
+2026-04-26 02:58:34,INFO,macro-fvg | direction=BEARISH fvg=[77618.97-77620.44] type=bullish liquidity_target=77493.83 entry=77498.08
+2026-04-26 02:58:34,DEBUG,session filter: outside NY trading hours (09:30–16:00 ET) — no orders or alerts placed.
+2026-04-26 02:58:35,DEBUG,timings (s): fetch=0.005 indicators=0.157 signals=0.001 order_and_email=0.000 total=1.043
+2026-04-26 02:59:34,INFO,macro-fvg | direction=BEARISH fvg=[77618.97-77620.44] type=bullish liquidity_target=77510.91 entry=77532.34
+2026-04-26 02:59:35,DEBUG,session filter: outside NY trading hours (09:30–16:00 ET) — no orders or alerts placed.
+2026-04-26 02:59:36,DEBUG,timings (s): fetch=0.005 indicators=0.155 signals=0.001 order_and_email=0.000 total=1.927
+2026-04-26 03:00:34,INFO,macro-fvg | direction=BEARISH fvg=[77618.97-77620.44] type=bullish liquidity_target=77511.39 entry=77526.15
+2026-04-26 03:00:35,DEBUG,session filter: outside NY trading hours (09:30–16:00 ET) — no orders or alerts placed.
+2026-04-26 03:00:38,DEBUG,timings (s): fetch=0.005 indicators=0.156 signals=0.002 order_and_email=0.000 total=3.622
+2026-04-26 03:01:34,INFO,macro-fvg | direction=BEARISH fvg=[77618.97-77620.44] type=bullish liquidity_target=77506.81 entry=77516.33
+2026-04-26 03:01:36,DEBUG,session filter: outside NY trading hours (09:30–16:00 ET) — no orders or alerts placed.
+2026-04-26 03:01:41,DEBUG,timings (s): fetch=0.005 indicators=0.161 signals=0.002 order_and_email=0.000 total=7.068
+2026-04-26 03:02:34,INFO,macro-fvg | direction=BEARISH fvg=[77618.97-77620.44] type=bullish liquidity_target=77509.4 entry=77520.27
+2026-04-26 03:02:37,DEBUG,session filter: outside NY trading hours (09:30–16:00 ET) — no orders or alerts placed.
+2026-04-26 03:02:48,DEBUG,timings (s): fetch=0.005 indicators=0.158 signals=0.001 order_and_email=0.000 total=14.017
+2026-04-26 03:03:34,INFO,macro-fvg | direction=BEARISH fvg=[77618.97-77620.44] type=bullish liquidity_target=77509.57 entry=77520.61
+2026-04-26 03:03:40,DEBUG,session filter: outside NY trading hours (09:30–16:00 ET) — no orders or alerts placed.
+2026-04-26 03:04:02,DEBUG,timings (s): fetch=0.005 indicators=0.154 signals=0.001 order_and_email=0.000 total=27.990
+2026-04-26 03:04:34,INFO,macro-fvg | direction=BEARISH fvg=[77618.97-77620.44] type=bullish liquidity_target=77502.09 entry=77508.71
+2026-04-26 03:04:45,DEBUG,session filter: outside NY trading hours (09:30–16:00 ET) — no orders or alerts placed.
+2026-04-26 03:05:31,DEBUG,timings (s): fetch=0.005 indicators=0.157 signals=0.001 order_and_email=0.000 total=56.480
+2026-04-26 03:05:34,INFO,macro-fvg | direction=BEARISH fvg=[77618.97-77620.44] type=bullish liquidity_target=77510.02 entry=77522.07
+2026-04-26 03:05:57,DEBUG,session filter: outside NY trading hours (09:30–16:00 ET) — no orders or alerts placed.
+2026-04-26 03:07:26,DEBUG,timings (s): fetch=0.006 indicators=0.171 signals=0.002 order_and_email=0.000 total=111.741
+2026-04-26 03:07:26,INFO,macro-fvg | direction=BEARISH fvg=[77618.97-77620.44] type=bullish liquidity_target=77512.42 entry=77527.6
+2026-04-26 03:08:09,DEBUG,session filter: outside NY trading hours (09:30–16:00 ET) — no orders or alerts placed.
+2026-04-26 03:11:00,DEBUG,timings (s): fetch=0.005 indicators=0.155 signals=0.001 order_and_email=0.000 total=214.642
+2026-04-26 03:11:01,DEBUG,session filter: outside NY trading hours (09:30–16:00 ET) — no orders or alerts placed.
+2026-04-26 03:16:42,DEBUG,timings (s): fetch=0.005 indicators=0.151 signals=0.001 order_and_email=0.000 total=341.794
+2026-04-26 03:16:42,INFO,macro-fvg | direction=BEARISH fvg=[77567.68-77569.46] type=bullish liquidity_target=77513.45 entry=77528.18
+2026-04-26 03:19:34,DEBUG,session filter: outside NY trading hours (09:30–16:00 ET) — no orders or alerts placed.
+2026-04-26 03:30:57,DEBUG,timings (s): fetch=0.005 indicators=0.154 signals=0.002 order_and_email=0.000 total=854.626
+2026-04-26 03:30:57,INFO,macro-fvg | direction=BULLISH fvg=[77567.68-77569.46] type=bullish liquidity_target=77563.8 entry=77532.07
+2026-04-26 03:36:38,DEBUG,session filter: outside NY trading hours (09:30–16:00 ET) — no orders or alerts placed.
+2026-04-26 03:59:32,DEBUG,timings (s): fetch=0.005 indicators=0.155 signals=0.001 order_and_email=0.000 total=1715.159
+2026-04-26 03:59:32,INFO,macro-fvg | direction=BULLISH fvg=[77567.68-77569.46] type=bullish liquidity_target=77534.15 entry=77479.87
+2026-04-26 04:10:55,DEBUG,session filter: outside NY trading hours (09:30–16:00 ET) — no orders or alerts placed.
+2026-04-26 04:56:24,DEBUG,timings (s): fetch=0.005 indicators=0.154 signals=0.001 order_and_email=0.000 total=3411.455
+2026-04-26 04:56:24,INFO,macro-fvg | direction=BULLISH fvg=[77535.36-77541.18] type=bullish liquidity_target=77557.84 entry=77521.69
+2026-04-26 05:19:09,DEBUG,session filter: outside NY trading hours (09:30–16:00 ET) — no orders or alerts placed.
+2026-04-26 06:50:33,DEBUG,timings (s): fetch=0.009 indicators=0.152 signals=0.001 order_and_email=0.000 total=6849.740
+2026-04-26 06:50:34,INFO,macro-fvg | direction=BULLISH fvg=[77404.09-77419.47] type=bearish liquidity_target=77792.01 entry=77709.93
+2026-04-26 07:36:31,DEBUG,session filter: outside NY trading hours (09:30–16:00 ET) — no orders or alerts placed.
+2026-04-26 09:20:51,INFO,macro-fvg | direction=BULLISH fvg=[77935.46-77945.77] type=bearish liquidity_target=78057.42 entry=78030.89
+2026-04-26 09:20:51,DEBUG,session filter: outside NY trading hours (09:30–16:00 ET) — no orders or alerts placed.
+2026-04-26 09:20:51,DEBUG,timings (s): fetch=0.037 indicators=0.169 signals=0.002 order_and_email=0.000 total=0.231
+2026-04-26 09:21:51,INFO,macro-fvg | direction=BULLISH fvg=[77935.46-77945.77] type=bearish liquidity_target=78071.38 entry=78042.64
+2026-04-26 09:21:51,DEBUG,session filter: outside NY trading hours (09:30–16:00 ET) — no orders or alerts placed.
+2026-04-26 09:21:51,DEBUG,timings (s): fetch=0.005 indicators=0.149 signals=0.001 order_and_email=0.000 total=0.178
+2026-04-26 09:22:51,INFO,macro-fvg | direction=BULLISH fvg=[77935.46-77945.77] type=bearish liquidity_target=78052.33 entry=78025.94
+2026-04-26 09:22:51,DEBUG,session filter: outside NY trading hours (09:30–16:00 ET) — no orders or alerts placed.
+2026-04-26 09:22:51,DEBUG,timings (s): fetch=0.005 indicators=0.149 signals=0.001 order_and_email=0.000 total=0.169
+2026-04-26 09:23:51,INFO,macro-fvg | direction=BULLISH fvg=[77935.46-77945.77] type=bearish liquidity_target=78065.08 entry=78037.44
+2026-04-26 09:23:51,DEBUG,session filter: outside NY trading hours (09:30–16:00 ET) — no orders or alerts placed.
+2026-04-26 09:23:51,DEBUG,timings (s): fetch=0.005 indicators=0.150 signals=0.001 order_and_email=0.000 total=0.179
+2026-04-26 09:24:51,INFO,macro-fvg | direction=BULLISH fvg=[77935.46-77945.77] type=bearish liquidity_target=78060.56 entry=78033.44
+2026-04-26 09:24:51,DEBUG,session filter: outside NY trading hours (09:30–16:00 ET) — no orders or alerts placed.
+2026-04-26 09:24:51,DEBUG,timings (s): fetch=0.005 indicators=0.165 signals=0.001 order_and_email=0.000 total=0.197
+2026-04-26 09:25:51,INFO,macro-fvg | direction=BULLISH fvg=[77935.46-77945.77] type=bearish liquidity_target=78061.11 entry=78034.55
+2026-04-26 09:25:51,DEBUG,session filter: outside NY trading hours (09:30–16:00 ET) — no orders or alerts placed.
+2026-04-26 09:25:51,DEBUG,timings (s): fetch=0.005 indicators=0.151 signals=0.002 order_and_email=0.000 total=0.178
+2026-04-26 09:26:51,INFO,macro-fvg | direction=BULLISH fvg=[77935.46-77945.77] type=bearish liquidity_target=78043.07 entry=78012.48
+2026-04-26 09:26:51,DEBUG,session filter: outside NY trading hours (09:30–16:00 ET) — no orders or alerts placed.
+2026-04-26 09:26:51,DEBUG,timings (s): fetch=0.009 indicators=0.155 signals=0.001 order_and_email=0.000 total=0.198
+2026-04-26 09:27:51,INFO,macro-fvg | direction=BULLISH fvg=[77935.46-77945.77] type=bearish liquidity_target=78046.73 entry=78019.99
+2026-04-26 09:27:51,DEBUG,session filter: outside NY trading hours (09:30–16:00 ET) — no orders or alerts placed.
+2026-04-26 09:27:51,DEBUG,timings (s): fetch=0.008 indicators=0.149 signals=0.001 order_and_email=0.000 total=0.206
+2026-04-26 09:28:51,INFO,macro-fvg | direction=BULLISH fvg=[77935.46-77945.77] type=bearish liquidity_target=78042.57 entry=78009.34
+2026-04-26 09:28:51,DEBUG,session filter: outside NY trading hours (09:30–16:00 ET) — no orders or alerts placed.
+2026-04-26 09:28:51,DEBUG,timings (s): fetch=0.005 indicators=0.149 signals=0.001 order_and_email=0.000 total=0.233
+2026-04-26 09:29:51,INFO,macro-fvg | direction=BULLISH fvg=[77935.46-77945.77] type=bearish liquidity_target=78043.82 entry=78015.8
+2026-04-26 09:29:51,DEBUG,session filter: outside NY trading hours (09:30–16:00 ET) — no orders or alerts placed.
+2026-04-26 09:29:51,DEBUG,timings (s): fetch=0.005 indicators=0.149 signals=0.001 order_and_email=0.000 total=0.283
+2026-04-26 09:30:51,INFO,macro-fvg | direction=BULLISH fvg=[77935.46-77945.77] type=bearish liquidity_target=78041.11 entry=78006.27
+2026-04-26 09:30:51,DEBUG,session filter: outside NY trading hours (09:30–16:00 ET) — no orders or alerts placed.
+2026-04-26 09:30:51,DEBUG,timings (s): fetch=0.005 indicators=0.149 signals=0.001 order_and_email=0.000 total=0.392
+2026-04-26 09:31:51,INFO,macro-fvg | direction=BULLISH fvg=[77935.46-77945.77] type=bearish liquidity_target=78034.42 entry=77989.72
+2026-04-26 09:31:51,DEBUG,session filter: outside NY trading hours (09:30–16:00 ET) — no orders or alerts placed.
+2026-04-26 09:31:51,DEBUG,timings (s): fetch=0.005 indicators=0.148 signals=0.001 order_and_email=0.000 total=0.590
+2026-04-26 09:32:51,INFO,macro-fvg | direction=BULLISH fvg=[77935.46-77945.77] type=bearish liquidity_target=78024.66 entry=77976.83
+2026-04-26 09:32:51,DEBUG,session filter: outside NY trading hours (09:30–16:00 ET) — no orders or alerts placed.
+2026-04-26 09:32:52,DEBUG,timings (s): fetch=0.008 indicators=0.149 signals=0.001 order_and_email=0.000 total=1.018
+2026-04-26 09:33:51,INFO,macro-fvg | direction=BULLISH fvg=[77935.46-77945.77] type=bearish liquidity_target=78035.93 entry=77994.43
+2026-04-26 09:33:51,DEBUG,session filter: outside NY trading hours (09:30–16:00 ET) — no orders or alerts placed.
+2026-04-26 09:33:53,DEBUG,timings (s): fetch=0.005 indicators=0.149 signals=0.001 order_and_email=0.000 total=1.825
+2026-04-26 09:34:51,INFO,macro-fvg | direction=BULLISH fvg=[77935.46-77945.77] type=bearish liquidity_target=78029.61 entry=77986.32
+2026-04-26 09:34:52,DEBUG,session filter: outside NY trading hours (09:30–16:00 ET) — no orders or alerts placed.
+2026-04-26 09:34:54,DEBUG,timings (s): fetch=0.005 indicators=0.149 signals=0.001 order_and_email=0.000 total=3.493
+2026-04-26 09:35:51,INFO,macro-fvg | direction=BULLISH fvg=[77935.46-77945.77] type=bearish liquidity_target=78024.21 entry=77978.94
+2026-04-26 09:35:52,DEBUG,session filter: outside NY trading hours (09:30–16:00 ET) — no orders or alerts placed.
+2026-04-26 09:35:58,DEBUG,timings (s): fetch=0.008 indicators=0.149 signals=0.001 order_and_email=0.000 total=6.987
+2026-04-26 09:36:51,INFO,macro-fvg | direction=BULLISH fvg=[77935.46-77945.77] type=bearish liquidity_target=78032.52 entry=77990.61
+2026-04-26 09:36:54,DEBUG,session filter: outside NY trading hours (09:30–16:00 ET) — no orders or alerts placed.
+2026-04-26 09:37:04,DEBUG,timings (s): fetch=0.005 indicators=0.149 signals=0.001 order_and_email=0.000 total=13.549
+2026-04-26 09:37:51,INFO,macro-fvg | direction=BULLISH fvg=[77935.46-77945.77] type=bearish liquidity_target=78024.0 entry=77980.14
+2026-04-26 09:37:56,DEBUG,session filter: outside NY trading hours (09:30–16:00 ET) — no orders or alerts placed.
+2026-04-26 09:38:18,DEBUG,timings (s): fetch=0.005 indicators=0.148 signals=0.001 order_and_email=0.000 total=26.803
+2026-04-26 09:38:51,INFO,macro-fvg | direction=BULLISH fvg=[77935.46-77945.77] type=bearish liquidity_target=78038.28 entry=78002.1
+2026-04-26 09:39:02,DEBUG,session filter: outside NY trading hours (09:30–16:00 ET) — no orders or alerts placed.
+2026-04-26 09:39:44,DEBUG,timings (s): fetch=0.005 indicators=0.149 signals=0.001 order_and_email=0.000 total=53.294
+2026-04-26 09:39:51,INFO,macro-fvg | direction=BULLISH fvg=[77935.46-77945.77] type=bearish liquidity_target=78027.86 entry=77986.69
+2026-04-26 09:40:12,DEBUG,session filter: outside NY trading hours (09:30–16:00 ET) — no orders or alerts placed.
+2026-04-26 09:41:37,DEBUG,timings (s): fetch=0.005 indicators=0.150 signals=0.001 order_and_email=0.000 total=105.976
+2026-04-26 09:41:37,INFO,macro-fvg | direction=BULLISH fvg=[77935.46-77945.77] type=bearish liquidity_target=78038.28 entry=78001.59
+2026-04-26 09:42:20,DEBUG,session filter: outside NY trading hours (09:30–16:00 ET) — no orders or alerts placed.
+2026-04-26 09:45:09,DEBUG,timings (s): fetch=0.004 indicators=0.150 signals=0.001 order_and_email=0.000 total=212.546
+2026-04-26 09:45:10,INFO,macro-fvg | direction=BULLISH fvg=[77935.46-77945.77] type=bearish liquidity_target=78029.47 entry=77988.81
+2026-04-26 09:46:37,DEBUG,session filter: outside NY trading hours (09:30–16:00 ET) — no orders or alerts placed.
+2026-04-26 09:52:18,DEBUG,timings (s): fetch=0.005 indicators=0.149 signals=0.001 order_and_email=0.000 total=428.090
+2026-04-26 09:52:18,INFO,macro-fvg | direction=BULLISH fvg=[77935.46-77945.77] type=bearish liquidity_target=78121.25 entry=78090.62
+2026-04-26 09:55:15,DEBUG,session filter: outside NY trading hours (09:30–16:00 ET) — no orders or alerts placed.

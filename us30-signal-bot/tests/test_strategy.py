@@ -513,3 +513,38 @@ def test_is_in_trading_session_uses_current_time_when_now_is_none(monkeypatch):
 	monkeypatch.setattr(_strat, "datetime", datetime)  # restore
 
 	assert result is True
+
+
+# --- Session filter: 24/7 symbol exemption ---
+
+def test_is_in_trading_session_btc_exempt_overnight():
+	"""BTCUSDm should always return True regardless of time."""
+	assert strategy.is_in_trading_session(_ny(2, 0), symbol="BTCUSDm") is True
+
+
+def test_is_in_trading_session_btc_exempt_before_open():
+	assert strategy.is_in_trading_session(_ny(9, 0), symbol="BTCUSDm") is True
+
+
+def test_is_in_trading_session_btc_exempt_after_close():
+	assert strategy.is_in_trading_session(_ny(20, 0), symbol="BTCUSDm") is True
+
+
+def test_is_in_trading_session_eth_exempt():
+	"""ETH (another 24/7 instrument) should also be exempt."""
+	assert strategy.is_in_trading_session(_ny(3, 0), symbol="ETHUSDm") is True
+
+
+def test_is_in_trading_session_us30_not_exempt_outside_hours():
+	"""US30 is an index and must respect the session filter."""
+	assert strategy.is_in_trading_session(_ny(8, 0), symbol="US30") is False
+
+
+def test_is_in_trading_session_us30_passes_during_session():
+	assert strategy.is_in_trading_session(_ny(10, 0), symbol="US30") is True
+
+
+def test_is_in_trading_session_empty_symbol_uses_time_gate():
+	"""No symbol provided → fall through to time-based check."""
+	assert strategy.is_in_trading_session(_ny(2, 0), symbol="") is False
+	assert strategy.is_in_trading_session(_ny(12, 0), symbol="") is True
