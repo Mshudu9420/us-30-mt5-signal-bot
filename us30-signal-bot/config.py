@@ -36,7 +36,7 @@ MACD_SLOW = 26
 MACD_SIGNAL_PERIOD = 9
 
 # Signal/risk parameters
-SL_BUFFER_PIPS = 10
+SL_BUFFER_PIPS = 20
 # Maximum allowed daily loss as a fraction of opening balance.
 # Once this threshold is reached the bot stops placing orders for the rest of the day.
 MAX_DAILY_LOSS_PCT = 0.05  # 5%
