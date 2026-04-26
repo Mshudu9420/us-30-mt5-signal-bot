@@ -17,10 +17,11 @@ def _normalize_recipients(recipients_value):
 
 
 def send_email_alert(signal_dict, risk_dict) -> bool:
-	"""Send a Gmail SMTP alert for high-confidence or medium-confidence signals."""
+	"""Send a Gmail SMTP alert for high-confidence, medium-confidence, or macro-FVG signals."""
 	is_high = signal_dict.get("is_high_confidence", False)
 	is_medium = signal_dict.get("is_medium_confidence", False)
-	if not is_high and not is_medium:
+	is_macro_fvg = signal_dict.get("is_macro_fvg", False)
+	if not is_high and not is_medium and not is_macro_fvg:
 		return False
 
 	if not config.ENABLE_EMAIL_ALERTS:
@@ -47,7 +48,13 @@ def send_email_alert(signal_dict, risk_dict) -> bool:
 	tp = float(risk_dict.get("tp", 0.0))
 	rr_ratio = float(risk_dict.get("rr_ratio", 0.0))
 
-	tier = "HIGH CONFIDENCE" if is_high else "MEDIUM CONFIDENCE"
+	if is_high:
+		tier = "HIGH CONFIDENCE"
+	elif is_medium:
+		tier = "MEDIUM CONFIDENCE"
+	else:
+		tier = "MACRO FVG"
+
 	subject = f"US30 Signal Alert [{tier}] - {direction} ({timeframe})"
 	body = (
 		f"{tier} signal detected.\n\n"
@@ -60,6 +67,15 @@ def send_email_alert(signal_dict, risk_dict) -> bool:
 		f"TP:         {tp:.2f}\n"
 		f"RR:         {rr_ratio:.2f}\n"
 	)
+
+	if is_macro_fvg:
+		fvg_bottom = signal_dict.get("fvg_bottom")
+		fvg_top = signal_dict.get("fvg_top")
+		liquidity_target = signal_dict.get("liquidity_target")
+		if fvg_bottom is not None and fvg_top is not None:
+			body += f"\nFVG Zone:   {fvg_bottom:.2f} – {fvg_top:.2f}\n"
+		if liquidity_target is not None:
+			body += f"Liquidity Target: {liquidity_target:.2f}\n"
 
 	message = f"Subject: {subject}\n\n{body}"
 

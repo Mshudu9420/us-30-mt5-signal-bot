@@ -158,6 +158,7 @@ def polling_loop() -> None:
 
 			# Macro FVG analysis: use the latest M1 bar time as 'now' to stay
 			# timezone-consistent with the fetched data.
+			macro_sig = None
 			if m1_df is not None:
 				_now = __import__("pandas").Timestamp(m1_df.iloc[-1]["time"])
 				macro_sig = get_macro_fvg_signal(m1_df, m1_fvgs, _now)
@@ -260,6 +261,71 @@ def polling_loop() -> None:
 					step_times["order_and_email"] = time.monotonic() - order_start
 					step_times["email_send"] = time.monotonic() - email_start
 					_last_signal_mono = time.monotonic()
+
+			# Macro-FVG auto-trading — independent of the BB+RSI confidence tiers.
+			# SL is placed just beyond the FVG zone (the structural invalidation level).
+			if (
+				macro_sig is not None
+				and is_in_trading_session(symbol=config.SYMBOL)
+				and getattr(config, "ENABLE_MACRO_FVG_TRADES", True)
+			):
+				_mfvg_direction = "BUY" if macro_sig["direction"] == "BULLISH" else "SELL"
+				_mfvg_entry = float(macro_sig["entry_price"])
+				if _mfvg_direction == "BUY":
+					_mfvg_sl = float(macro_sig["fvg_bottom"]) - config.SL_BUFFER_PIPS
+				else:
+					_mfvg_sl = float(macro_sig["fvg_top"]) + config.SL_BUFFER_PIPS
+				_mfvg_tp = float(macro_sig["liquidity_target"])
+				_mfvg_lot = calculate_lot_size(risk_amount, abs(_mfvg_entry - _mfvg_sl), config.DEFAULT_PIP_VALUE)
+				_mfvg_rr = calculate_rr_ratio(_mfvg_entry, _mfvg_sl, _mfvg_tp)
+				_mfvg_alert_sig = dict(macro_sig, is_macro_fvg=True, direction=_mfvg_direction)
+				_mfvg_risk_dict = {"lot_size": _mfvg_lot, "sl": _mfvg_sl, "tp": _mfvg_tp, "rr_ratio": _mfvg_rr}
+
+				_mfvg_order_response = None
+				_mfvg_order_summary = None
+				if _daily_loss_tracker.is_triggered(_capital):
+					_log.warning(
+						f"circuit-breaker: daily loss limit reached — macro-FVG trade skipped "
+						f"(opening={_daily_loss_tracker.opening_balance:.2f} "
+						f"current={_capital:.2f} "
+						f"limit={config.MAX_DAILY_LOSS_PCT * 100:.0f}%)."
+					)
+					_mfvg_order_summary = {"success": False, "error": "DAILY_LOSS_LIMIT_HIT"}
+				elif config.ENABLE_AUTO_TRADES:
+					if config.ENABLE_LIVE_TRADES:
+						if mt5_connector.has_open_position(config.SYMBOL, _mfvg_direction):
+							_log.info(
+								f"macro-fvg trade skipped: open {_mfvg_direction} position "
+								f"already exists for {config.SYMBOL}"
+							)
+							_mfvg_order_summary = {"success": False, "error": "DUPLICATE_POSITION"}
+						else:
+							_mfvg_order_response = mt5_connector.place_market_order(
+								config.SYMBOL,
+								_mfvg_direction,
+								_mfvg_lot,
+								_mfvg_sl,
+								_mfvg_tp,
+								deviation=getattr(config, "ORDER_DEVIATION", None),
+								magic=getattr(config, "ORDER_MAGIC", None),
+							)
+							_mfvg_order_summary = mt5_connector.summarize_order_result(_mfvg_order_response)
+							_log.info(f"macro-fvg auto-trade summary: {_mfvg_order_summary}")
+					else:
+						_mfvg_order_summary = {"success": False, "error": "LIVE_TRADES_DISABLED"}
+						_log.info("macro-fvg trade skipped: live trading disabled (ENABLE_LIVE_TRADES=False)")
+
+				if _mfvg_order_summary is not None:
+					_mfvg_alert_sig["order_summary"] = _mfvg_order_summary
+				if _mfvg_order_response is not None:
+					_mfvg_alert_sig["order_info"] = _mfvg_order_response
+
+				if not step_times.get("order_and_email"):
+					_mfvg_email_start = time.monotonic()
+					send_email_alert(_mfvg_alert_sig, _mfvg_risk_dict)
+					step_times["order_and_email"] = time.monotonic() - order_start
+					step_times["email_send"] = time.monotonic() - _mfvg_email_start
+				_last_signal_mono = time.monotonic()
 
 			# Heartbeat (print latest close/time)
 			if m5_df is not None:

@@ -394,3 +394,107 @@ def test_polling_loop_no_signal_alert_suppressed_when_interval_zero(monkeypatch)
     main.polling_loop()
 
     assert len(no_signal_calls) == 0
+
+
+# ---------------------------------------------------------------------------
+# Macro-FVG auto-trading in polling_loop()
+# ---------------------------------------------------------------------------
+
+def _make_macro_signal():
+    return {
+        "source": "macro_fvg",
+        "direction": "BULLISH",
+        "fvg_top": 77858.36,
+        "fvg_bottom": 77853.49,
+        "fvg_type": "BULLISH",
+        "entry_price": 77953.65,
+        "liquidity_target": 78000.97,
+        "timeframe": "M1",
+    }
+
+
+def test_polling_loop_places_macro_fvg_order_when_enabled(monkeypatch):
+    """When ENABLE_MACRO_FVG_TRADES=True and macro_sig is returned, place_market_order is called."""
+    orders_placed = []
+
+    def fake_get_ohlcv(symbol, tf, n):
+        import mt5_mock
+        mt5_mock.initialize()
+        import mt5_connector
+        return mt5_connector.get_ohlcv(symbol, tf, n)
+
+    def fake_place_market_order(symbol, direction, volume, sl, tp, **kwargs):
+        orders_placed.append({"symbol": symbol, "direction": direction, "sl": sl, "tp": tp})
+        return {"success": True, "retcode": 10009, "result": SimpleNamespace(order=999001, volume=volume, price=77953.65)}
+
+    def fake_summarize(resp):
+        return {"success": True, "retcode": 10009, "order_id": 999001, "volume": resp["result"].volume, "price": resp["result"].price}
+
+    monkeypatch.setattr(main, "get_ohlcv", fake_get_ohlcv)
+    monkeypatch.setattr(main, "get_macro_fvg_signal", lambda df, fvgs, now: _make_macro_signal())
+    monkeypatch.setattr(main.mt5_connector, "place_market_order", fake_place_market_order)
+    monkeypatch.setattr(main.mt5_connector, "summarize_order_result", fake_summarize)
+    monkeypatch.setattr(main.mt5_connector, "has_open_position", lambda sym, d: False)
+    monkeypatch.setattr(main, "is_in_trading_session", lambda **kw: True)
+    monkeypatch.setattr(main, "send_email_alert", lambda sig, risk: None)
+    monkeypatch.setattr(main, "send_no_signal_alert", lambda m: None)
+    monkeypatch.setattr(main, "send_bot_started_alert", lambda *a, **kw: None)
+    monkeypatch.setattr(main.config, "ENABLE_MACRO_FVG_TRADES", True)
+    monkeypatch.setattr(main.config, "ENABLE_AUTO_TRADES", True)
+    monkeypatch.setattr(main.config, "ENABLE_LIVE_TRADES", True)
+    monkeypatch.setattr(main.config, "NO_SIGNAL_ALERT_INTERVAL_SECONDS", 0)
+
+    call_count = [0]
+
+    def one_cycle_sleep(s):
+        call_count[0] += 1
+        if call_count[0] >= 1:
+            raise KeyboardInterrupt
+
+    monkeypatch.setattr(main.time, "sleep", one_cycle_sleep)
+
+    main.polling_loop()
+
+    assert len(orders_placed) == 1
+    assert orders_placed[0]["direction"] == "BUY"
+    assert orders_placed[0]["symbol"] == main.config.SYMBOL
+
+
+def test_polling_loop_skips_macro_fvg_order_when_disabled(monkeypatch):
+    """When ENABLE_MACRO_FVG_TRADES=False, place_market_order is never called for macro-FVG signals."""
+    orders_placed = []
+
+    def fake_get_ohlcv(symbol, tf, n):
+        import mt5_mock
+        mt5_mock.initialize()
+        import mt5_connector
+        return mt5_connector.get_ohlcv(symbol, tf, n)
+
+    def fake_place_market_order(symbol, direction, volume, sl, tp, **kwargs):
+        orders_placed.append(direction)
+        return {"success": True, "retcode": 10009, "result": SimpleNamespace(order=1, volume=volume, price=77953.65)}
+
+    monkeypatch.setattr(main, "get_ohlcv", fake_get_ohlcv)
+    monkeypatch.setattr(main, "get_macro_fvg_signal", lambda df, fvgs, now: _make_macro_signal())
+    monkeypatch.setattr(main.mt5_connector, "place_market_order", fake_place_market_order)
+    monkeypatch.setattr(main, "is_in_trading_session", lambda **kw: True)
+    monkeypatch.setattr(main, "send_email_alert", lambda sig, risk: None)
+    monkeypatch.setattr(main, "send_no_signal_alert", lambda m: None)
+    monkeypatch.setattr(main, "send_bot_started_alert", lambda *a, **kw: None)
+    monkeypatch.setattr(main.config, "ENABLE_MACRO_FVG_TRADES", False)
+    monkeypatch.setattr(main.config, "ENABLE_AUTO_TRADES", True)
+    monkeypatch.setattr(main.config, "ENABLE_LIVE_TRADES", True)
+    monkeypatch.setattr(main.config, "NO_SIGNAL_ALERT_INTERVAL_SECONDS", 0)
+
+    call_count = [0]
+
+    def one_cycle_sleep(s):
+        call_count[0] += 1
+        if call_count[0] >= 1:
+            raise KeyboardInterrupt
+
+    monkeypatch.setattr(main.time, "sleep", one_cycle_sleep)
+
+    main.polling_loop()
+
+    assert len(orders_placed) == 0

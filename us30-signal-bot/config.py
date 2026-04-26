@@ -89,6 +89,11 @@ ORDER_MAGIC = 20260423
 # enable automated behavior in testing without opening live trading.
 ENABLE_LIVE_TRADES = True
 
+# Enable automatic order placement when a Macro FVG signal is detected.
+# Respects ENABLE_AUTO_TRADES, ENABLE_LIVE_TRADES, daily loss circuit breaker,
+# and the duplicate position gate. Set to False to log signals only.
+ENABLE_MACRO_FVG_TRADES = True
+
 # No-signal heartbeat alert.
 # Send an email if no buy/sell signal fires within this many seconds.
 # Set to 0 to disable.
