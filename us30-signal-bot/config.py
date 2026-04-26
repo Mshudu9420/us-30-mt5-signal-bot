@@ -55,7 +55,7 @@ MT5_RECONNECT_BACKOFF_BASE = 10  # seconds
 
 # Alerts
 ENABLE_EMAIL_ALERTS = True
-EMAIL_RECIPIENT = "mmathidi01@gmail.com", "mementorelo@gmail.com"
+EMAIL_RECIPIENT =  "mementorelo@gmail.com"
 
 # Timezone for timestamp display and logging. Default: South African Standard Time (SAST).
 # Use a tz database name recognized by pandas (e.g. 'Africa/Johannesburg').
