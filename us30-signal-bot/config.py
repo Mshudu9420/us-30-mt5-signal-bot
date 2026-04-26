@@ -94,11 +94,6 @@ ENABLE_LIVE_TRADES = True
 # and the open-trade cap. Set to False to log signals only.
 ENABLE_MACRO_FVG_TRADES = True
 
-# Maximum number of simultaneously open positions per symbol.
-# The bot will not place a new order while this many (or more) positions are open.
-# Once existing trades close (TP or SL hit), new orders may be placed again.
-# Each open trade risks RISK_PERCENTS[RISK_MODE] of the current account balance (5% by default).
-MAX_OPEN_TRADES = 5
 
 # No-signal heartbeat alert.
 # Send an email if no buy/sell signal fires within this many seconds.

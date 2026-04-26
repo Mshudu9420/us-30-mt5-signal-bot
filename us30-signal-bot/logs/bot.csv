@@ -920,3 +920,191 @@ timestamp,level,message
 2026-04-26 16:33:34,INFO,macro-fvg trade skipped: open BUY position already exists for BTCUSDm
 2026-04-26 16:33:38,DEBUG,timings (s): fetch=0.010 indicators=0.170 signals=0.003 order_and_email=3.779 total=5.072
 2026-04-26 16:34:33,INFO,macro-fvg | direction=BULLISH fvg=[77949.4-77951.43] type=bearish liquidity_target=78100.16 entry=78068.07
+2026-04-26 16:34:34,ERROR,Startup aborted: MT5 connection failed.
+2026-04-26 16:34:34,INFO,macro-fvg trade skipped: open BUY position already exists for BTCUSDm
+2026-04-26 16:34:38,ERROR,Startup aborted: account info unavailable.
+2026-04-26 16:34:40,DEBUG,timings (s): fetch=0.012 indicators=0.164 signals=0.002 order_and_email=4.386 total=6.448
+2026-04-26 16:34:41,DEBUG,timings (s): fetch=0.015 indicators=0.153 signals=0.002 order_and_email=0.000 total=0.170
+2026-04-26 16:34:41,ERROR,Unexpected error in polling loop: 
+2026-04-26 16:34:42,DEBUG,timings (s): fetch=0.003 indicators=0.241 signals=0.001 order_and_email=0.000 total=0.245
+2026-04-26 16:34:42,ERROR,Unexpected error in polling loop: 
+2026-04-26 16:34:42,DEBUG,timings (s): fetch=0.004 indicators=0.155 signals=0.000 order_and_email=0.000 total=0.159
+2026-04-26 16:34:42,ERROR,Unexpected error in polling loop: 
+2026-04-26 16:34:42,INFO,"auto-trade summary: {'success': False, 'error': 'symbol tick info unavailable for BTCUSDm'}"
+2026-04-26 16:34:42,DEBUG,timings (s): fetch=0.003 indicators=0.153 signals=0.000 order_and_email=0.001 total=0.157
+2026-04-26 16:34:42,ERROR,Unexpected error in polling loop: 
+2026-04-26 16:34:42,DEBUG,timings (s): fetch=0.003 indicators=0.149 signals=0.000 order_and_email=0.000 total=0.153
+2026-04-26 16:34:42,ERROR,Unexpected error in polling loop: 
+2026-04-26 16:34:42,DEBUG,timings (s): fetch=0.003 indicators=0.151 signals=0.000 order_and_email=0.000 total=0.154
+2026-04-26 16:34:42,INFO,Bot stopped by user.
+2026-04-26 16:34:42,WARNING,All OHLCV fetches returned None — MT5 connection may have dropped. Attempting reconnect…
+2026-04-26 16:34:42,INFO,MT5 reconnect successful. Resuming polling.
+2026-04-26 16:34:43,DEBUG,timings (s): fetch=0.003 indicators=0.151 signals=0.000 order_and_email=0.000 total=0.154
+2026-04-26 16:34:43,ERROR,Unexpected error in polling loop: 
+2026-04-26 16:34:43,WARNING,All OHLCV fetches returned None — MT5 connection may have dropped. Attempting reconnect…
+2026-04-26 16:34:43,ERROR,MT5 reconnect failed after all attempts. Stopping bot.
+2026-04-26 16:34:46,WARNING,All OHLCV fetches returned None — MT5 connection may have dropped. Attempting reconnect…
+2026-04-26 16:34:46,INFO,MT5 reconnect successful. Resuming polling.
+2026-04-26 16:34:46,INFO,macro-fvg | direction=BULLISH fvg=[77949.4-77951.43] type=bearish liquidity_target=78094.54 entry=78058.92
+2026-04-26 16:34:46,DEBUG,session filter: outside NY trading hours (09:30–16:00 ET) — no orders or alerts placed.
+2026-04-26 16:34:46,INFO,no-signal alert: 0m since last signal — sending heartbeat email.
+2026-04-26 16:34:46,DEBUG,timings (s): fetch=0.017 indicators=0.161 signals=0.002 order_and_email=0.000 total=0.185
+2026-04-26 16:34:46,INFO,Bot stopped by user.
+2026-04-26 16:34:46,WARNING,All OHLCV fetches returned None — MT5 connection may have dropped. Attempting reconnect…
+2026-04-26 16:34:46,INFO,MT5 reconnect successful. Resuming polling.
+2026-04-26 16:34:46,INFO,macro-fvg | direction=BULLISH fvg=[77949.4-77951.43] type=bearish liquidity_target=78094.54 entry=78058.92
+2026-04-26 16:34:46,DEBUG,session filter: outside NY trading hours (09:30–16:00 ET) — no orders or alerts placed.
+2026-04-26 16:34:46,DEBUG,timings (s): fetch=0.005 indicators=0.157 signals=0.002 order_and_email=0.000 total=0.169
+2026-04-26 16:34:46,INFO,Bot stopped by user.
+2026-04-26 16:34:46,WARNING,All OHLCV fetches returned None — MT5 connection may have dropped. Attempting reconnect…
+2026-04-26 16:34:46,INFO,MT5 reconnect successful. Resuming polling.
+2026-04-26 16:34:46,INFO,macro-fvg | direction=BULLISH fvg=[77853.49-77858.36] type=BULLISH liquidity_target=78000.97 entry=77953.65
+2026-04-26 16:34:46,INFO,"macro-fvg auto-trade summary: {'success': True, 'retcode': 10009, 'order_id': 999001, 'volume': 0.08, 'price': 77953.65}"
+2026-04-26 16:34:46,DEBUG,timings (s): fetch=0.005 indicators=0.162 signals=0.001 order_and_email=0.000 total=0.169
+2026-04-26 16:34:46,INFO,Bot stopped by user.
+2026-04-26 16:34:46,WARNING,All OHLCV fetches returned None — MT5 connection may have dropped. Attempting reconnect…
+2026-04-26 16:34:46,INFO,MT5 reconnect successful. Resuming polling.
+2026-04-26 16:34:47,INFO,macro-fvg | direction=BULLISH fvg=[77853.49-77858.36] type=BULLISH liquidity_target=78000.97 entry=77953.65
+2026-04-26 16:34:47,DEBUG,timings (s): fetch=0.005 indicators=0.157 signals=0.002 order_and_email=0.000 total=0.164
+2026-04-26 16:34:47,INFO,Bot stopped by user.
+2026-04-26 16:34:47,WARNING,All OHLCV fetches returned None — MT5 connection may have dropped. Attempting reconnect…
+2026-04-26 16:34:47,INFO,MT5 reconnect successful. Resuming polling.
+2026-04-26 16:34:47,INFO,macro-fvg | direction=BULLISH fvg=[77853.49-77858.36] type=BULLISH liquidity_target=78000.97 entry=77953.65
+2026-04-26 16:34:47,INFO,macro-fvg trade skipped: max open trades reached (5/5) for BTCUSDm
+2026-04-26 16:34:47,DEBUG,timings (s): fetch=0.005 indicators=0.158 signals=0.002 order_and_email=0.000 total=0.165
+2026-04-26 16:34:47,INFO,Bot stopped by user.
+2026-04-26 16:34:47,WARNING,All OHLCV fetches returned None — MT5 connection may have dropped. Attempting reconnect…
+2026-04-26 16:34:47,INFO,MT5 reconnect successful. Resuming polling.
+2026-04-26 16:34:47,INFO,macro-fvg | direction=BULLISH fvg=[77853.49-77858.36] type=BULLISH liquidity_target=78000.97 entry=77953.65
+2026-04-26 16:34:47,INFO,"macro-fvg auto-trade summary: {'success': True, 'retcode': 10009, 'order_id': 2, 'volume': 0.08, 'price': 77953.65}"
+2026-04-26 16:34:47,DEBUG,timings (s): fetch=0.005 indicators=0.161 signals=0.001 order_and_email=0.000 total=0.168
+2026-04-26 16:34:47,INFO,Bot stopped by user.
+2026-04-26 16:36:19,INFO,macro-fvg | direction=BULLISH fvg=[77949.4-77951.43] type=bearish liquidity_target=78098.79 entry=78064.19
+2026-04-26 16:36:19,INFO,"macro-fvg auto-trade summary: {'success': True, 'retcode': 10027, 'order_id': 0}"
+2026-04-26 16:36:23,DEBUG,timings (s): fetch=0.017 indicators=0.155 signals=0.001 order_and_email=3.716 total=3.903
+2026-04-26 16:37:19,INFO,macro-fvg | direction=BULLISH fvg=[77949.4-77951.43] type=bearish liquidity_target=78095.46 entry=78060.75
+2026-04-26 16:37:19,INFO,"macro-fvg auto-trade summary: {'success': True, 'retcode': 10027, 'order_id': 0}"
+2026-04-26 16:37:23,DEBUG,timings (s): fetch=0.005 indicators=0.151 signals=0.001 order_and_email=3.804 total=3.973
+2026-04-26 16:38:19,INFO,macro-fvg | direction=BULLISH fvg=[77949.4-77951.43] type=bearish liquidity_target=78112.7 entry=78084.16
+2026-04-26 16:38:19,INFO,"macro-fvg auto-trade summary: {'success': True, 'retcode': 10027, 'order_id': 0}"
+2026-04-26 16:38:24,DEBUG,timings (s): fetch=0.005 indicators=0.153 signals=0.001 order_and_email=4.942 total=5.121
+2026-04-26 16:39:19,INFO,macro-fvg | direction=BULLISH fvg=[77949.4-77951.43] type=bearish liquidity_target=78112.2 entry=78083.65
+2026-04-26 16:39:19,INFO,macro-fvg trade skipped: max open trades reached (5/5) for BTCUSDm
+2026-04-26 16:39:29,DEBUG,timings (s): fetch=0.005 indicators=0.154 signals=0.001 order_and_email=9.686 total=9.865
+2026-04-26 16:40:19,INFO,macro-fvg | direction=BULLISH fvg=[77949.4-77951.43] type=bearish liquidity_target=78120.18 entry=78093.15
+2026-04-26 16:40:19,INFO,macro-fvg trade skipped: max open trades reached (5/5) for BTCUSDm
+2026-04-26 16:40:23,DEBUG,timings (s): fetch=0.005 indicators=0.151 signals=0.001 order_and_email=3.271 total=3.440
+2026-04-26 16:41:19,INFO,macro-fvg | direction=BULLISH fvg=[77949.4-77951.43] type=bearish liquidity_target=78130.62 entry=78104.46
+2026-04-26 16:41:19,INFO,macro-fvg trade skipped: max open trades reached (5/5) for BTCUSDm
+2026-04-26 16:41:23,DEBUG,timings (s): fetch=0.005 indicators=0.151 signals=0.001 order_and_email=4.023 total=4.195
+2026-04-26 16:42:19,INFO,macro-fvg | direction=BULLISH fvg=[77949.4-77951.43] type=bearish liquidity_target=78133.04 entry=78105.39
+2026-04-26 16:42:19,INFO,macro-fvg trade skipped: max open trades reached (5/5) for BTCUSDm
+2026-04-26 16:42:23,DEBUG,timings (s): fetch=0.006 indicators=0.154 signals=0.001 order_and_email=4.102 total=4.286
+2026-04-26 16:43:19,INFO,macro-fvg | direction=BULLISH fvg=[77949.4-77951.43] type=bearish liquidity_target=78100.15 entry=78066.12
+2026-04-26 16:43:19,INFO,macro-fvg trade skipped: max open trades reached (5/5) for BTCUSDm
+2026-04-26 16:43:23,DEBUG,timings (s): fetch=0.005 indicators=0.153 signals=0.001 order_and_email=3.668 total=3.865
+2026-04-26 16:44:19,INFO,macro-fvg | direction=BULLISH fvg=[77949.4-77951.43] type=bearish liquidity_target=78098.81 entry=78063.42
+2026-04-26 16:44:19,INFO,"macro-fvg auto-trade summary: {'success': True, 'retcode': 10027, 'order_id': 0}"
+2026-04-26 16:44:27,DEBUG,timings (s): fetch=0.005 indicators=0.151 signals=0.001 order_and_email=8.025 total=8.245
+2026-04-26 16:44:34,INFO,Bot stopped by user.
+2026-04-26 16:44:42,INFO,macro-fvg | direction=BULLISH fvg=[77949.4-77951.43] type=bearish liquidity_target=78099.32 entry=78065.48
+2026-04-26 16:44:42,INFO,"macro-fvg auto-trade summary: {'success': True, 'retcode': 10027, 'order_id': 0}"
+2026-04-26 16:44:47,DEBUG,timings (s): fetch=0.019 indicators=0.162 signals=0.002 order_and_email=4.911 total=5.103
+2026-04-26 16:45:42,INFO,macro-fvg | direction=BULLISH fvg=[77949.4-77951.43] type=bearish liquidity_target=78089.48 entry=78046.76
+2026-04-26 16:45:42,INFO,"macro-fvg auto-trade summary: {'success': True, 'retcode': 10027, 'order_id': 0}"
+2026-04-26 16:45:45,DEBUG,timings (s): fetch=0.005 indicators=0.153 signals=0.001 order_and_email=3.264 total=3.433
+2026-04-26 16:46:42,INFO,macro-fvg | direction=BULLISH fvg=[77949.4-77951.43] type=bearish liquidity_target=78041.71 entry=78004.43
+2026-04-26 16:46:42,INFO,"macro-fvg auto-trade summary: {'success': True, 'retcode': 10027, 'order_id': 0}"
+2026-04-26 16:46:45,DEBUG,timings (s): fetch=0.006 indicators=0.162 signals=0.002 order_and_email=3.434 total=3.613
+2026-04-26 16:47:42,INFO,macro-fvg | direction=BULLISH fvg=[77949.4-77951.43] type=bearish liquidity_target=78080.97 entry=78038.37
+2026-04-26 16:47:42,INFO,"macro-fvg auto-trade summary: {'success': True, 'retcode': 10027, 'order_id': 0}"
+2026-04-26 16:47:45,DEBUG,timings (s): fetch=0.005 indicators=0.154 signals=0.001 order_and_email=3.434 total=3.604
+2026-04-26 16:48:42,INFO,macro-fvg | direction=BULLISH fvg=[77949.4-77951.43] type=bearish liquidity_target=78072.06 entry=78028.85
+2026-04-26 16:48:42,INFO,"macro-fvg auto-trade summary: {'success': True, 'retcode': 10027, 'order_id': 0}"
+2026-04-26 16:48:45,DEBUG,timings (s): fetch=0.005 indicators=0.155 signals=0.001 order_and_email=3.197 total=3.371
+2026-04-26 16:49:42,INFO,macro-fvg | direction=BULLISH fvg=[77949.4-77951.43] type=bearish liquidity_target=78066.15 entry=78022.01
+2026-04-26 16:49:42,INFO,"macro-fvg auto-trade summary: {'success': True, 'retcode': 10027, 'order_id': 0}"
+2026-04-26 16:49:45,DEBUG,timings (s): fetch=0.005 indicators=0.154 signals=0.001 order_and_email=3.352 total=3.527
+2026-04-26 16:50:42,INFO,macro-fvg | direction=BULLISH fvg=[77949.4-77951.43] type=bearish liquidity_target=78141.25 entry=78123.01
+2026-04-26 16:50:42,INFO,"macro-fvg auto-trade summary: {'success': True, 'retcode': 10027, 'order_id': 0}"
+2026-04-26 16:50:45,DEBUG,timings (s): fetch=0.005 indicators=0.155 signals=0.002 order_and_email=3.170 total=3.355
+2026-04-26 16:51:42,INFO,macro-fvg | direction=BULLISH fvg=[77949.4-77951.43] type=bearish liquidity_target=78140.95 entry=78117.34
+2026-04-26 16:51:42,INFO,"macro-fvg auto-trade summary: {'success': True, 'retcode': 10027, 'order_id': 0}"
+2026-04-26 16:51:45,DEBUG,timings (s): fetch=0.005 indicators=0.154 signals=0.001 order_and_email=3.262 total=3.476
+2026-04-26 16:52:42,INFO,macro-fvg | direction=BULLISH fvg=[77949.4-77951.43] type=bearish liquidity_target=78168.21 entry=78152.79
+2026-04-26 16:52:42,INFO,"macro-fvg auto-trade summary: {'success': True, 'retcode': 10027, 'order_id': 0}"
+2026-04-26 16:52:49,DEBUG,timings (s): fetch=0.005 indicators=0.154 signals=0.001 order_and_email=7.534 total=7.773
+2026-04-26 16:53:42,INFO,macro-fvg | direction=BULLISH fvg=[77949.4-77951.43] type=bearish liquidity_target=78150.45 entry=78131.12
+2026-04-26 16:53:42,INFO,"macro-fvg auto-trade summary: {'success': True, 'retcode': 10027, 'order_id': 0}"
+2026-04-26 16:53:48,DEBUG,timings (s): fetch=0.005 indicators=0.154 signals=0.001 order_and_email=5.652 total=5.948
+2026-04-26 16:54:42,INFO,macro-fvg | direction=BULLISH fvg=[77949.4-77951.43] type=bearish liquidity_target=78170.98 entry=78157.88
+2026-04-26 16:54:42,INFO,"macro-fvg auto-trade summary: {'success': True, 'retcode': 10027, 'order_id': 0}"
+2026-04-26 16:54:46,DEBUG,timings (s): fetch=0.005 indicators=0.154 signals=0.002 order_and_email=3.848 total=4.247
+2026-04-26 16:55:42,INFO,macro-fvg | direction=BULLISH fvg=[77949.4-77951.43] type=bearish liquidity_target=78155.24 entry=78137.86
+2026-04-26 16:55:42,INFO,"macro-fvg auto-trade summary: {'success': True, 'retcode': 10027, 'order_id': 0}"
+2026-04-26 16:55:47,DEBUG,timings (s): fetch=0.005 indicators=0.153 signals=0.001 order_and_email=5.238 total=5.864
+2026-04-26 16:56:42,INFO,macro-fvg | direction=BULLISH fvg=[77949.4-77951.43] type=bearish liquidity_target=78151.99 entry=78135.09
+2026-04-26 16:56:42,INFO,"macro-fvg auto-trade summary: {'success': True, 'retcode': 10027, 'order_id': 0}"
+2026-04-26 16:56:46,DEBUG,timings (s): fetch=0.005 indicators=0.158 signals=0.002 order_and_email=3.433 total=4.478
+2026-04-26 16:57:42,INFO,macro-fvg | direction=BULLISH fvg=[77949.4-77951.43] type=bearish liquidity_target=78138.99 entry=78109.26
+2026-04-26 16:57:42,INFO,"macro-fvg auto-trade summary: {'success': True, 'retcode': 10027, 'order_id': 0}"
+2026-04-26 16:57:47,DEBUG,timings (s): fetch=0.005 indicators=0.153 signals=0.001 order_and_email=3.753 total=5.630
+2026-04-26 16:58:42,INFO,macro-fvg | direction=BULLISH fvg=[77949.4-77951.43] type=bearish liquidity_target=78125.67 entry=78095.74
+2026-04-26 16:58:42,INFO,"macro-fvg auto-trade summary: {'success': True, 'retcode': 10027, 'order_id': 0}"
+2026-04-26 16:58:49,DEBUG,timings (s): fetch=0.005 indicators=0.154 signals=0.001 order_and_email=4.062 total=7.616
+2026-04-26 16:59:42,INFO,macro-fvg | direction=BULLISH fvg=[77949.4-77951.43] type=bearish liquidity_target=78125.9 entry=78096.1
+2026-04-26 16:59:43,INFO,"macro-fvg auto-trade summary: {'success': True, 'retcode': 10027, 'order_id': 0}"
+2026-04-26 16:59:55,DEBUG,timings (s): fetch=0.005 indicators=0.153 signals=0.001 order_and_email=6.658 total=13.595
+2026-04-26 17:00:42,INFO,macro-fvg | direction=BULLISH fvg=[77949.4-77951.43] type=bearish liquidity_target=78144.55 entry=78123.44
+2026-04-26 17:00:44,INFO,"macro-fvg auto-trade summary: {'success': True, 'retcode': 10027, 'order_id': 0}"
+2026-04-26 17:01:07,DEBUG,timings (s): fetch=0.005 indicators=0.153 signals=0.001 order_and_email=12.049 total=25.723
+2026-04-26 17:01:42,INFO,macro-fvg | direction=BULLISH fvg=[77949.4-77951.43] type=bearish liquidity_target=78135.55 entry=78106.8
+2026-04-26 17:01:47,INFO,"macro-fvg auto-trade summary: {'success': True, 'retcode': 10027, 'order_id': 0}"
+2026-04-26 17:02:18,DEBUG,timings (s): fetch=0.005 indicators=0.154 signals=0.001 order_and_email=8.731 total=36.001
+2026-04-26 17:02:42,INFO,macro-fvg | direction=BULLISH fvg=[77949.4-77951.43] type=bearish liquidity_target=78143.54 entry=78123.95
+2026-04-26 17:02:53,INFO,"macro-fvg auto-trade summary: {'success': True, 'retcode': 10027, 'order_id': 0}"
+2026-04-26 17:18:29,ERROR,Startup aborted: MT5 connection failed.
+2026-04-26 17:18:34,ERROR,Startup aborted: account info unavailable.
+2026-04-26 17:18:41,DEBUG,timings (s): fetch=0.020 indicators=0.152 signals=0.001 order_and_email=0.000 total=0.179
+2026-04-26 17:18:41,ERROR,Unexpected error in polling loop: 
+2026-04-26 17:18:41,DEBUG,timings (s): fetch=0.003 indicators=0.152 signals=0.000 order_and_email=0.000 total=0.156
+2026-04-26 17:18:41,ERROR,Unexpected error in polling loop: 
+2026-04-26 17:18:41,DEBUG,timings (s): fetch=0.003 indicators=0.158 signals=0.000 order_and_email=0.000 total=0.161
+2026-04-26 17:18:41,ERROR,Unexpected error in polling loop: 
+2026-04-26 17:18:41,INFO,"auto-trade summary: {'success': False, 'error': 'symbol tick info unavailable for BTCUSDm'}"
+2026-04-26 17:18:41,DEBUG,timings (s): fetch=0.003 indicators=0.152 signals=0.001 order_and_email=0.006 total=0.162
+2026-04-26 17:18:41,ERROR,Unexpected error in polling loop: 
+2026-04-26 17:18:41,DEBUG,timings (s): fetch=0.004 indicators=0.151 signals=0.000 order_and_email=0.000 total=0.156
+2026-04-26 17:18:41,ERROR,Unexpected error in polling loop: 
+2026-04-26 17:18:41,DEBUG,timings (s): fetch=0.003 indicators=0.156 signals=0.000 order_and_email=0.000 total=0.159
+2026-04-26 17:18:41,INFO,Bot stopped by user.
+2026-04-26 17:18:41,WARNING,All OHLCV fetches returned None — MT5 connection may have dropped. Attempting reconnect…
+2026-04-26 17:18:41,INFO,MT5 reconnect successful. Resuming polling.
+2026-04-26 17:18:42,DEBUG,timings (s): fetch=0.003 indicators=0.153 signals=0.000 order_and_email=0.000 total=0.156
+2026-04-26 17:18:42,ERROR,Unexpected error in polling loop: 
+2026-04-26 17:18:42,WARNING,All OHLCV fetches returned None — MT5 connection may have dropped. Attempting reconnect…
+2026-04-26 17:18:42,ERROR,MT5 reconnect failed after all attempts. Stopping bot.
+2026-04-26 17:18:45,WARNING,All OHLCV fetches returned None — MT5 connection may have dropped. Attempting reconnect…
+2026-04-26 17:18:45,INFO,MT5 reconnect successful. Resuming polling.
+2026-04-26 17:18:46,INFO,macro-fvg | direction=BULLISH fvg=[78038.63-78117.34] type=bullish liquidity_target=78152.46 entry=78136.12
+2026-04-26 17:18:46,DEBUG,session filter: outside NY trading hours (09:30–16:00 ET) — no orders or alerts placed.
+2026-04-26 17:18:46,INFO,no-signal alert: 0m since last signal — sending heartbeat email.
+2026-04-26 17:18:46,DEBUG,timings (s): fetch=0.017 indicators=0.161 signals=0.002 order_and_email=0.000 total=0.200
+2026-04-26 17:18:46,INFO,Bot stopped by user.
+2026-04-26 17:18:46,WARNING,All OHLCV fetches returned None — MT5 connection may have dropped. Attempting reconnect…
+2026-04-26 17:18:46,INFO,MT5 reconnect successful. Resuming polling.
+2026-04-26 17:18:46,INFO,macro-fvg | direction=BULLISH fvg=[78038.63-78117.34] type=bullish liquidity_target=78152.46 entry=78136.12
+2026-04-26 17:18:46,DEBUG,session filter: outside NY trading hours (09:30–16:00 ET) — no orders or alerts placed.
+2026-04-26 17:18:46,DEBUG,timings (s): fetch=0.005 indicators=0.157 signals=0.001 order_and_email=0.000 total=0.170
+2026-04-26 17:18:46,INFO,Bot stopped by user.
+2026-04-26 17:18:46,WARNING,All OHLCV fetches returned None — MT5 connection may have dropped. Attempting reconnect…
+2026-04-26 17:18:46,INFO,MT5 reconnect successful. Resuming polling.
+2026-04-26 17:18:46,INFO,macro-fvg | direction=BULLISH fvg=[77853.49-77858.36] type=BULLISH liquidity_target=78000.97 entry=77953.65
+2026-04-26 17:18:46,INFO,"macro-fvg auto-trade summary: {'success': True, 'retcode': 10009, 'order_id': 999001, 'volume': 0.08, 'price': 77953.65}"
+2026-04-26 17:18:46,DEBUG,timings (s): fetch=0.006 indicators=0.163 signals=0.002 order_and_email=0.000 total=0.172
+2026-04-26 17:18:46,INFO,Bot stopped by user.
+2026-04-26 17:18:46,WARNING,All OHLCV fetches returned None — MT5 connection may have dropped. Attempting reconnect…
+2026-04-26 17:18:46,INFO,MT5 reconnect successful. Resuming polling.
+2026-04-26 17:18:46,INFO,macro-fvg | direction=BULLISH fvg=[77853.49-77858.36] type=BULLISH liquidity_target=78000.97 entry=77953.65
+2026-04-26 17:18:46,DEBUG,timings (s): fetch=0.005 indicators=0.158 signals=0.001 order_and_email=0.000 total=0.165
+2026-04-26 17:18:46,INFO,Bot stopped by user.
