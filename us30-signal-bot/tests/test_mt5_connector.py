@@ -1,3 +1,5 @@
+import types
+
 import pandas as pd
 import mt5_mock
 import mt5_connector
@@ -401,3 +403,288 @@ def test_reconnect_returns_false_when_all_attempts_exhausted(monkeypatch, capsys
 	assert result is False
 	output = capsys.readouterr().out
 	assert "exhausted" in output.lower() or "failed" in output.lower()
+
+
+# ---------------------------------------------------------------------------
+# place_market_order()
+# ---------------------------------------------------------------------------
+
+def _make_order_mt5(*, fail_tick=False, raise_on_send=False, include_filling=True):
+	"""Return a minimal MT5 stub suitable for place_market_order tests."""
+
+	class FakeTick:
+		ask = 78500.0
+		bid = 78490.0
+
+	class _MT5:
+		ORDER_TYPE_BUY = 0
+		ORDER_TYPE_SELL = 1
+		TRADE_ACTION_DEAL = 1
+		if include_filling:
+			ORDER_TIME_GTC = 1
+			ORDER_FILLING_FOK = 3
+
+		@staticmethod
+		def symbol_info_tick(symbol):
+			return None if fail_tick else FakeTick()
+
+		@staticmethod
+		def order_send(request):
+			if raise_on_send:
+				raise RuntimeError("MT5 terminal disconnected")
+			return types.SimpleNamespace(retcode=10009, order=123456)
+
+	return _MT5
+
+
+def test_place_market_order_returns_failure_when_no_order_send(monkeypatch):
+	"""Returns failure dict when mt5 has no order_send attribute."""
+
+	class NoOrderSendMT5:
+		pass  # no order_send
+
+	monkeypatch.setattr(mt5_connector, "mt5", NoOrderSendMT5)
+
+	result = mt5_connector.place_market_order("BTCUSDm", "BUY", 0.01)
+
+	assert result["success"] is False
+	assert "order_send" in result["error"]
+
+
+def test_place_market_order_returns_failure_when_tick_unavailable(monkeypatch):
+	"""Returns failure dict when symbol_info_tick returns None."""
+	monkeypatch.setattr(mt5_connector, "mt5", _make_order_mt5(fail_tick=True))
+
+	result = mt5_connector.place_market_order("BTCUSDm", "BUY", 0.01)
+
+	assert result["success"] is False
+	assert "tick info unavailable" in result["error"]
+	assert "BTCUSDm" in result["error"]
+
+
+def test_place_market_order_buy_uses_ask_price(monkeypatch):
+	"""BUY order puts tick.ask into the request and sets ORDER_TYPE_BUY."""
+	requests_sent = []
+	_MT5 = _make_order_mt5()
+	_orig_send = _MT5.order_send
+
+	@staticmethod
+	def capturing_send(request):
+		requests_sent.append(request)
+		return _orig_send.__func__(request)  # type: ignore[attr-defined]
+
+	_MT5.order_send = capturing_send
+	monkeypatch.setattr(mt5_connector, "mt5", _MT5)
+
+	result = mt5_connector.place_market_order(
+		"BTCUSDm", "BUY", 0.01, sl=78400.0, tp=78600.0
+	)
+
+	assert result["success"] is True
+	req = requests_sent[0]
+	assert req["price"] == 78500.0
+	assert req["type"] == 0  # ORDER_TYPE_BUY
+	assert req["volume"] == 0.01
+	assert req["sl"] == 78400.0
+	assert req["tp"] == 78600.0
+	assert req["comment"] == "us30-signal-bot"
+
+
+def test_place_market_order_sell_uses_bid_price(monkeypatch):
+	"""SELL order puts tick.bid into the request and sets ORDER_TYPE_SELL."""
+	requests_sent = []
+	_MT5 = _make_order_mt5()
+	_orig_send = _MT5.order_send
+
+	@staticmethod
+	def capturing_send(request):
+		requests_sent.append(request)
+		return _orig_send.__func__(request)  # type: ignore[attr-defined]
+
+	_MT5.order_send = capturing_send
+	monkeypatch.setattr(mt5_connector, "mt5", _MT5)
+
+	result = mt5_connector.place_market_order("BTCUSDm", "SELL", 0.05)
+
+	assert result["success"] is True
+	req = requests_sent[0]
+	assert req["price"] == 78490.0
+	assert req["type"] == 1  # ORDER_TYPE_SELL
+	assert req["volume"] == 0.05
+
+
+def test_place_market_order_sl_tp_default_to_zero_when_omitted(monkeypatch):
+	"""sl and tp are 0.0 in the request when not provided."""
+	requests_sent = []
+	_MT5 = _make_order_mt5()
+	_orig_send = _MT5.order_send
+
+	@staticmethod
+	def capturing_send(request):
+		requests_sent.append(request)
+		return _orig_send.__func__(request)  # type: ignore[attr-defined]
+
+	_MT5.order_send = capturing_send
+	monkeypatch.setattr(mt5_connector, "mt5", _MT5)
+
+	mt5_connector.place_market_order("BTCUSDm", "BUY", 0.01)
+
+	assert requests_sent[0]["sl"] == 0.0
+	assert requests_sent[0]["tp"] == 0.0
+
+
+def test_place_market_order_uses_config_defaults_for_deviation_and_magic(monkeypatch):
+	"""ORDER_DEVIATION and ORDER_MAGIC from config flow into the request."""
+	requests_sent = []
+	_MT5 = _make_order_mt5()
+	_orig_send = _MT5.order_send
+
+	@staticmethod
+	def capturing_send(request):
+		requests_sent.append(request)
+		return _orig_send.__func__(request)  # type: ignore[attr-defined]
+
+	_MT5.order_send = capturing_send
+	monkeypatch.setattr(mt5_connector, "mt5", _MT5)
+	monkeypatch.setattr(mt5_connector.config, "ORDER_DEVIATION", 15)
+	monkeypatch.setattr(mt5_connector.config, "ORDER_MAGIC", 42)
+
+	mt5_connector.place_market_order("BTCUSDm", "BUY", 0.01)
+
+	assert requests_sent[0]["deviation"] == 15
+	assert requests_sent[0]["magic"] == 42
+
+
+def test_place_market_order_explicit_deviation_and_magic_override_config(monkeypatch):
+	"""Caller-provided deviation/magic override config values."""
+	requests_sent = []
+	_MT5 = _make_order_mt5()
+	_orig_send = _MT5.order_send
+
+	@staticmethod
+	def capturing_send(request):
+		requests_sent.append(request)
+		return _orig_send.__func__(request)  # type: ignore[attr-defined]
+
+	_MT5.order_send = capturing_send
+	monkeypatch.setattr(mt5_connector, "mt5", _MT5)
+	monkeypatch.setattr(mt5_connector.config, "ORDER_DEVIATION", 20)
+	monkeypatch.setattr(mt5_connector.config, "ORDER_MAGIC", 0)
+
+	mt5_connector.place_market_order("BTCUSDm", "BUY", 0.01, deviation=5, magic=99)
+
+	assert requests_sent[0]["deviation"] == 5
+	assert requests_sent[0]["magic"] == 99
+
+
+def test_place_market_order_includes_filling_and_time_when_available(monkeypatch):
+	"""ORDER_TIME_GTC and ORDER_FILLING_FOK are added when the mt5 stub exposes them."""
+	requests_sent = []
+	_MT5 = _make_order_mt5(include_filling=True)
+	_orig_send = _MT5.order_send
+
+	@staticmethod
+	def capturing_send(request):
+		requests_sent.append(request)
+		return _orig_send.__func__(request)  # type: ignore[attr-defined]
+
+	_MT5.order_send = capturing_send
+	monkeypatch.setattr(mt5_connector, "mt5", _MT5)
+
+	mt5_connector.place_market_order("BTCUSDm", "BUY", 0.01)
+
+	assert "type_time" in requests_sent[0]
+	assert "type_filling" in requests_sent[0]
+
+
+def test_place_market_order_omits_filling_when_unavailable(monkeypatch):
+	"""type_time / type_filling are absent when mt5 stub lacks those constants."""
+	requests_sent = []
+	_MT5 = _make_order_mt5(include_filling=False)
+	_orig_send = _MT5.order_send
+
+	@staticmethod
+	def capturing_send(request):
+		requests_sent.append(request)
+		return _orig_send.__func__(request)  # type: ignore[attr-defined]
+
+	_MT5.order_send = capturing_send
+	monkeypatch.setattr(mt5_connector, "mt5", _MT5)
+
+	mt5_connector.place_market_order("BTCUSDm", "BUY", 0.01)
+
+	assert "type_time" not in requests_sent[0]
+	assert "type_filling" not in requests_sent[0]
+
+
+def test_place_market_order_returns_failure_when_order_send_raises(monkeypatch):
+	"""Returns failure dict when order_send raises an unexpected exception."""
+	monkeypatch.setattr(mt5_connector, "mt5", _make_order_mt5(raise_on_send=True))
+
+	result = mt5_connector.place_market_order("BTCUSDm", "BUY", 0.01)
+
+	assert result["success"] is False
+	assert "MT5 terminal disconnected" in result["error"]
+
+
+def test_place_market_order_returns_retcode_in_success_result(monkeypatch):
+	"""Successful response includes retcode extracted from the MT5 result object."""
+	monkeypatch.setattr(mt5_connector, "mt5", _make_order_mt5())
+
+	result = mt5_connector.place_market_order("BTCUSDm", "BUY", 0.01)
+
+	assert result["success"] is True
+	assert result["retcode"] == 10009
+
+
+# ---------------------------------------------------------------------------
+# summarize_order_result()
+# ---------------------------------------------------------------------------
+
+def test_summarize_order_result_returns_failure_summary_for_failed_response():
+	response = {"success": False, "error": "symbol tick info unavailable for BTCUSDm"}
+
+	summary = mt5_connector.summarize_order_result(response)
+
+	assert summary == {"success": False, "error": "symbol tick info unavailable for BTCUSDm"}
+
+
+def test_summarize_order_result_extracts_retcode_and_order_id():
+	result_obj = types.SimpleNamespace(retcode=10009, order=99876)
+	response = {"success": True, "result": result_obj, "retcode": 10009}
+
+	summary = mt5_connector.summarize_order_result(response)
+
+	assert summary["success"] is True
+	assert summary["retcode"] == 10009
+	assert summary["order_id"] == 99876
+
+
+def test_summarize_order_result_handles_missing_order_id_gracefully():
+	result_obj = types.SimpleNamespace()  # no order attribute
+	response = {"success": True, "result": result_obj, "retcode": 10009}
+
+	summary = mt5_connector.summarize_order_result(response)
+
+	assert summary["success"] is True
+	assert "order_id" not in summary
+
+
+def test_summarize_order_result_extracts_volume_and_price_from_request_dict():
+	req = {"volume": 0.05, "price": 78500.0}
+	result_obj = types.SimpleNamespace(request=req, order=1)
+	response = {"success": True, "result": result_obj, "retcode": 10009}
+
+	summary = mt5_connector.summarize_order_result(response)
+
+	assert summary["volume"] == 0.05
+	assert summary["price"] == 78500.0
+
+
+def test_summarize_order_result_success_false_when_key_absent():
+	"""Treats missing 'success' key as failure."""
+	response = {"error": "something went wrong"}
+
+	summary = mt5_connector.summarize_order_result(response)
+
+	assert summary["success"] is False
