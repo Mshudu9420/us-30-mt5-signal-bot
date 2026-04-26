@@ -390,3 +390,24 @@ timestamp,level,message
 2026-04-26 12:36:24,INFO,macro-fvg | direction=BULLISH fvg=[77983.43-77985.91] type=bullish liquidity_target=78048.69 entry=78021.28
 2026-04-26 13:04:39,DEBUG,timings (s): fetch=0.005 indicators=0.154 signals=0.001 order_and_email=0.000 total=1695.397
 2026-04-26 13:04:39,INFO,macro-fvg | direction=BULLISH fvg=[77983.43-77985.91] type=bullish liquidity_target=78067.31 entry=78038.49
+2026-04-26 13:37:30,ERROR,Startup aborted: MT5 connection failed.
+2026-04-26 13:37:30,ERROR,Startup aborted: account info unavailable.
+2026-04-26 13:37:30,DEBUG,timings (s): fetch=0.009 indicators=0.162 signals=0.001 order_and_email=0.000 total=0.172
+2026-04-26 13:37:30,ERROR,Unexpected error in polling loop: 
+2026-04-26 13:37:30,DEBUG,timings (s): fetch=0.003 indicators=0.156 signals=0.000 order_and_email=0.000 total=0.160
+2026-04-26 13:37:30,ERROR,Unexpected error in polling loop: 
+2026-04-26 13:37:30,DEBUG,timings (s): fetch=0.003 indicators=0.158 signals=0.000 order_and_email=0.000 total=0.162
+2026-04-26 13:37:30,ERROR,Unexpected error in polling loop: 
+2026-04-26 13:37:30,INFO,"auto-trade summary: {'success': False, 'error': 'symbol tick info unavailable for BTCUSDm'}"
+2026-04-26 13:37:30,DEBUG,timings (s): fetch=0.003 indicators=0.155 signals=0.000 order_and_email=0.006 total=0.165
+2026-04-26 13:37:30,ERROR,Unexpected error in polling loop: 
+2026-04-26 13:37:31,DEBUG,timings (s): fetch=0.003 indicators=0.157 signals=0.000 order_and_email=0.000 total=0.161
+2026-04-26 13:37:31,ERROR,Unexpected error in polling loop: 
+2026-04-26 13:37:31,DEBUG,timings (s): fetch=0.003 indicators=0.235 signals=0.000 order_and_email=0.000 total=0.238
+2026-04-26 13:37:31,INFO,Bot stopped by user.
+2026-04-26 13:37:31,WARNING,All OHLCV fetches returned None — MT5 connection may have dropped. Attempting reconnect…
+2026-04-26 13:37:31,INFO,MT5 reconnect successful. Resuming polling.
+2026-04-26 13:37:31,DEBUG,timings (s): fetch=0.009 indicators=0.205 signals=0.000 order_and_email=0.000 total=0.214
+2026-04-26 13:37:31,ERROR,Unexpected error in polling loop: 
+2026-04-26 13:37:31,WARNING,All OHLCV fetches returned None — MT5 connection may have dropped. Attempting reconnect…
+2026-04-26 13:37:31,ERROR,MT5 reconnect failed after all attempts. Stopping bot.

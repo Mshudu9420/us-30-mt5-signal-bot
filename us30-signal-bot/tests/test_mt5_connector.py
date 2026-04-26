@@ -465,15 +465,14 @@ def test_place_market_order_returns_failure_when_tick_unavailable(monkeypatch):
 def test_place_market_order_buy_uses_ask_price(monkeypatch):
 	"""BUY order puts tick.ask into the request and sets ORDER_TYPE_BUY."""
 	requests_sent = []
-	_MT5 = _make_order_mt5()
-	_orig_send = _MT5.order_send
 
-	@staticmethod
+	_MT5 = _make_order_mt5()
+
 	def capturing_send(request):
 		requests_sent.append(request)
-		return _orig_send.__func__(request)  # type: ignore[attr-defined]
+		return types.SimpleNamespace(retcode=10009, order=123456)
 
-	_MT5.order_send = capturing_send
+	_MT5.order_send = staticmethod(capturing_send)
 	monkeypatch.setattr(mt5_connector, "mt5", _MT5)
 
 	result = mt5_connector.place_market_order(
@@ -493,15 +492,14 @@ def test_place_market_order_buy_uses_ask_price(monkeypatch):
 def test_place_market_order_sell_uses_bid_price(monkeypatch):
 	"""SELL order puts tick.bid into the request and sets ORDER_TYPE_SELL."""
 	requests_sent = []
-	_MT5 = _make_order_mt5()
-	_orig_send = _MT5.order_send
 
-	@staticmethod
+	_MT5 = _make_order_mt5()
+
 	def capturing_send(request):
 		requests_sent.append(request)
-		return _orig_send.__func__(request)  # type: ignore[attr-defined]
+		return types.SimpleNamespace(retcode=10009, order=654321)
 
-	_MT5.order_send = capturing_send
+	_MT5.order_send = staticmethod(capturing_send)
 	monkeypatch.setattr(mt5_connector, "mt5", _MT5)
 
 	result = mt5_connector.place_market_order("BTCUSDm", "SELL", 0.05)
@@ -516,15 +514,14 @@ def test_place_market_order_sell_uses_bid_price(monkeypatch):
 def test_place_market_order_sl_tp_default_to_zero_when_omitted(monkeypatch):
 	"""sl and tp are 0.0 in the request when not provided."""
 	requests_sent = []
-	_MT5 = _make_order_mt5()
-	_orig_send = _MT5.order_send
 
-	@staticmethod
+	_MT5 = _make_order_mt5()
+
 	def capturing_send(request):
 		requests_sent.append(request)
-		return _orig_send.__func__(request)  # type: ignore[attr-defined]
+		return types.SimpleNamespace(retcode=10009, order=1)
 
-	_MT5.order_send = capturing_send
+	_MT5.order_send = staticmethod(capturing_send)
 	monkeypatch.setattr(mt5_connector, "mt5", _MT5)
 
 	mt5_connector.place_market_order("BTCUSDm", "BUY", 0.01)
@@ -536,15 +533,14 @@ def test_place_market_order_sl_tp_default_to_zero_when_omitted(monkeypatch):
 def test_place_market_order_uses_config_defaults_for_deviation_and_magic(monkeypatch):
 	"""ORDER_DEVIATION and ORDER_MAGIC from config flow into the request."""
 	requests_sent = []
-	_MT5 = _make_order_mt5()
-	_orig_send = _MT5.order_send
 
-	@staticmethod
+	_MT5 = _make_order_mt5()
+
 	def capturing_send(request):
 		requests_sent.append(request)
-		return _orig_send.__func__(request)  # type: ignore[attr-defined]
+		return types.SimpleNamespace(retcode=10009, order=1)
 
-	_MT5.order_send = capturing_send
+	_MT5.order_send = staticmethod(capturing_send)
 	monkeypatch.setattr(mt5_connector, "mt5", _MT5)
 	monkeypatch.setattr(mt5_connector.config, "ORDER_DEVIATION", 15)
 	monkeypatch.setattr(mt5_connector.config, "ORDER_MAGIC", 42)
@@ -558,15 +554,14 @@ def test_place_market_order_uses_config_defaults_for_deviation_and_magic(monkeyp
 def test_place_market_order_explicit_deviation_and_magic_override_config(monkeypatch):
 	"""Caller-provided deviation/magic override config values."""
 	requests_sent = []
-	_MT5 = _make_order_mt5()
-	_orig_send = _MT5.order_send
 
-	@staticmethod
+	_MT5 = _make_order_mt5()
+
 	def capturing_send(request):
 		requests_sent.append(request)
-		return _orig_send.__func__(request)  # type: ignore[attr-defined]
+		return types.SimpleNamespace(retcode=10009, order=1)
 
-	_MT5.order_send = capturing_send
+	_MT5.order_send = staticmethod(capturing_send)
 	monkeypatch.setattr(mt5_connector, "mt5", _MT5)
 	monkeypatch.setattr(mt5_connector.config, "ORDER_DEVIATION", 20)
 	monkeypatch.setattr(mt5_connector.config, "ORDER_MAGIC", 0)
@@ -580,15 +575,14 @@ def test_place_market_order_explicit_deviation_and_magic_override_config(monkeyp
 def test_place_market_order_includes_filling_and_time_when_available(monkeypatch):
 	"""ORDER_TIME_GTC and ORDER_FILLING_FOK are added when the mt5 stub exposes them."""
 	requests_sent = []
-	_MT5 = _make_order_mt5(include_filling=True)
-	_orig_send = _MT5.order_send
 
-	@staticmethod
+	_MT5 = _make_order_mt5(include_filling=True)
+
 	def capturing_send(request):
 		requests_sent.append(request)
-		return _orig_send.__func__(request)  # type: ignore[attr-defined]
+		return types.SimpleNamespace(retcode=10009, order=1)
 
-	_MT5.order_send = capturing_send
+	_MT5.order_send = staticmethod(capturing_send)
 	monkeypatch.setattr(mt5_connector, "mt5", _MT5)
 
 	mt5_connector.place_market_order("BTCUSDm", "BUY", 0.01)
@@ -600,15 +594,14 @@ def test_place_market_order_includes_filling_and_time_when_available(monkeypatch
 def test_place_market_order_omits_filling_when_unavailable(monkeypatch):
 	"""type_time / type_filling are absent when mt5 stub lacks those constants."""
 	requests_sent = []
-	_MT5 = _make_order_mt5(include_filling=False)
-	_orig_send = _MT5.order_send
 
-	@staticmethod
+	_MT5 = _make_order_mt5(include_filling=False)
+
 	def capturing_send(request):
 		requests_sent.append(request)
-		return _orig_send.__func__(request)  # type: ignore[attr-defined]
+		return types.SimpleNamespace(retcode=10009, order=1)
 
-	_MT5.order_send = capturing_send
+	_MT5.order_send = staticmethod(capturing_send)
 	monkeypatch.setattr(mt5_connector, "mt5", _MT5)
 
 	mt5_connector.place_market_order("BTCUSDm", "BUY", 0.01)
