@@ -7,7 +7,7 @@ import mt5_connector
 from alerts import send_email_alert
 from indicators import calculate_bollinger_bands, calculate_ema, calculate_macd, calculate_rsi, detect_fvg
 from logger import get_logger
-from mt5_connector import connect, disconnect, get_ohlcv
+from mt5_connector import connect, disconnect, get_ohlcv, reconnect
 from risk_manager import (
 	calculate_lot_size,
 	calculate_risk_amount,
@@ -62,6 +62,18 @@ def polling_loop() -> None:
 			m15_df = get_ohlcv(config.SYMBOL, TIMEFRAME_M15, config.N_BARS)
 			h1_df = get_ohlcv(config.SYMBOL, TIMEFRAME_H1, config.N_BARS)
 			step_times["fetch"] = time.monotonic() - fetch_start
+
+			# Detect a dropped MT5 connection: all four fetches returning None is a
+			# strong signal the terminal disconnected (not just a data gap).
+			if m1_df is None and m5_df is None and m15_df is None and h1_df is None:
+				_log.warning("All OHLCV fetches returned None — MT5 connection may have dropped. Attempting reconnect…")
+				if reconnect():
+					_log.info("MT5 reconnect successful. Resuming polling.")
+				else:
+					_log.error("MT5 reconnect failed after all attempts. Stopping bot.")
+					disconnect()
+					break
+				continue
 
 			# Indicators
 			ind_start = time.monotonic()

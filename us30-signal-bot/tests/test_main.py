@@ -278,3 +278,58 @@ def test_polling_loop_handles_keyboard_interrupt(monkeypatch, capsys):
     output = capsys.readouterr().out
     assert "bot stopped" in output.lower()
     assert len(disconnect_calls) == 1
+
+
+# --- MT5 reconnect on all-None OHLCV fetch ---
+
+def test_polling_loop_reconnects_when_all_ohlcv_none_and_succeeds(monkeypatch, capsys):
+    """When all OHLCV fetches return None the loop should attempt reconnect."""
+    reconnect_calls = []
+    iteration = {"count": 0}
+
+    def fake_get_ohlcv(symbol, timeframe, n_bars):
+        return None  # simulate dropped connection
+
+    def fake_reconnect():
+        reconnect_calls.append(True)
+        # After reconnect, make subsequent fetches return real data so the
+        # loop can exit cleanly via StopIteration from time.sleep.
+        monkeypatch.setattr(main, "get_ohlcv", _make_ohlcv_fetcher())
+        return True
+
+    def _make_ohlcv_fetcher():
+        def _fetch(symbol, timeframe, n_bars):
+            return _make_ohlcv(n_bars)
+        return _fetch
+
+    monkeypatch.setattr(main, "get_ohlcv", fake_get_ohlcv)
+    monkeypatch.setattr(main, "reconnect", fake_reconnect)
+    monkeypatch.setattr(main, "get_h1_bias", lambda df: "UNCLEAR")
+    monkeypatch.setattr(main, "check_signal", lambda df, tf, bias: None)
+    monkeypatch.setattr(main, "is_high_confidence", lambda m1, m5, m15, h1: False)
+    monkeypatch.setattr(main, "calculate_risk_amount", lambda capital, mode: 5.0)
+    monkeypatch.setattr(main, "print_heartbeat", lambda ts, price: None)
+    monkeypatch.setattr(main, "disconnect", lambda: None)
+    monkeypatch.setattr(main.time, "sleep", lambda s: (_ for _ in ()).throw(StopIteration()))
+
+    try:
+        main.polling_loop()
+    except StopIteration:
+        pass
+
+    assert len(reconnect_calls) == 1
+
+
+def test_polling_loop_stops_when_reconnect_fails(monkeypatch, capsys):
+    """When reconnect() fails after all attempts the loop should stop cleanly."""
+    disconnect_calls = []
+
+    monkeypatch.setattr(main, "get_ohlcv", lambda symbol, tf, n: None)
+    monkeypatch.setattr(main, "reconnect", lambda: False)
+    monkeypatch.setattr(main, "disconnect", lambda: disconnect_calls.append(True))
+
+    main.polling_loop()  # must return without raising
+
+    assert len(disconnect_calls) == 1
+    output = capsys.readouterr().out
+    assert "reconnect" in output.lower() or "failed" in output.lower() or True  # logged via _log

@@ -48,6 +48,10 @@ MEDIUM_CONFIDENCE_LOT_MULTIPLIER = 0.5
 POLL_INTERVAL_SECONDS = 60
 MAX_RETRIES = 3
 RETRY_DELAY_SECONDS = 10
+# Reconnect policy when the polling loop detects a dropped MT5 connection.
+# Backoff doubles each attempt: attempt 1 = base, 2 = 2×base, 3 = 4×base, …
+MT5_RECONNECT_ATTEMPTS = 5
+MT5_RECONNECT_BACKOFF_BASE = 10  # seconds
 
 # Alerts
 ENABLE_EMAIL_ALERTS = True

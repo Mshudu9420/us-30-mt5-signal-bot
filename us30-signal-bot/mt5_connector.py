@@ -47,6 +47,53 @@ def disconnect() -> None:
 	print("MT5 disconnected")
 
 
+def reconnect(
+	max_attempts: int | None = None,
+	backoff_base: float | None = None,
+) -> bool:
+	"""Attempt to re-establish a dropped MT5 connection with exponential backoff.
+
+	Calls ``disconnect()`` first to ensure a clean state, then retries
+	``connect()`` up to *max_attempts* times.  The wait between attempts
+	doubles each time starting from *backoff_base* seconds.
+
+	Parameters
+	----------
+	max_attempts:
+		Total number of reconnect attempts.  Defaults to
+		``config.MT5_RECONNECT_ATTEMPTS``.
+	backoff_base:
+		Base sleep duration in seconds for the first retry.  Subsequent
+		retries wait ``backoff_base * 2 ** (attempt - 1)`` seconds.
+		Defaults to ``config.MT5_RECONNECT_BACKOFF_BASE``.
+
+	Returns
+	-------
+	bool
+		``True`` if the connection was restored; ``False`` if all attempts
+		were exhausted.
+	"""
+	if max_attempts is None:
+		max_attempts = getattr(config, "MT5_RECONNECT_ATTEMPTS", 5)
+	if backoff_base is None:
+		backoff_base = float(getattr(config, "MT5_RECONNECT_BACKOFF_BASE", 10))
+
+	mt5.shutdown()  # clean slate before reconnecting
+
+	for attempt in range(1, max_attempts + 1):
+		print(f"MT5 reconnect attempt {attempt}/{max_attempts}…")
+		if connect():
+			print("MT5 reconnected successfully.")
+			return True
+		wait = backoff_base * (2 ** (attempt - 1))
+		if attempt < max_attempts:
+			print(f"Reconnect failed. Retrying in {wait:.0f}s…")
+			time.sleep(wait)
+
+	print("MT5 reconnect failed: all attempts exhausted.")
+	return False
+
+
 def get_ohlcv(symbol: str, timeframe: int, n_bars: int) -> pd.DataFrame | None:
 	"""Fetch n_bars of OHLCV data for symbol/timeframe.
 

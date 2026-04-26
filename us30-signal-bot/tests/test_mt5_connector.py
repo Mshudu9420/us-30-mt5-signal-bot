@@ -304,3 +304,100 @@ def test_has_open_position_returns_false_when_positions_get_raises(monkeypatch):
 	monkeypatch.setattr(mt5_connector, "mt5", BrokenMT5)
 
 	assert mt5_connector.has_open_position("BTCUSDm", "BUY") is False
+
+
+# ---------------------------------------------------------------------------
+# reconnect()
+# ---------------------------------------------------------------------------
+
+def test_reconnect_returns_true_on_first_attempt(monkeypatch, capsys):
+	"""Reconnect should succeed immediately when connect() works on first try."""
+	shutdown_calls = []
+
+	class QuickMT5:
+		@staticmethod
+		def shutdown():
+			shutdown_calls.append(True)
+
+		@staticmethod
+		def initialize():
+			return True
+
+		@staticmethod
+		def account_info():
+			return mt5_mock.AccountInfo(login=1, server="Demo", balance=1000.0)
+
+	monkeypatch.setattr(mt5_connector, "mt5", QuickMT5)
+	monkeypatch.setattr(mt5_connector.time, "sleep", lambda s: None)
+
+	result = mt5_connector.reconnect(max_attempts=3, backoff_base=0)
+
+	assert result is True
+	assert shutdown_calls, "mt5.shutdown() should be called before reconnecting"
+	output = capsys.readouterr().out
+	assert "reconnected" in output.lower()
+
+
+def test_reconnect_retries_with_backoff_and_succeeds(monkeypatch, capsys):
+	"""Fails twice then succeeds on the third attempt."""
+	attempts = [0]
+	sleep_calls = []
+
+	class FlakyMT5:
+		@staticmethod
+		def shutdown():
+			pass
+
+		@staticmethod
+		def initialize():
+			attempts[0] += 1
+			return attempts[0] >= 3
+
+		@staticmethod
+		def last_error():
+			return (1, "transient")
+
+		@staticmethod
+		def account_info():
+			return mt5_mock.AccountInfo(login=1, server="Demo", balance=1000.0)
+
+	monkeypatch.setattr(mt5_connector, "mt5", FlakyMT5)
+	monkeypatch.setattr(mt5_connector.time, "sleep", lambda s: sleep_calls.append(s))
+	monkeypatch.setattr(mt5_connector.config, "MAX_RETRIES", 1)
+	monkeypatch.setattr(mt5_connector.config, "RETRY_DELAY_SECONDS", 0)
+
+	result = mt5_connector.reconnect(max_attempts=5, backoff_base=1)
+
+	assert result is True
+	# Two failed attempts → two backoff sleeps before the third succeeds
+	assert len(sleep_calls) == 2
+	# Backoff doubles: first=1s, second=2s
+	assert sleep_calls[0] == 1.0
+	assert sleep_calls[1] == 2.0
+
+
+def test_reconnect_returns_false_when_all_attempts_exhausted(monkeypatch, capsys):
+	"""Returns False and logs failure when every attempt fails."""
+	class AlwaysFailMT5:
+		@staticmethod
+		def shutdown():
+			pass
+
+		@staticmethod
+		def initialize():
+			return False
+
+		@staticmethod
+		def last_error():
+			return (1, "down")
+
+	monkeypatch.setattr(mt5_connector, "mt5", AlwaysFailMT5)
+	monkeypatch.setattr(mt5_connector.time, "sleep", lambda s: None)
+	monkeypatch.setattr(mt5_connector.config, "MAX_RETRIES", 1)
+	monkeypatch.setattr(mt5_connector.config, "RETRY_DELAY_SECONDS", 0)
+
+	result = mt5_connector.reconnect(max_attempts=3, backoff_base=0)
+
+	assert result is False
+	output = capsys.readouterr().out
+	assert "exhausted" in output.lower() or "failed" in output.lower()
