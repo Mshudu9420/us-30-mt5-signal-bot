@@ -124,14 +124,14 @@ def polling_loop() -> None:
 			m5_signal = check_signal(m5_df, "M5", h1_bias) if m5_df is not None else None
 			m15_signal = check_signal(m15_df, "M15", h1_bias) if m15_df is not None else None
 
-			# Use live account balance for risk calculations; fall back to config
-			# INITIAL_CAPITAL if account info is unavailable (e.g. in tests/mock mode).
+			# Use live account equity (balance + floating P&L) for risk calculations;
+			# fall back to config INITIAL_CAPITAL if account info is unavailable.
 			_account_info = mt5_connector.mt5.account_info()
-			_capital = float(_account_info.balance) if _account_info is not None else config.INITIAL_CAPITAL
+			_capital = float(_account_info.equity) if _account_info is not None else config.INITIAL_CAPITAL
 			risk_amount = calculate_risk_amount(_capital, config.RISK_MODE)
 
-			# Update daily loss tracker with the current balance so it can detect
-			# a new trading day and record the opening balance automatically.
+			# Update daily loss tracker with current equity so open floating losses
+			# count toward the daily drawdown limit.
 			_daily_loss_tracker.update(_capital)
 
 			# Evaluate confidence tiers up-front so every signal print can show the label.

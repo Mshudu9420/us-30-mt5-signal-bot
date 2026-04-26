@@ -200,9 +200,51 @@ def place_market_order(
 		except Exception:
 			retcode = None
 
-		return {"success": True, "result": result, "retcode": retcode}
+		# 10009 = TRADE_RETCODE_DONE — the only retcode that means the order
+		# was actually accepted and filled by the broker.
+		# Any other retcode (e.g. 10027 = AutoTrading disabled, 10006 = rejected,
+		# 10014 = invalid volume) means the order was NOT placed.
+		success = (retcode == 10009)
+		return {"success": success, "result": result, "retcode": retcode}
 	except Exception as exc:
 		return {"success": False, "error": str(exc)}
+
+
+# Human-readable descriptions for common MT5 trade return codes.
+_RETCODE_DESCRIPTIONS: dict[int, str] = {
+	10004: "REQUOTE",
+	10006: "REJECTED",
+	10007: "CANCELLED",
+	10008: "PLACED",
+	10009: "DONE",
+	10010: "DONE_PARTIAL",
+	10011: "ERROR",
+	10012: "TIMEOUT",
+	10013: "INVALID",
+	10014: "INVALID_VOLUME",
+	10015: "INVALID_PRICE",
+	10016: "INVALID_STOPS",
+	10017: "TRADE_DISABLED",
+	10018: "MARKET_CLOSED",
+	10019: "NO_MONEY",
+	10020: "PRICE_CHANGED",
+	10021: "PRICE_OFF",
+	10022: "INVALID_EXPIRATION",
+	10023: "ORDER_CHANGED",
+	10024: "TOO_MANY_REQUESTS",
+	10025: "NO_CHANGES",
+	10026: "SERVER_DISABLES_AT",
+	10027: "CLIENT_DISABLES_AT (AutoTrading disabled in MT5 terminal)",
+	10028: "LOCKED",
+	10029: "FROZEN",
+	10030: "INVALID_FILL",
+	10031: "CONNECTION",
+	10032: "ONLY_REAL",
+	10033: "LIMIT_ORDERS",
+	10034: "LIMIT_VOLUME",
+	10035: "INVALID_ORDER",
+	10036: "POSITION_CLOSED",
+}
 
 
 def summarize_order_result(order_response: dict) -> dict:
@@ -212,14 +254,23 @@ def summarize_order_result(order_response: dict) -> dict:
 	most useful fields for console/email reporting.
 	"""
 	summary: dict = {"success": bool(order_response.get("success", False))}
+
+	# Always include retcode when present so failures are self-explanatory in logs.
+	retcode = order_response.get("retcode")
+	if retcode is not None:
+		summary["retcode"] = retcode
+		desc = _RETCODE_DESCRIPTIONS.get(int(retcode))
+		if desc:
+			summary["retcode_desc"] = desc
+
 	if not summary["success"]:
-		summary["error"] = order_response.get("error")
+		error = order_response.get("error")
+		if error:
+			summary["error"] = error
 		return summary
 
 	# Try to extract MT5 result details safely
 	result = order_response.get("result")
-	retcode = order_response.get("retcode")
-	summary["retcode"] = retcode
 
 	# Many MT5 wrappers return an object with 'order' or 'order_id' attributes
 	order_id = None
