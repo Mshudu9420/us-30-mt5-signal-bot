@@ -2,6 +2,7 @@
 
 import os
 import smtplib
+from email.mime.text import MIMEText
 from dotenv import load_dotenv
 
 import config
@@ -73,26 +74,30 @@ def send_email_alert(signal_dict, risk_dict) -> bool:
 		fvg_top = signal_dict.get("fvg_top")
 		liquidity_target = signal_dict.get("liquidity_target")
 		if fvg_bottom is not None and fvg_top is not None:
-			body += f"\nFVG Zone:   {fvg_bottom:.2f} – {fvg_top:.2f}\n"
+			body += f"\nFVG Zone:   {fvg_bottom:.2f} - {fvg_top:.2f}\n"
 		if liquidity_target is not None:
 			body += f"Liquidity Target: {liquidity_target:.2f}\n"
-
-	message = f"Subject: {subject}\n\n{body}"
 
 	# Append order info / summary to the email body if the signal includes it
 	order_info = signal_dict.get("order_info")
 	if order_info is not None:
-		message += f"\nORDER INFO (raw):\n{order_info}\n"
+		body += f"\nORDER INFO (raw):\n{order_info}\n"
 
 	order_summary = signal_dict.get("order_summary")
 	if order_summary is not None:
-		# order_summary is expected to be a dict; format key: value lines for readability
-		message += "\nORDER SUMMARY:\n"
+		body += "\nORDER SUMMARY:\n"
 		if isinstance(order_summary, dict):
 			for k, v in order_summary.items():
-				message += f"- {k}: {v}\n"
+				body += f"- {k}: {v}\n"
 		else:
-			message += f"{order_summary}\n"
+			body += f"{order_summary}\n"
+
+	# Build a UTF-8 MIME message so non-ASCII characters in prices / symbols
+	# do not trigger UnicodeEncodeError in smtplib.sendmail().
+	msg = MIMEText(body, "plain", "utf-8")
+	msg["Subject"] = subject
+	msg["From"] = gmail_user
+	msg["To"] = ", ".join(recipients)
 
 	# The bot only supports Gmail SMTP for sending alerts.
 	# Use smtp.gmail.com with STARTTLS on port 587 and optional DEBUG_SMTP.
@@ -101,7 +106,7 @@ def send_email_alert(signal_dict, risk_dict) -> bool:
 			server.set_debuglevel(1)
 		server.starttls()
 		server.login(gmail_user, gmail_app_password)
-		server.sendmail(gmail_user, recipients, message)
+		server.send_message(msg)
 
 	return True
 
@@ -126,7 +131,10 @@ def _smtp_send(subject: str, body: str) -> bool:
 	if not recipients:
 		return False
 
-	message = f"Subject: {subject}\n\n{body}"
+	msg = MIMEText(body, "plain", "utf-8")
+	msg["Subject"] = subject
+	msg["From"] = gmail_user
+	msg["To"] = ", ".join(recipients)
 
 	try:
 		with smtplib.SMTP("smtp.gmail.com", 587) as server:
@@ -134,7 +142,7 @@ def _smtp_send(subject: str, body: str) -> bool:
 				server.set_debuglevel(1)
 			server.starttls()
 			server.login(gmail_user, gmail_app_password)
-			server.sendmail(gmail_user, recipients, message)
+			server.send_message(msg)
 	except Exception:
 		return False
 
@@ -155,7 +163,7 @@ def send_bot_started_alert(account_login: int | str, account_balance: float, ser
 
 def send_bot_stopped_alert(reason: str) -> bool:
 	"""Send a plain email notification that the bot has stopped automatically."""
-	subject = "US30 Bot STOPPED — automatic shutdown"
+	subject = "US30 Bot STOPPED - automatic shutdown"
 	body = (
 		"The US30 signal bot has stopped automatically.\n\n"
 		f"Reason: {reason}\n\n"
@@ -166,7 +174,7 @@ def send_bot_stopped_alert(reason: str) -> bool:
 
 def send_no_signal_alert(minutes_since_last: int) -> bool:
 	"""Send an email when no buy/sell signal has fired within the configured interval."""
-	subject = "US30 Bot — No Signal"
+	subject = "US30 Bot - No Signal"
 	body = (
 		f"No buy or sell signal has been detected in the last {minutes_since_last} minute(s).\n\n"
 		"The bot is still running and monitoring the market.\n"

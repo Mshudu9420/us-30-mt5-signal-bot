@@ -272,3 +272,19 @@ def has_open_position(symbol: str, direction: str) -> bool:
 		if pos_type == target_type:
 			return True
 	return False
+
+
+def count_open_positions(symbol: str) -> int:
+	"""Return the total number of open positions for the given symbol (all directions).
+
+	Returns 0 when positions_get is unavailable or raises.
+	"""
+	if not hasattr(mt5, "positions_get"):
+		return 0
+	try:
+		positions = mt5.positions_get(symbol=symbol)
+	except Exception:
+		return 0
+	if not positions:
+		return 0
+	return len(positions)

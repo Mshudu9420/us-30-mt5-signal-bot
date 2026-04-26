@@ -207,9 +207,14 @@ def polling_loop() -> None:
 					order_summary = {"success": False, "error": "DAILY_LOSS_LIMIT_HIT"}
 				elif config.ENABLE_AUTO_TRADES:
 					if config.ENABLE_LIVE_TRADES:
-						if mt5_connector.has_open_position(config.SYMBOL, _direction):
-							_log.info(f"auto-trade skipped: open {_direction} position already exists for {config.SYMBOL}")
-							order_summary = {"success": False, "error": "DUPLICATE_POSITION"}
+						_open_count = mt5_connector.count_open_positions(config.SYMBOL)
+						_max_trades = getattr(config, "MAX_OPEN_TRADES", 5)
+						if _open_count >= _max_trades:
+							_log.info(
+								f"auto-trade skipped: max open trades reached "
+								f"({_open_count}/{_max_trades}) for {config.SYMBOL}"
+							)
+							order_summary = {"success": False, "error": "MAX_OPEN_TRADES_REACHED"}
 						else:
 							order_response = mt5_connector.place_market_order(
 								config.SYMBOL,
@@ -293,12 +298,14 @@ def polling_loop() -> None:
 					_mfvg_order_summary = {"success": False, "error": "DAILY_LOSS_LIMIT_HIT"}
 				elif config.ENABLE_AUTO_TRADES:
 					if config.ENABLE_LIVE_TRADES:
-						if mt5_connector.has_open_position(config.SYMBOL, _mfvg_direction):
+						_mfvg_open_count = mt5_connector.count_open_positions(config.SYMBOL)
+						_mfvg_max_trades = getattr(config, "MAX_OPEN_TRADES", 5)
+						if _mfvg_open_count >= _mfvg_max_trades:
 							_log.info(
-								f"macro-fvg trade skipped: open {_mfvg_direction} position "
-								f"already exists for {config.SYMBOL}"
+								f"macro-fvg trade skipped: max open trades reached "
+								f"({_mfvg_open_count}/{_mfvg_max_trades}) for {config.SYMBOL}"
 							)
-							_mfvg_order_summary = {"success": False, "error": "DUPLICATE_POSITION"}
+							_mfvg_order_summary = {"success": False, "error": "MAX_OPEN_TRADES_REACHED"}
 						else:
 							_mfvg_order_response = mt5_connector.place_market_order(
 								config.SYMBOL,

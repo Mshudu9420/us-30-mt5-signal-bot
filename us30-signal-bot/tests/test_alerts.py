@@ -29,6 +29,21 @@ class DummySMTP:
 	def sendmail(self, sender, recipients, message):
 		self.sendmail_args = (sender, recipients, message)
 
+	def send_message(self, msg, from_addr=None, to_addrs=None):
+		"""Intercept send_message (used with MIMEText) and populate sendmail_args
+		in the same format as sendmail() so existing test assertions keep working."""
+		sender = from_addr or msg.get("From", "")
+		to_header = msg.get("To", "")
+		recipients = [addr.strip() for addr in to_header.split(",") if addr.strip()]
+		payload = msg.get_payload(decode=True)
+		if payload is not None:
+			body = payload.decode(msg.get_content_charset("utf-8"))
+		else:
+			body = str(msg.get_payload())
+		subject = msg.get("Subject", "")
+		message_str = f"Subject: {subject}\n\n{body}"
+		self.sendmail_args = (sender, recipients, message_str)
+
 
 def test_send_email_alert_sends_when_high_confidence(monkeypatch):
 	created = {}
@@ -281,7 +296,7 @@ def test_send_no_signal_alert_sends_email_with_minutes(monkeypatch):
 
 	assert result is True
 	message = created["client"].sendmail_args[2]
-	assert "Subject: US30 Bot \u2014 No Signal" in message
+	assert "Subject: US30 Bot - No Signal" in message
 	assert "30 minute(s)" in message
 	assert "still running" in message
 

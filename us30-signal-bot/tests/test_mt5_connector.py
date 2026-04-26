@@ -309,6 +309,58 @@ def test_has_open_position_returns_false_when_positions_get_raises(monkeypatch):
 
 
 # ---------------------------------------------------------------------------
+# count_open_positions()
+# ---------------------------------------------------------------------------
+
+def _make_pos(pos_type: int):
+	"""Return a minimal SimpleNamespace that looks like an MT5 position."""
+	import types
+	return types.SimpleNamespace(ticket=100, symbol="BTCUSDm", type=pos_type, volume=0.01)
+
+
+def test_count_open_positions_returns_zero_when_no_positions(monkeypatch):
+	class FakeMT5:
+		@staticmethod
+		def positions_get(symbol=None):
+			return []
+
+	monkeypatch.setattr(mt5_connector, "mt5", FakeMT5)
+
+	assert mt5_connector.count_open_positions("BTCUSDm") == 0
+
+
+def test_count_open_positions_returns_correct_count(monkeypatch):
+	class FakeMT5:
+		@staticmethod
+		def positions_get(symbol=None):
+			return [_make_pos(0), _make_pos(1), _make_pos(0)]  # 2 BUY + 1 SELL
+
+	monkeypatch.setattr(mt5_connector, "mt5", FakeMT5)
+
+	assert mt5_connector.count_open_positions("BTCUSDm") == 3
+
+
+def test_count_open_positions_returns_zero_when_positions_get_missing(monkeypatch):
+	class NoAttrMT5:
+		pass
+
+	monkeypatch.setattr(mt5_connector, "mt5", NoAttrMT5)
+
+	assert mt5_connector.count_open_positions("BTCUSDm") == 0
+
+
+def test_count_open_positions_returns_zero_when_positions_get_raises(monkeypatch):
+	class BrokenMT5:
+		@staticmethod
+		def positions_get(symbol=None):
+			raise RuntimeError("MT5 error")
+
+	monkeypatch.setattr(mt5_connector, "mt5", BrokenMT5)
+
+	assert mt5_connector.count_open_positions("BTCUSDm") == 0
+
+
+# ---------------------------------------------------------------------------
 # reconnect()
 # ---------------------------------------------------------------------------
 
