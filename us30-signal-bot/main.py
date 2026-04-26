@@ -4,7 +4,7 @@ import time
 
 import config
 import mt5_connector
-from alerts import send_email_alert
+from alerts import send_email_alert, send_bot_stopped_alert, send_bot_started_alert, send_no_signal_alert
 from indicators import calculate_bollinger_bands, calculate_ema, calculate_macd, calculate_rsi, detect_fvg
 from logger import get_logger
 from mt5_connector import connect, disconnect, get_ohlcv, reconnect
@@ -26,14 +26,19 @@ def main() -> bool:
 	"""Initialize MT5 and print startup summary on launch."""
 	if not connect():
 		_log.error("Startup aborted: MT5 connection failed.")
+		print("BOT STOPPED: MT5 connection failed. Check logs.")
+		send_bot_stopped_alert("Startup aborted: MT5 connection failed.")
 		return False
 
 	account_info = mt5_connector.mt5.account_info()
 	if account_info is None:
 		_log.error("Startup aborted: account info unavailable.")
+		print("BOT STOPPED: account info unavailable. Check logs.")
+		send_bot_stopped_alert("Startup aborted: account info unavailable.")
 		return False
 
 	print_startup_summary(account_info, config)
+	send_bot_started_alert(account_info.login, account_info.balance, account_info.server)
 	return True
 
 
@@ -49,6 +54,10 @@ def polling_loop() -> None:
 		TIMEFRAME_H1 = _mt5.TIMEFRAME_H1
 
 	_daily_loss_tracker = DailyLossTracker(config.MAX_DAILY_LOSS_PCT)
+	# No-signal heartbeat tracking: record monotonic time of last signal and last
+	# no-signal alert so we only send once per quiet interval.
+	_last_signal_mono: float = time.monotonic()
+	_last_no_signal_alert_mono: float = time.monotonic()
 
 	while True:
 		# Use monotonic clock to keep a fixed-rate polling interval and report step timings.
@@ -71,6 +80,8 @@ def polling_loop() -> None:
 					_log.info("MT5 reconnect successful. Resuming polling.")
 				else:
 					_log.error("MT5 reconnect failed after all attempts. Stopping bot.")
+					print("BOT STOPPED: MT5 reconnect failed after all attempts. Check logs.")
+					send_bot_stopped_alert("MT5 reconnect failed after all attempts.")
 					disconnect()
 					break
 				continue
@@ -224,6 +235,7 @@ def polling_loop() -> None:
 				send_email_alert(_alert_sig, _risk_dict)
 				step_times["order_and_email"] = time.monotonic() - order_start
 				step_times["email_send"] = time.monotonic() - email_start
+				_last_signal_mono = time.monotonic()
 
 			# Medium-confidence handling: alert only, half lot, no auto-trade.
 			# Only fires when high-confidence did not already fire.
@@ -247,11 +259,25 @@ def polling_loop() -> None:
 					send_email_alert(_alert_sig, _risk_dict)
 					step_times["order_and_email"] = time.monotonic() - order_start
 					step_times["email_send"] = time.monotonic() - email_start
+					_last_signal_mono = time.monotonic()
 
 			# Heartbeat (print latest close/time)
 			if m5_df is not None:
 				latest = m5_df.iloc[-1]
 				print_heartbeat(str(latest["time"]), float(latest["close"]))
+
+			# No-signal heartbeat alert: fire once per quiet interval when no
+			# buy/sell signal has been detected within the configured window.
+			_no_signal_interval = getattr(config, "NO_SIGNAL_ALERT_INTERVAL_SECONDS", 0)
+			if _no_signal_interval > 0:
+				_now_mono = time.monotonic()
+				_since_signal = _now_mono - _last_signal_mono
+				_since_alert = _now_mono - _last_no_signal_alert_mono
+				if _since_signal >= _no_signal_interval and _since_alert >= _no_signal_interval:
+					_minutes = int(_since_signal // 60)
+					_log.info(f"no-signal alert: {_minutes}m since last signal — sending heartbeat email.")
+					send_no_signal_alert(_minutes)
+					_last_no_signal_alert_mono = _now_mono
 
 			# Total cycle time and sleep to keep a fixed-rate cadence
 			cycle_elapsed = time.monotonic() - cycle_start

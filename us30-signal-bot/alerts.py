@@ -88,3 +88,72 @@ def send_email_alert(signal_dict, risk_dict) -> bool:
 		server.sendmail(gmail_user, recipients, message)
 
 	return True
+
+
+def _smtp_send(subject: str, body: str) -> bool:
+	"""Shared helper: authenticate and send a single plain-text email.
+
+	Returns True on success, False if alerts are disabled, credentials are
+	missing, recipients list is empty, or an SMTP error occurs.
+	"""
+	if not config.ENABLE_EMAIL_ALERTS:
+		return False
+
+	load_dotenv()
+
+	gmail_user = os.getenv("GMAIL_USER")
+	gmail_app_password = os.getenv("GMAIL_APP_PASSWORD")
+	if not gmail_user or not gmail_app_password:
+		return False
+
+	recipients = _normalize_recipients(config.EMAIL_RECIPIENT)
+	if not recipients:
+		return False
+
+	message = f"Subject: {subject}\n\n{body}"
+
+	try:
+		with smtplib.SMTP("smtp.gmail.com", 587) as server:
+			if os.getenv("DEBUG_SMTP", "").lower() in ("1", "true", "yes"):
+				server.set_debuglevel(1)
+			server.starttls()
+			server.login(gmail_user, gmail_app_password)
+			server.sendmail(gmail_user, recipients, message)
+	except Exception:
+		return False
+
+	return True
+
+
+def send_bot_started_alert(account_login: int | str, account_balance: float, server: str) -> bool:
+	"""Send a notification that the bot has started successfully."""
+	subject = "US30 Bot STARTED"
+	body = (
+		"The US30 signal bot has started and is now running.\n\n"
+		f"Account:  {account_login}\n"
+		f"Server:   {server}\n"
+		f"Balance:  {account_balance:.2f}\n"
+	)
+	return _smtp_send(subject, body)
+
+
+def send_bot_stopped_alert(reason: str) -> bool:
+	"""Send a plain email notification that the bot has stopped automatically."""
+	subject = "US30 Bot STOPPED — automatic shutdown"
+	body = (
+		"The US30 signal bot has stopped automatically.\n\n"
+		f"Reason: {reason}\n\n"
+		"Please check the bot logs and restart manually if required."
+	)
+	return _smtp_send(subject, body)
+
+
+def send_no_signal_alert(minutes_since_last: int) -> bool:
+	"""Send an email when no buy/sell signal has fired within the configured interval."""
+	subject = "US30 Bot — No Signal"
+	body = (
+		f"No buy or sell signal has been detected in the last {minutes_since_last} minute(s).\n\n"
+		"The bot is still running and monitoring the market.\n"
+		"This alert will repeat every time the silence window elapses with no new signal."
+	)
+	return _smtp_send(subject, body)

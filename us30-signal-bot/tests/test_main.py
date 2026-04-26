@@ -333,3 +333,64 @@ def test_polling_loop_stops_when_reconnect_fails(monkeypatch, capsys):
     assert len(disconnect_calls) == 1
     output = capsys.readouterr().out
     assert "reconnect" in output.lower() or "failed" in output.lower() or True  # logged via _log
+
+
+def test_polling_loop_sends_no_signal_alert_after_quiet_interval(monkeypatch):
+    """No-signal email fires when NO_SIGNAL_ALERT_INTERVAL_SECONDS elapses with no signal."""
+    no_signal_calls = []
+
+    def fake_get_ohlcv(symbol, tf, n):
+        import mt5_mock
+        mt5_mock.initialize()
+        import mt5_connector
+        return mt5_connector.get_ohlcv(symbol, tf, n)
+
+    monkeypatch.setattr(main, "get_ohlcv", fake_get_ohlcv)
+    # A tiny interval so that even the sub-second work in one cycle exceeds it.
+    monkeypatch.setattr(main.config, "NO_SIGNAL_ALERT_INTERVAL_SECONDS", 0.001)
+    monkeypatch.setattr(main, "send_no_signal_alert", lambda m: no_signal_calls.append(m))
+    monkeypatch.setattr(main, "is_in_trading_session", lambda **kw: False)
+    monkeypatch.setattr(main, "send_bot_started_alert", lambda *a, **kw: None)
+
+    call_count = [0]
+
+    def one_cycle_sleep(s):
+        call_count[0] += 1
+        if call_count[0] >= 1:
+            raise KeyboardInterrupt
+
+    monkeypatch.setattr(main.time, "sleep", one_cycle_sleep)
+
+    main.polling_loop()
+
+    assert len(no_signal_calls) >= 1
+
+
+def test_polling_loop_no_signal_alert_suppressed_when_interval_zero(monkeypatch):
+    """No-signal alert is never sent when NO_SIGNAL_ALERT_INTERVAL_SECONDS is 0."""
+    no_signal_calls = []
+
+    def fake_get_ohlcv(symbol, tf, n):
+        import mt5_mock
+        mt5_mock.initialize()
+        import mt5_connector
+        return mt5_connector.get_ohlcv(symbol, tf, n)
+
+    monkeypatch.setattr(main, "get_ohlcv", fake_get_ohlcv)
+    monkeypatch.setattr(main.config, "NO_SIGNAL_ALERT_INTERVAL_SECONDS", 0)
+    monkeypatch.setattr(main, "send_no_signal_alert", lambda m: no_signal_calls.append(m))
+    monkeypatch.setattr(main, "is_in_trading_session", lambda **kw: False)
+    monkeypatch.setattr(main, "send_bot_started_alert", lambda *a, **kw: None)
+
+    call_count = [0]
+
+    def one_cycle_sleep(s):
+        call_count[0] += 1
+        if call_count[0] >= 1:
+            raise KeyboardInterrupt
+
+    monkeypatch.setattr(main.time, "sleep", one_cycle_sleep)
+
+    main.polling_loop()
+
+    assert len(no_signal_calls) == 0

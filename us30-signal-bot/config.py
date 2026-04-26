@@ -88,3 +88,8 @@ ORDER_MAGIC = 20260423
 # to execute live trades against your real account. Kept separate so you can
 # enable automated behavior in testing without opening live trading.
 ENABLE_LIVE_TRADES = True
+
+# No-signal heartbeat alert.
+# Send an email if no buy/sell signal fires within this many seconds.
+# Set to 0 to disable.
+NO_SIGNAL_ALERT_INTERVAL_SECONDS = 1800  # 30 minutes

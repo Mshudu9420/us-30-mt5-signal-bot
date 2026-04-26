@@ -411,3 +411,113 @@ timestamp,level,message
 2026-04-26 13:37:31,ERROR,Unexpected error in polling loop: 
 2026-04-26 13:37:31,WARNING,All OHLCV fetches returned None — MT5 connection may have dropped. Attempting reconnect…
 2026-04-26 13:37:31,ERROR,MT5 reconnect failed after all attempts. Stopping bot.
+2026-04-26 13:51:37,ERROR,Startup aborted: MT5 connection failed.
+2026-04-26 13:51:40,ERROR,Startup aborted: account info unavailable.
+2026-04-26 13:51:42,DEBUG,timings (s): fetch=0.004 indicators=0.158 signals=0.001 order_and_email=0.000 total=0.164
+2026-04-26 13:51:42,ERROR,Unexpected error in polling loop: 
+2026-04-26 13:51:42,DEBUG,timings (s): fetch=0.003 indicators=0.158 signals=0.000 order_and_email=0.000 total=0.161
+2026-04-26 13:51:42,ERROR,Unexpected error in polling loop: 
+2026-04-26 13:51:42,DEBUG,timings (s): fetch=0.003 indicators=0.155 signals=0.000 order_and_email=0.000 total=0.159
+2026-04-26 13:51:42,ERROR,Unexpected error in polling loop: 
+2026-04-26 13:51:42,INFO,"auto-trade summary: {'success': False, 'error': 'symbol tick info unavailable for BTCUSDm'}"
+2026-04-26 13:51:42,DEBUG,timings (s): fetch=0.003 indicators=0.159 signals=0.001 order_and_email=0.001 total=0.163
+2026-04-26 13:51:42,ERROR,Unexpected error in polling loop: 
+2026-04-26 13:51:42,DEBUG,timings (s): fetch=0.003 indicators=0.156 signals=0.000 order_and_email=0.000 total=0.160
+2026-04-26 13:51:42,ERROR,Unexpected error in polling loop: 
+2026-04-26 13:51:42,DEBUG,timings (s): fetch=0.003 indicators=0.154 signals=0.000 order_and_email=0.000 total=0.158
+2026-04-26 13:51:42,INFO,Bot stopped by user.
+2026-04-26 13:51:42,WARNING,All OHLCV fetches returned None — MT5 connection may have dropped. Attempting reconnect…
+2026-04-26 13:51:42,INFO,MT5 reconnect successful. Resuming polling.
+2026-04-26 13:51:43,DEBUG,timings (s): fetch=0.003 indicators=0.157 signals=0.000 order_and_email=0.000 total=0.161
+2026-04-26 13:51:43,ERROR,Unexpected error in polling loop: 
+2026-04-26 13:51:43,WARNING,All OHLCV fetches returned None — MT5 connection may have dropped. Attempting reconnect…
+2026-04-26 13:51:43,ERROR,MT5 reconnect failed after all attempts. Stopping bot.
+2026-04-26 13:55:05,ERROR,Startup aborted: MT5 connection failed.
+2026-04-26 13:55:07,ERROR,Startup aborted: account info unavailable.
+2026-04-26 13:55:09,DEBUG,timings (s): fetch=0.004 indicators=0.158 signals=0.001 order_and_email=0.000 total=0.164
+2026-04-26 13:55:09,ERROR,Unexpected error in polling loop: 
+2026-04-26 13:55:09,DEBUG,timings (s): fetch=0.003 indicators=0.158 signals=0.000 order_and_email=0.000 total=0.162
+2026-04-26 13:55:09,ERROR,Unexpected error in polling loop: 
+2026-04-26 13:55:09,DEBUG,timings (s): fetch=0.003 indicators=0.155 signals=0.000 order_and_email=0.000 total=0.158
+2026-04-26 13:55:09,ERROR,Unexpected error in polling loop: 
+2026-04-26 13:55:10,INFO,"auto-trade summary: {'success': False, 'error': 'symbol tick info unavailable for BTCUSDm'}"
+2026-04-26 13:55:10,DEBUG,timings (s): fetch=0.003 indicators=0.157 signals=0.001 order_and_email=0.001 total=0.162
+2026-04-26 13:55:10,ERROR,Unexpected error in polling loop: 
+2026-04-26 13:55:10,DEBUG,timings (s): fetch=0.003 indicators=0.159 signals=0.000 order_and_email=0.000 total=0.162
+2026-04-26 13:55:10,ERROR,Unexpected error in polling loop: 
+2026-04-26 13:55:10,DEBUG,timings (s): fetch=0.003 indicators=0.156 signals=0.000 order_and_email=0.000 total=0.159
+2026-04-26 13:55:10,INFO,Bot stopped by user.
+2026-04-26 13:55:10,WARNING,All OHLCV fetches returned None — MT5 connection may have dropped. Attempting reconnect…
+2026-04-26 13:55:10,INFO,MT5 reconnect successful. Resuming polling.
+2026-04-26 13:55:10,DEBUG,timings (s): fetch=0.003 indicators=0.158 signals=0.000 order_and_email=0.000 total=0.161
+2026-04-26 13:55:10,ERROR,Unexpected error in polling loop: 
+2026-04-26 13:55:10,WARNING,All OHLCV fetches returned None — MT5 connection may have dropped. Attempting reconnect…
+2026-04-26 13:55:10,ERROR,MT5 reconnect failed after all attempts. Stopping bot.
+2026-04-26 14:02:58,DEBUG,timings (s): fetch=0.004 indicators=0.155 signals=0.001 order_and_email=0.000 total=3499.337
+2026-04-26 14:04:05,ERROR,Startup aborted: MT5 connection failed.
+2026-04-26 14:04:07,ERROR,Startup aborted: account info unavailable.
+2026-04-26 14:04:09,DEBUG,timings (s): fetch=0.013 indicators=0.159 signals=0.001 order_and_email=0.000 total=0.174
+2026-04-26 14:04:09,ERROR,Unexpected error in polling loop: 
+2026-04-26 14:04:09,DEBUG,timings (s): fetch=0.003 indicators=0.161 signals=0.000 order_and_email=0.000 total=0.165
+2026-04-26 14:04:09,ERROR,Unexpected error in polling loop: 
+2026-04-26 14:04:10,DEBUG,timings (s): fetch=0.003 indicators=0.159 signals=0.000 order_and_email=0.000 total=0.163
+2026-04-26 14:04:10,ERROR,Unexpected error in polling loop: 
+2026-04-26 14:04:10,INFO,"auto-trade summary: {'success': False, 'error': 'symbol tick info unavailable for BTCUSDm'}"
+2026-04-26 14:04:10,DEBUG,timings (s): fetch=0.004 indicators=0.162 signals=0.001 order_and_email=0.006 total=0.173
+2026-04-26 14:04:10,ERROR,Unexpected error in polling loop: 
+2026-04-26 14:04:10,DEBUG,timings (s): fetch=0.004 indicators=0.160 signals=0.000 order_and_email=0.000 total=0.165
+2026-04-26 14:04:10,ERROR,Unexpected error in polling loop: 
+2026-04-26 14:04:10,DEBUG,timings (s): fetch=0.003 indicators=0.160 signals=0.000 order_and_email=0.000 total=0.164
+2026-04-26 14:04:10,INFO,Bot stopped by user.
+2026-04-26 14:04:10,WARNING,All OHLCV fetches returned None — MT5 connection may have dropped. Attempting reconnect…
+2026-04-26 14:04:10,INFO,MT5 reconnect successful. Resuming polling.
+2026-04-26 14:04:10,DEBUG,timings (s): fetch=0.003 indicators=0.159 signals=0.000 order_and_email=0.000 total=0.163
+2026-04-26 14:04:10,ERROR,Unexpected error in polling loop: 
+2026-04-26 14:04:10,WARNING,All OHLCV fetches returned None — MT5 connection may have dropped. Attempting reconnect…
+2026-04-26 14:04:10,ERROR,MT5 reconnect failed after all attempts. Stopping bot.
+2026-04-26 14:04:12,WARNING,All OHLCV fetches returned None — MT5 connection may have dropped. Attempting reconnect…
+2026-04-26 14:04:12,INFO,MT5 reconnect successful. Resuming polling.
+2026-04-26 14:04:13,INFO,macro-fvg | direction=BULLISH fvg=[78010.58-78046.76] type=bullish liquidity_target=78126.18 entry=78098.61
+2026-04-26 14:04:13,DEBUG,session filter: outside NY trading hours (09:30–16:00 ET) — no orders or alerts placed.
+2026-04-26 14:04:13,DEBUG,timings (s): fetch=0.000 indicators=0.000 signals=0.000 order_and_email=0.000 total=0.007
+2026-04-26 14:04:13,INFO,Bot stopped by user.
+2026-04-26 14:04:13,WARNING,All OHLCV fetches returned None — MT5 connection may have dropped. Attempting reconnect…
+2026-04-26 14:04:13,INFO,MT5 reconnect successful. Resuming polling.
+2026-04-26 14:04:13,INFO,macro-fvg | direction=BULLISH fvg=[78010.58-78046.76] type=bullish liquidity_target=78126.18 entry=78098.61
+2026-04-26 14:04:13,DEBUG,session filter: outside NY trading hours (09:30–16:00 ET) — no orders or alerts placed.
+2026-04-26 14:04:13,DEBUG,timings (s): fetch=0.005 indicators=0.165 signals=0.001 order_and_email=0.000 total=0.177
+2026-04-26 14:04:13,INFO,Bot stopped by user.
+2026-04-26 14:05:29,ERROR,Startup aborted: MT5 connection failed.
+2026-04-26 14:05:32,ERROR,Startup aborted: account info unavailable.
+2026-04-26 14:05:34,DEBUG,timings (s): fetch=0.004 indicators=0.160 signals=0.001 order_and_email=0.000 total=0.166
+2026-04-26 14:05:34,ERROR,Unexpected error in polling loop: 
+2026-04-26 14:05:34,DEBUG,timings (s): fetch=0.003 indicators=0.167 signals=0.000 order_and_email=0.000 total=0.170
+2026-04-26 14:05:34,ERROR,Unexpected error in polling loop: 
+2026-04-26 14:05:34,DEBUG,timings (s): fetch=0.003 indicators=0.161 signals=0.000 order_and_email=0.000 total=0.164
+2026-04-26 14:05:34,ERROR,Unexpected error in polling loop: 
+2026-04-26 14:05:34,INFO,"auto-trade summary: {'success': False, 'error': 'symbol tick info unavailable for BTCUSDm'}"
+2026-04-26 14:05:34,DEBUG,timings (s): fetch=0.003 indicators=0.161 signals=0.001 order_and_email=0.001 total=0.166
+2026-04-26 14:05:34,ERROR,Unexpected error in polling loop: 
+2026-04-26 14:05:34,DEBUG,timings (s): fetch=0.003 indicators=0.161 signals=0.000 order_and_email=0.000 total=0.165
+2026-04-26 14:05:34,ERROR,Unexpected error in polling loop: 
+2026-04-26 14:05:34,DEBUG,timings (s): fetch=0.003 indicators=0.162 signals=0.000 order_and_email=0.000 total=0.165
+2026-04-26 14:05:34,INFO,Bot stopped by user.
+2026-04-26 14:05:34,WARNING,All OHLCV fetches returned None — MT5 connection may have dropped. Attempting reconnect…
+2026-04-26 14:05:34,INFO,MT5 reconnect successful. Resuming polling.
+2026-04-26 14:05:35,DEBUG,timings (s): fetch=0.003 indicators=0.160 signals=0.000 order_and_email=0.000 total=0.164
+2026-04-26 14:05:35,ERROR,Unexpected error in polling loop: 
+2026-04-26 14:05:35,WARNING,All OHLCV fetches returned None — MT5 connection may have dropped. Attempting reconnect…
+2026-04-26 14:05:35,ERROR,MT5 reconnect failed after all attempts. Stopping bot.
+2026-04-26 14:05:37,WARNING,All OHLCV fetches returned None — MT5 connection may have dropped. Attempting reconnect…
+2026-04-26 14:05:37,INFO,MT5 reconnect successful. Resuming polling.
+2026-04-26 14:05:37,INFO,macro-fvg | direction=BULLISH fvg=[78010.58-78046.76] type=bullish liquidity_target=78117.19 entry=78084.12
+2026-04-26 14:05:37,DEBUG,session filter: outside NY trading hours (09:30–16:00 ET) — no orders or alerts placed.
+2026-04-26 14:05:37,INFO,no-signal alert: 0m since last signal — sending heartbeat email.
+2026-04-26 14:05:37,DEBUG,timings (s): fetch=0.012 indicators=0.173 signals=0.001 order_and_email=0.000 total=0.193
+2026-04-26 14:05:37,INFO,Bot stopped by user.
+2026-04-26 14:05:37,WARNING,All OHLCV fetches returned None — MT5 connection may have dropped. Attempting reconnect…
+2026-04-26 14:05:37,INFO,MT5 reconnect successful. Resuming polling.
+2026-04-26 14:05:37,INFO,macro-fvg | direction=BULLISH fvg=[78010.58-78046.76] type=bullish liquidity_target=78117.19 entry=78084.12
+2026-04-26 14:05:37,DEBUG,session filter: outside NY trading hours (09:30–16:00 ET) — no orders or alerts placed.
+2026-04-26 14:05:37,DEBUG,timings (s): fetch=0.005 indicators=0.164 signals=0.001 order_and_email=0.000 total=0.177
+2026-04-26 14:05:37,INFO,Bot stopped by user.
