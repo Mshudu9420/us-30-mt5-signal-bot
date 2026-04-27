@@ -234,7 +234,7 @@ def polling_loop() -> None:
 				step_times["email_send"] = time.monotonic() - email_start
 				_last_signal_mono = time.monotonic()
 
-			# Medium-confidence handling: alert only, half lot, no auto-trade.
+			# Medium-confidence handling: half lot, auto-trade + alert.
 			# Only fires when high-confidence did not already fire.
 			elif _med_conf:
 				_sig = m5_signal
@@ -250,7 +250,41 @@ def polling_loop() -> None:
 				_rr = calculate_rr_ratio(_entry, _sl, _tp)
 				_alert_sig = dict(_sig, is_medium_confidence=True)
 				_risk_dict = {"lot_size": _lot, "sl": _sl, "tp": _tp, "rr_ratio": _rr}
-				_log.info(f"medium-confidence signal: {_direction} lot={_lot:.2f} (alert only, no auto-trade)")
+				_log.info(f"medium-confidence signal: {_direction} lot={_lot:.2f}")
+
+				_med_order_response = None
+				_med_order_summary = None
+				if _daily_loss_tracker.is_triggered(_capital):
+					_log.warning(
+						f"circuit-breaker: daily loss limit reached "
+						f"(opening={_daily_loss_tracker.opening_balance:.2f} "
+						f"current={_capital:.2f} "
+						f"limit={config.MAX_DAILY_LOSS_PCT * 100:.0f}%). "
+						f"No orders will be placed today."
+					)
+					_med_order_summary = {"success": False, "error": "DAILY_LOSS_LIMIT_HIT"}
+				elif config.ENABLE_AUTO_TRADES:
+					if config.ENABLE_LIVE_TRADES:
+						_med_order_response = mt5_connector.place_market_order(
+							config.SYMBOL,
+							_direction,
+							_lot,
+							_sl,
+							_tp,
+							deviation=getattr(config, "ORDER_DEVIATION", None),
+							magic=getattr(config, "ORDER_MAGIC", None),
+						)
+						_med_order_summary = mt5_connector.summarize_order_result(_med_order_response)
+						_log.info(f"medium-confidence auto-trade summary: {_med_order_summary}")
+					else:
+						_med_order_summary = {"success": False, "error": "LIVE_TRADES_DISABLED"}
+						_log.info("medium-confidence trade skipped: live trading disabled (ENABLE_LIVE_TRADES=False)")
+
+				if _med_order_summary is not None:
+					_alert_sig["order_summary"] = _med_order_summary
+				if _med_order_response is not None:
+					_alert_sig["order_info"] = _med_order_response
+
 				if not step_times.get("order_and_email"):
 					email_start = time.monotonic()
 					send_email_alert(_alert_sig, _risk_dict)
@@ -258,10 +292,11 @@ def polling_loop() -> None:
 					step_times["email_send"] = time.monotonic() - email_start
 					_last_signal_mono = time.monotonic()
 
-			# Macro-FVG auto-trading — independent of the BB+RSI confidence tiers.
+			# Macro-FVG auto-trading — only fires when a confidence tier also agrees.
 			# SL is placed just beyond the FVG zone (the structural invalidation level).
 			if (
 				macro_sig is not None
+				and (_high_conf or _med_conf)
 				and is_in_trading_session(symbol=config.SYMBOL)
 				and getattr(config, "ENABLE_MACRO_FVG_TRADES", True)
 			):

@@ -2,8 +2,8 @@
 
 # Broker and symbol settings
 BROKER_NAME = "Exness"
-SYMBOL = "BTCUSDm"
-SYMBOL_FALLBACKS = ["BTCUSD.cash", "BTCUSDCash", "BTCUSD"]
+SYMBOL = "US30m"
+SYMBOL_FALLBACKS = ["US30.cash", "US30Cash", "US30"]
 
 # Account and risk configuration
 # INITIAL_CAPITAL is used as a fallback when the live MT5 account balance is
