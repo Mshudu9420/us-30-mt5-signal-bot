@@ -2,8 +2,8 @@
 
 # Broker and symbol settings
 BROKER_NAME = "Exness"
-SYMBOL = "US30m"
-SYMBOL_FALLBACKS = ["US30.cash", "US30Cash", "US30"]
+SYMBOL = "XAUUSDm" 
+SYMBOL_FALLBACKS = ["XAUUSDm", "XAUUSD", "XAU"]
 
 # Account and risk configuration
 # INITIAL_CAPITAL is used as a fallback when the live MT5 account balance is
@@ -55,7 +55,7 @@ MT5_RECONNECT_BACKOFF_BASE = 10  # seconds
 
 # Alerts
 ENABLE_EMAIL_ALERTS = True
-EMAIL_RECIPIENT =  "mementorelo@gmail.com"
+EMAIL_RECIPIENT =  "mmathidi01@gmail.com"
 
 # Timezone for timestamp display and logging. Default: South African Standard Time (SAST).
 # Use a tz database name recognized by pandas (e.g. 'Africa/Johannesburg').

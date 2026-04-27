@@ -1516,3 +1516,13 @@ timestamp,level,message
 2026-04-27 20:19:03,INFO,macro-fvg | direction=BULLISH fvg=[49176.7-49183.7] type=bullish liquidity_target=49224.22 entry=49205.7
 2026-04-27 20:22:29,DEBUG,timings (s): fetch=0.005 indicators=0.152 signals=0.001 order_and_email=0.000 total=206.529
 2026-04-27 20:22:30,INFO,macro-fvg | direction=BULLISH fvg=[49176.7-49183.7] type=bullish liquidity_target=49224.38 entry=49206.6
+2026-04-27 20:26:23,INFO,macro-fvg | direction=BULLISH fvg=[49176.7-49183.7] type=bullish liquidity_target=49223.93 entry=49207.0
+2026-04-27 20:26:23,DEBUG,timings (s): fetch=0.017 indicators=0.030 signals=0.002 order_and_email=0.000 total=0.066
+2026-04-27 20:27:23,INFO,macro-fvg | direction=BULLISH fvg=[49176.7-49183.7] type=bullish liquidity_target=49221.24 entry=49205.7
+2026-04-27 20:27:23,DEBUG,timings (s): fetch=0.005 indicators=0.023 signals=0.001 order_and_email=0.000 total=0.037
+2026-04-27 20:28:23,INFO,macro-fvg | direction=BULLISH fvg=[49176.7-49183.7] type=bullish liquidity_target=49226.91 entry=49208.7
+2026-04-27 20:28:23,DEBUG,timings (s): fetch=0.005 indicators=0.023 signals=0.001 order_and_email=0.000 total=0.037
+2026-04-27 20:29:23,INFO,macro-fvg | direction=BULLISH fvg=[49176.7-49183.7] type=bullish liquidity_target=49228.93 entry=49210.7
+2026-04-27 20:29:23,DEBUG,timings (s): fetch=0.005 indicators=0.024 signals=0.001 order_and_email=0.000 total=0.039
+2026-04-27 20:30:23,INFO,macro-fvg | direction=BULLISH fvg=[49176.7-49183.7] type=bullish liquidity_target=49219.55 entry=49204.7
+2026-04-27 20:30:23,DEBUG,timings (s): fetch=0.006 indicators=0.024 signals=0.001 order_and_email=0.000 total=0.041
