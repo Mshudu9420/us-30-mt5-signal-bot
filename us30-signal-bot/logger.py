@@ -30,18 +30,22 @@ _CSV_HEADER = ["timestamp", "level", "message"]
 _logger: logging.Logger | None = None
 
 
+_CSV_BUF: io.StringIO = io.StringIO()
+_CSV_WRITER: csv.writer = csv.writer(_CSV_BUF, quoting=csv.QUOTE_MINIMAL)  # type: ignore[type-arg]
+
+
 class _CsvFormatter(logging.Formatter):
 	"""Format each log record as a single CSV row (no trailing newline)."""
 
 	def format(self, record: logging.LogRecord) -> str:
-		buf = io.StringIO()
-		writer = csv.writer(buf, quoting=csv.QUOTE_MINIMAL)
-		writer.writerow([
+		_CSV_BUF.seek(0)
+		_CSV_BUF.truncate(0)
+		_CSV_WRITER.writerow([
 			self.formatTime(record, self.datefmt),
 			record.levelname,
 			record.getMessage(),
 		])
-		return buf.getvalue().rstrip("\r\n")
+		return _CSV_BUF.getvalue().rstrip("\r\n")
 
 
 class _StdoutHandler(logging.StreamHandler):

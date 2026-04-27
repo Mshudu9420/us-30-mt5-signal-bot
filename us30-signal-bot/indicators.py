@@ -2,30 +2,29 @@
 
 from __future__ import annotations
 
+import numpy as np
 import pandas as pd
 
 
 def calculate_bollinger_bands(df: pd.DataFrame, period: int, std_dev: float) -> pd.DataFrame:
-	"""Return a copy of df with Bollinger Band columns added.
+	"""Add Bollinger Band columns to df in-place and return df.
 
 	Columns added:
 	- bb_mid
 	- bb_upper
 	- bb_lower
 	"""
-	result = df.copy()
-	rolling_close = result["close"].rolling(window=period)
-	result["bb_mid"] = rolling_close.mean()
+	rolling_close = df["close"].rolling(window=period)
+	df["bb_mid"] = rolling_close.mean()
 	rolling_std = rolling_close.std()
-	result["bb_upper"] = result["bb_mid"] + (rolling_std * std_dev)
-	result["bb_lower"] = result["bb_mid"] - (rolling_std * std_dev)
-	return result
+	df["bb_upper"] = df["bb_mid"] + (rolling_std * std_dev)
+	df["bb_lower"] = df["bb_mid"] - (rolling_std * std_dev)
+	return df
 
 
 def calculate_rsi(df: pd.DataFrame, period: int) -> pd.DataFrame:
-	"""Return a copy of df with an RSI column added."""
-	result = df.copy()
-	delta = result["close"].diff()
+	"""Add an RSI column to df in-place and return df."""
+	delta = df["close"].diff()
 	gain = delta.clip(lower=0)
 	loss = -delta.clip(upper=0)
 
@@ -33,17 +32,16 @@ def calculate_rsi(df: pd.DataFrame, period: int) -> pd.DataFrame:
 	avg_loss = loss.rolling(window=period, min_periods=period).mean()
 
 	rs = avg_gain / avg_loss.replace(0, pd.NA)
-	result["rsi"] = 100 - (100 / (1 + rs))
-	result.loc[(avg_loss == 0) & (avg_gain > 0), "rsi"] = 100.0
-	result.loc[(avg_gain == 0) & (avg_loss > 0), "rsi"] = 0.0
-	return result
+	df["rsi"] = 100 - (100 / (1 + rs))
+	df.loc[(avg_loss == 0) & (avg_gain > 0), "rsi"] = 100.0
+	df.loc[(avg_gain == 0) & (avg_loss > 0), "rsi"] = 0.0
+	return df
 
 
 def calculate_ema(df: pd.DataFrame, period: int) -> pd.DataFrame:
-	"""Return a copy of df with an EMA column added."""
-	result = df.copy()
-	result["ema"] = result["close"].ewm(span=period, adjust=False).mean()
-	return result
+	"""Add an EMA column to df in-place and return df."""
+	df["ema"] = df["close"].ewm(span=period, adjust=False).mean()
+	return df
 
 
 def calculate_macd(
@@ -59,13 +57,12 @@ def calculate_macd(
 	- macd_signal    : EMA(signal) of the MACD line
 	- macd_histogram : macd minus macd_signal (positive = bullish momentum)
 	"""
-	result = df.copy()
-	fast_ema = result["close"].ewm(span=fast, adjust=False).mean()
-	slow_ema = result["close"].ewm(span=slow, adjust=False).mean()
-	result["macd"] = fast_ema - slow_ema
-	result["macd_signal"] = result["macd"].ewm(span=signal, adjust=False).mean()
-	result["macd_histogram"] = result["macd"] - result["macd_signal"]
-	return result
+	fast_ema = df["close"].ewm(span=fast, adjust=False).mean()
+	slow_ema = df["close"].ewm(span=slow, adjust=False).mean()
+	df["macd"] = fast_ema - slow_ema
+	df["macd_signal"] = df["macd"].ewm(span=signal, adjust=False).mean()
+	df["macd_histogram"] = df["macd"] - df["macd_signal"]
+	return df
 
 
 def get_latest_values(df: pd.DataFrame) -> dict[str, float]:
@@ -90,20 +87,23 @@ def detect_fvg(df: pd.DataFrame) -> list[dict]:
 	  time       : timestamp of the completing (third) candle
 	  bar_index  : positional index of the third candle in df
 	"""
+	highs = df["high"].to_numpy(dtype=float)
+	lows = df["low"].to_numpy(dtype=float)
+	times = df["time"].to_numpy() if "time" in df.columns else np.full(len(df), None)
+
 	fvgs: list[dict] = []
 	for i in range(2, len(df)):
-		c0_high = float(df.iloc[i - 2]["high"])
-		c0_low = float(df.iloc[i - 2]["low"])
-		c2_high = float(df.iloc[i]["high"])
-		c2_low = float(df.iloc[i]["low"])
-		bar_time = df.iloc[i]["time"] if "time" in df.columns else None
+		c0_high = highs[i - 2]
+		c0_low = lows[i - 2]
+		c2_high = highs[i]
+		c2_low = lows[i]
 
 		if c0_high < c2_low:  # bullish FVG — gap above first candle's high
 			fvgs.append({
 				"type": "bullish",
 				"top": c2_low,
 				"bottom": c0_high,
-				"time": bar_time,
+				"time": times[i],
 				"bar_index": i,
 			})
 		elif c0_low > c2_high:  # bearish FVG — gap below first candle's low
@@ -111,7 +111,7 @@ def detect_fvg(df: pd.DataFrame) -> list[dict]:
 				"type": "bearish",
 				"top": c0_low,
 				"bottom": c2_high,
-				"time": bar_time,
+				"time": times[i],
 				"bar_index": i,
 			})
 	return fvgs
