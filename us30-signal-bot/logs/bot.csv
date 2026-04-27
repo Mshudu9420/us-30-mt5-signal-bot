@@ -1474,3 +1474,17 @@ timestamp,level,message
 2026-04-27 18:45:00,DEBUG,timings (s): fetch=0.009 indicators=0.151 signals=0.001 order_and_email=688.716 total=5448.600
 2026-04-27 18:45:00,INFO,macro-fvg | direction=BULLISH fvg=[49138.6-49144.1] type=bearish liquidity_target=49209.46 entry=49184.1
 2026-04-27 19:07:38,WARNING,circuit-breaker: daily loss limit reached — macro-FVG trade skipped (opening=135.37 current=87.71 limit=5%).
+2026-04-27 19:58:20,INFO,macro-fvg | direction=BULLISH fvg=[49189.8-49190.3] type=bullish liquidity_target=49206.41 entry=49186.7
+2026-04-27 19:58:20,DEBUG,timings (s): fetch=0.021 indicators=0.161 signals=0.001 order_and_email=0.000 total=0.196
+2026-04-27 19:59:20,INFO,macro-fvg | direction=BULLISH fvg=[49189.8-49190.3] type=bullish liquidity_target=49202.08 entry=49181.2
+2026-04-27 19:59:20,DEBUG,timings (s): fetch=0.005 indicators=0.157 signals=0.002 order_and_email=0.000 total=0.174
+2026-04-27 20:00:20,INFO,macro-fvg | direction=BULLISH fvg=[49189.8-49190.3] type=bullish liquidity_target=49195.39 entry=49169.7
+2026-04-27 20:00:20,DEBUG,timings (s): fetch=0.005 indicators=0.169 signals=0.002 order_and_email=0.000 total=0.187
+2026-04-27 20:01:20,INFO,macro-fvg | direction=BULLISH fvg=[49189.8-49190.3] type=bullish liquidity_target=49195.2 entry=49171.2
+2026-04-27 20:01:20,DEBUG,timings (s): fetch=0.005 indicators=0.156 signals=0.001 order_and_email=0.000 total=0.173
+2026-04-27 20:02:20,INFO,macro-fvg | direction=BULLISH fvg=[49189.8-49190.3] type=bullish liquidity_target=49205.36 entry=49184.8
+2026-04-27 20:02:20,DEBUG,timings (s): fetch=0.005 indicators=0.168 signals=0.002 order_and_email=0.000 total=0.189
+2026-04-27 20:03:20,INFO,macro-fvg | direction=BULLISH fvg=[49189.8-49190.3] type=bullish liquidity_target=49205.78 entry=49185.7
+2026-04-27 20:03:20,DEBUG,timings (s): fetch=0.005 indicators=0.173 signals=0.002 order_and_email=0.000 total=0.199
+2026-04-27 20:04:20,INFO,macro-fvg | direction=BULLISH fvg=[49189.8-49190.3] type=bullish liquidity_target=49205.56 entry=49186.2
+2026-04-27 20:04:20,DEBUG,timings (s): fetch=0.005 indicators=0.163 signals=0.002 order_and_email=0.000 total=0.196

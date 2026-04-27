@@ -184,57 +184,101 @@ def polling_loop() -> None:
 				_sig = m1_signal or m5_signal or m15_signal
 				_df = m5_df if m5_signal is not None else m15_df
 				_direction = _sig["direction"]
-				_entry = float(_sig["entry_price"])
-				_row = _df.iloc[-1]
-				_sl_band = float(_row["bb_lower"] if _direction == "BUY" else _row["bb_upper"])
-				_sl = calculate_sl_price(_direction, _sl_band, config.SL_BUFFER_PIPS)
-				_tp = calculate_tp_price(_direction, float(_row["bb_mid"]))
-				_lot = calculate_lot_size(risk_amount, abs(_entry - _sl), config.DEFAULT_PIP_VALUE)
-				_rr = calculate_rr_ratio(_entry, _sl, _tp)
-				_alert_sig = dict(_sig, is_high_confidence=True)
-				_risk_dict = {"lot_size": _lot, "sl": _sl, "tp": _tp, "rr_ratio": _rr}
 
-				order_response = None
-				order_summary = None
-				if _daily_loss_tracker.is_triggered(_capital):
-					_log.warning(
-						f"circuit-breaker: daily loss limit reached "
-						f"(opening={_daily_loss_tracker.opening_balance:.2f} "
-						f"current={_capital:.2f} "
-						f"limit={config.MAX_DAILY_LOSS_PCT * 100:.0f}%). "
-						f"No orders will be placed today."
-					)
-					order_summary = {"success": False, "error": "DAILY_LOSS_LIMIT_HIT"}
-				elif config.ENABLE_AUTO_TRADES:
-					if config.ENABLE_LIVE_TRADES:
-						order_response = mt5_connector.place_market_order(
-							config.SYMBOL,
-							_direction,
-							_lot,
-							_sl,
-							_tp,
-							deviation=getattr(config, "ORDER_DEVIATION", None),
-							magic=getattr(config, "ORDER_MAGIC", None),
-						)
-						order_summary = mt5_connector.summarize_order_result(order_response)
-						_log.info(f"auto-trade summary: {order_summary}")
+				# Determine whether a macro FVG aligns with the high-confidence direction.
+				_fvg_direction = (
+					"BUY" if macro_sig["direction"] == "BULLISH" else "SELL"
+				) if macro_sig is not None else None
+				_fvg_aligned = (
+					macro_sig is not None
+					and _fvg_direction == _direction
+					and getattr(config, "ENABLE_MACRO_FVG_TRADES", True)
+				)
+
+				if _fvg_aligned:
+					# High-confidence + FVG confluence: use structural FVG levels for SL/TP.
+					_entry = float(macro_sig["entry_price"])
+					if _direction == "BUY":
+						_sl = float(macro_sig["fvg_bottom"]) - config.SL_BUFFER_PIPS
 					else:
-						order_summary = {"success": False, "error": "LIVE_TRADES_DISABLED"}
-						_log.info("auto-trade skipped: live trading disabled (ENABLE_LIVE_TRADES=False)")
+						_sl = float(macro_sig["fvg_top"]) + config.SL_BUFFER_PIPS
+					_tp = float(macro_sig["liquidity_target"])
+					_lot = calculate_lot_size(risk_amount, abs(_entry - _sl), config.DEFAULT_PIP_VALUE)
+					_rr = calculate_rr_ratio(_entry, _sl, _tp)
+					_alert_sig = dict(
+						_sig,
+						is_high_confidence=True,
+						is_macro_fvg=True,
+						fvg_top=macro_sig["fvg_top"],
+						fvg_bottom=macro_sig["fvg_bottom"],
+					)
+					_risk_dict = {"lot_size": _lot, "sl": _sl, "tp": _tp, "rr_ratio": _rr}
+					_log.info(
+						f"high-confidence + FVG confluence: {_direction} "
+						f"entry={_entry} fvg=[{macro_sig['fvg_bottom']}-{macro_sig['fvg_top']}] "
+						f"sl={_sl} tp={_tp} lot={_lot:.2f}"
+					)
 
-				if order_summary is not None:
-					_alert_sig["order_summary"] = order_summary
-				if order_response is not None:
-					_alert_sig["order_info"] = order_response
+					order_response = None
+					order_summary = None
+					if _daily_loss_tracker.is_triggered(_capital):
+						_log.warning(
+							f"circuit-breaker: daily loss limit reached "
+							f"(opening={_daily_loss_tracker.opening_balance:.2f} "
+							f"current={_capital:.2f} "
+							f"limit={config.MAX_DAILY_LOSS_PCT * 100:.0f}%). "
+							f"No orders will be placed today."
+						)
+						order_summary = {"success": False, "error": "DAILY_LOSS_LIMIT_HIT"}
+					elif config.ENABLE_AUTO_TRADES:
+						if config.ENABLE_LIVE_TRADES:
+							order_response = mt5_connector.place_market_order(
+								config.SYMBOL,
+								_direction,
+								_lot,
+								_sl,
+								_tp,
+								deviation=getattr(config, "ORDER_DEVIATION", None),
+								magic=getattr(config, "ORDER_MAGIC", None),
+							)
+							order_summary = mt5_connector.summarize_order_result(order_response)
+							_log.info(f"high-conf+fvg auto-trade summary: {order_summary}")
+						else:
+							order_summary = {"success": False, "error": "LIVE_TRADES_DISABLED"}
+							_log.info("high-conf+fvg trade skipped: live trading disabled (ENABLE_LIVE_TRADES=False)")
 
-				# send alert (could block on SMTP)
-				email_start = time.monotonic()
-				send_email_alert(_alert_sig, _risk_dict)
-				step_times["order_and_email"] = time.monotonic() - order_start
-				step_times["email_send"] = time.monotonic() - email_start
-				_last_signal_mono = time.monotonic()
+					if order_summary is not None:
+						_alert_sig["order_summary"] = order_summary
+					if order_response is not None:
+						_alert_sig["order_info"] = order_response
 
-			# Medium-confidence handling: half lot, auto-trade + alert.
+					email_start = time.monotonic()
+					send_email_alert(_alert_sig, _risk_dict)
+					step_times["order_and_email"] = time.monotonic() - order_start
+					step_times["email_send"] = time.monotonic() - email_start
+					_last_signal_mono = time.monotonic()
+
+				else:
+					# High-confidence without FVG confluence: alert only, no trade.
+					_entry = float(_sig["entry_price"])
+					_row = _df.iloc[-1]
+					_sl_band = float(_row["bb_lower"] if _direction == "BUY" else _row["bb_upper"])
+					_sl = calculate_sl_price(_direction, _sl_band, config.SL_BUFFER_PIPS)
+					_tp = calculate_tp_price(_direction, float(_row["bb_mid"]))
+					_lot = calculate_lot_size(risk_amount, abs(_entry - _sl), config.DEFAULT_PIP_VALUE)
+					_rr = calculate_rr_ratio(_entry, _sl, _tp)
+					_alert_sig = dict(_sig, is_high_confidence=True)
+					_risk_dict = {"lot_size": _lot, "sl": _sl, "tp": _tp, "rr_ratio": _rr}
+					_log.info(
+						f"high-confidence signal (no FVG confluence): {_direction} — alert only, no trade."
+					)
+					email_start = time.monotonic()
+					send_email_alert(_alert_sig, _risk_dict)
+					step_times["order_and_email"] = time.monotonic() - order_start
+					step_times["email_send"] = time.monotonic() - email_start
+					_last_signal_mono = time.monotonic()
+
+			# Medium-confidence: alert only, no auto-trade.
 			# Only fires when high-confidence did not already fire.
 			elif _med_conf:
 				_sig = m5_signal
@@ -250,106 +294,13 @@ def polling_loop() -> None:
 				_rr = calculate_rr_ratio(_entry, _sl, _tp)
 				_alert_sig = dict(_sig, is_medium_confidence=True)
 				_risk_dict = {"lot_size": _lot, "sl": _sl, "tp": _tp, "rr_ratio": _rr}
-				_log.info(f"medium-confidence signal: {_direction} lot={_lot:.2f}")
-
-				_med_order_response = None
-				_med_order_summary = None
-				if _daily_loss_tracker.is_triggered(_capital):
-					_log.warning(
-						f"circuit-breaker: daily loss limit reached "
-						f"(opening={_daily_loss_tracker.opening_balance:.2f} "
-						f"current={_capital:.2f} "
-						f"limit={config.MAX_DAILY_LOSS_PCT * 100:.0f}%). "
-						f"No orders will be placed today."
-					)
-					_med_order_summary = {"success": False, "error": "DAILY_LOSS_LIMIT_HIT"}
-				elif config.ENABLE_AUTO_TRADES:
-					if config.ENABLE_LIVE_TRADES:
-						_med_order_response = mt5_connector.place_market_order(
-							config.SYMBOL,
-							_direction,
-							_lot,
-							_sl,
-							_tp,
-							deviation=getattr(config, "ORDER_DEVIATION", None),
-							magic=getattr(config, "ORDER_MAGIC", None),
-						)
-						_med_order_summary = mt5_connector.summarize_order_result(_med_order_response)
-						_log.info(f"medium-confidence auto-trade summary: {_med_order_summary}")
-					else:
-						_med_order_summary = {"success": False, "error": "LIVE_TRADES_DISABLED"}
-						_log.info("medium-confidence trade skipped: live trading disabled (ENABLE_LIVE_TRADES=False)")
-
-				if _med_order_summary is not None:
-					_alert_sig["order_summary"] = _med_order_summary
-				if _med_order_response is not None:
-					_alert_sig["order_info"] = _med_order_response
-
+				_log.info(f"medium-confidence signal: {_direction} lot={_lot:.2f} (alert only, no trade)")
 				if not step_times.get("order_and_email"):
 					email_start = time.monotonic()
 					send_email_alert(_alert_sig, _risk_dict)
 					step_times["order_and_email"] = time.monotonic() - order_start
 					step_times["email_send"] = time.monotonic() - email_start
 					_last_signal_mono = time.monotonic()
-
-			# Macro-FVG auto-trading — only fires when a confidence tier also agrees.
-			# SL is placed just beyond the FVG zone (the structural invalidation level).
-			if (
-				macro_sig is not None
-				and (_high_conf or _med_conf)
-				and is_in_trading_session(symbol=config.SYMBOL)
-				and getattr(config, "ENABLE_MACRO_FVG_TRADES", True)
-			):
-				_mfvg_direction = "BUY" if macro_sig["direction"] == "BULLISH" else "SELL"
-				_mfvg_entry = float(macro_sig["entry_price"])
-				if _mfvg_direction == "BUY":
-					_mfvg_sl = float(macro_sig["fvg_bottom"]) - config.SL_BUFFER_PIPS
-				else:
-					_mfvg_sl = float(macro_sig["fvg_top"]) + config.SL_BUFFER_PIPS
-				_mfvg_tp = float(macro_sig["liquidity_target"])
-				_mfvg_lot = calculate_lot_size(risk_amount, abs(_mfvg_entry - _mfvg_sl), config.DEFAULT_PIP_VALUE)
-				_mfvg_rr = calculate_rr_ratio(_mfvg_entry, _mfvg_sl, _mfvg_tp)
-				_mfvg_alert_sig = dict(macro_sig, is_macro_fvg=True, direction=_mfvg_direction)
-				_mfvg_risk_dict = {"lot_size": _mfvg_lot, "sl": _mfvg_sl, "tp": _mfvg_tp, "rr_ratio": _mfvg_rr}
-
-				_mfvg_order_response = None
-				_mfvg_order_summary = None
-				if _daily_loss_tracker.is_triggered(_capital):
-					_log.warning(
-						f"circuit-breaker: daily loss limit reached — macro-FVG trade skipped "
-						f"(opening={_daily_loss_tracker.opening_balance:.2f} "
-						f"current={_capital:.2f} "
-						f"limit={config.MAX_DAILY_LOSS_PCT * 100:.0f}%)."
-					)
-					_mfvg_order_summary = {"success": False, "error": "DAILY_LOSS_LIMIT_HIT"}
-				elif config.ENABLE_AUTO_TRADES:
-					if config.ENABLE_LIVE_TRADES:
-						_mfvg_order_response = mt5_connector.place_market_order(
-							config.SYMBOL,
-							_mfvg_direction,
-							_mfvg_lot,
-							_mfvg_sl,
-							_mfvg_tp,
-							deviation=getattr(config, "ORDER_DEVIATION", None),
-							magic=getattr(config, "ORDER_MAGIC", None),
-						)
-						_mfvg_order_summary = mt5_connector.summarize_order_result(_mfvg_order_response)
-						_log.info(f"macro-fvg auto-trade summary: {_mfvg_order_summary}")
-					else:
-						_mfvg_order_summary = {"success": False, "error": "LIVE_TRADES_DISABLED"}
-						_log.info("macro-fvg trade skipped: live trading disabled (ENABLE_LIVE_TRADES=False)")
-
-				if _mfvg_order_summary is not None:
-					_mfvg_alert_sig["order_summary"] = _mfvg_order_summary
-				if _mfvg_order_response is not None:
-					_mfvg_alert_sig["order_info"] = _mfvg_order_response
-
-				if not step_times.get("order_and_email"):
-					_mfvg_email_start = time.monotonic()
-					send_email_alert(_mfvg_alert_sig, _mfvg_risk_dict)
-					step_times["order_and_email"] = time.monotonic() - order_start
-					step_times["email_send"] = time.monotonic() - _mfvg_email_start
-				_last_signal_mono = time.monotonic()
 
 			# Heartbeat (print latest close/time)
 			if m5_df is not None:
