@@ -3,7 +3,7 @@
 # Broker and symbol settings
 BROKER_NAME = "Exness"
 SYMBOL = "us30m" 
-SYMBOL_FALLBACKS = ["us30m", "us30", "XAUUSDm", "XAUUSD", "XAU"]
+SYMBOL_FALLBACKS = ["us30m", "us30" ,"us30usd", "us30usd.m"]  # Common variations to try if the primary symbol is not found
 
 # Account and risk configuration
 # INITIAL_CAPITAL is used as a fallback when the live MT5 account balance is
